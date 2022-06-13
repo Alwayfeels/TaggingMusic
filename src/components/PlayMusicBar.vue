@@ -60,7 +60,7 @@ const state = reactive({
   playerSlider: 0,
   playerSliderMax: computed(() => {
     if (!player.duration || typeof player.duration !== 'number') return 0
-    return (state.playOption.duration / 1000).toFixed(0)
+    return Number((state.playOption.duration / 1000).toFixed(0))
   }),
   playOption: {
     duration: 213440, // 歌曲总时长，毫秒

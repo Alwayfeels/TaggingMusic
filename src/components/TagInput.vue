@@ -30,14 +30,14 @@ const state = reactive({
   _taggedSong: null
 })
 
-// 监听songId初始化tagInputVal
+// 监听 songId 初始化 tagInputVal
 watch(() => props.songId, async (songId) => {
-  if (!state._taggedSong) {
-    state._taggedSong = await localforage.getItem('taggedSong')
-  }
+  state._taggedSong = await localforage.getItem('taggedSong')
   let existSong = state._taggedSong?.find(e => e.songId === songId)
   if (existSong) {
     state.tagInputVal = existSong.tagName.map(e => e)
+  } else {
+    state.tagInputVal = []
   }
 }, {
   immediate: true

@@ -1,6 +1,7 @@
 <template>
   <n-auto-complete size="small" ref="singleTagInput" v-model:value="state.inputValue" v-model:options="state.activeTags"
-    placeholder="请输入" @keypress.enter.prevent="enterHandler" @keydown.tab.prevent="tabHandler" :on-blur="blurHandler" />
+    :get-show="() => true" placeholder="请输入" @keypress.enter.prevent="enterHandler" @keydown.tab.prevent="tabHandler"
+    @keydown.esc.prevent="onBlur" :on-blur="blurHandler" :on-update:value="inputValChange" />
 </template>
 
 <script setup>
@@ -20,8 +21,8 @@ const emit = defineEmits(["change", "blur", "pressTab"]);
 const singleTagInput = ref(null);
 let state = reactive({
   tag: [],
+  inputValue: null,
   activeTags: [],
-  inputValue: null
 })
 
 onMounted(() => {
@@ -36,13 +37,14 @@ function initTag() {
   })
 }
 
-// input输入处理
-watch(state.inputValue, (inputVal) => {
+function inputValChange(inputVal) {
   state.activeTags = state.tag.filter((e) => {
-    return e.label && e.label.includes(inputVal);
+    return e.label.includes(inputVal);
   });
-});
-// 加载时 focus
+  state.inputValue = inputVal;
+}
+
+// 加载时 focus, 并展示所有 tag 供选择
 watch(singleTagInput, (el) => {
   if (el)
     nextTick(() => {
@@ -58,5 +60,8 @@ function tabHandler() {
 }
 function blurHandler() {
   emit("blur", state.inputValue);
+}
+function onBlur() {
+  singleTagInput.value.blur()
 }
 </script>
