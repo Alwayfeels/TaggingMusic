@@ -1,5 +1,5 @@
 <template>
-  <n-layout class="main-container" :class="showPlayBar ? 'min-height' : 'full-height'" has-sider>
+  <n-layout class="main-container" :class="globalPlayer.isPlayerShow ? 'min-height' : 'full-height'" has-sider>
     <n-layout-sider collapse-mode="width" :collapsed-width="120" :width="320" show-trigger="arrow-circle"
       content-style="padding: 24px;" bordered :native-scrollbar="false">
       <n-spin :show="state.playlistLoading">
@@ -19,17 +19,10 @@ import { h, onMounted, reactive } from 'vue';
 import api from '@/api/http';
 import localforage from 'localforage';
 import { NMenu } from 'naive-ui';
-import { useVModel } from '@vueuse/core'
+import { usePlayerStore } from '@/store/player';
 
-// 绑定播放栏目
-const props = defineProps({
-  showPlayBar: {
-    type: Boolean,
-    default: false
-  }
-})
-const emit = defineEmits(['update:showPlayBar'])
-const showPlayBar = useVModel(props, 'showPlayBar', emit)
+// 全局player store
+const globalPlayer = usePlayerStore()
 
 const state = reactive({
   profile: null,
@@ -114,9 +107,11 @@ const getSonglist = async () => {
     height: 100%;
   }
 }
+
 .full-height {
   height: calc(100vh - 5rem);
 }
+
 .min-height {
   height: calc(100vh - 10rem);
 }

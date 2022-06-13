@@ -1,26 +1,23 @@
 <template>
   <div id="app">
-    <TopBar v-model:showPlayBar="app.showPlayBar" />
-    <router-view v-model:showPlayBar="app.showPlayBar"  />
-    <PlayMusicBar v-model:visiable="app.showPlayBar" />
+    <TopBar />
+    <router-view />
+    <PlayMusicBar />
   </div>
 </template>
 
 <script setup>
 import TopBar from '@/components/TopBar.vue';
 import PlayMusicBar from '@/components/PlayMusicBar.vue';
-import { reactive } from 'vue';
+import api from '@/api/http'
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 
-const app = reactive({
-  showPlayBar: true,
-});
 </script>
 
 <style>
 #app {
-  font-family: "Inter","Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+  font-family: "Inter", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   /* font-family: Avenir, Helvetica, Arial, sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

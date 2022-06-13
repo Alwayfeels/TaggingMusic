@@ -31,19 +31,12 @@ import { NButton } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
-import { useVModel } from '@vueuse/core'
+import { usePlayerStore } from '@/store/player';
 
-// 绑定播放栏
-const props = defineProps({
-  showPlayBar: {
-    type: Boolean,
-    default: false
-  }
-})
-const emit = defineEmits(['update:showPlayBar'])
-const playBarVisiable = useVModel(props, 'showPlayBar', emit)
-const togglePlayBar = () => {
-  playBarVisiable.value = !playBarVisiable.value
+// 全局player store
+const globalPlayer = usePlayerStore()
+const togglePlayerBar = () => {
+  globalPlayer.togglePlayer()
 }
 
 const state = reactive({
