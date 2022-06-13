@@ -8,14 +8,13 @@
       </n-spin>
     </n-layout-sider>
     <n-layout-content content-style="padding: 24px;" :native-scrollbar="false">
-      <CommonTable class="h-full" v-model:tableData="state.songlist" v-model:loading="state.songlistLoading">
-      </CommonTable>
+      <SongTable class="h-full" v-model:tableData="state.songlist" v-model:loading="state.songlistLoading" />
     </n-layout-content>
   </n-layout>
 </template>
 
 <script setup>
-import CommonTable from '@/components/CommonTable.vue';
+import SongTable from '@/components/SongTable.vue';
 import { h, onMounted, reactive } from 'vue';
 import api from '@/api/http';
 import localforage from 'localforage';

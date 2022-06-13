@@ -20,21 +20,22 @@ import SingleTagInput from "@/components/SingleTagInput.vue";
 import localforage from "localforage";
 
 const props = defineProps({
-  songId: Number
+  songId: Number,
+  songInfo: Object,
 });
 
 const dynamicTags = ref(null)
 const state = reactive({
   tagInputVal: [],
-  local_taggedSong: null
+  _taggedSong: null
 })
 
 // 监听songId初始化tagInputVal
 watch(() => props.songId, async (songId) => {
-  if (!state.local_taggedSong) {
-    state.local_taggedSong = await localforage.getItem('taggedSong')
+  if (!state._taggedSong) {
+    state._taggedSong = await localforage.getItem('taggedSong')
   }
-  let existSong = state.local_taggedSong?.find(e => e.songId === songId)
+  let existSong = state._taggedSong?.find(e => e.songId === songId)
   if (existSong) {
     state.tagInputVal = existSong.tagName.map(e => e)
   }
@@ -44,8 +45,8 @@ watch(() => props.songId, async (songId) => {
 
 // taginput 事件处理
 function dynamicTagsChange(newVal) {
+  // remove tag
   if (newVal.length < state.tagInputVal.length) {
-    // is remove tag event
     let needRemoveTag = state.tagInputVal.filter(x => !newVal.includes(x))
     removeTag(needRemoveTag)
     removeTagInTaggedSong(needRemoveTag)
@@ -86,16 +87,16 @@ async function insertTag(tagName) {
   if (typeof tagName !== "string") {
     throw error("insertTag(): tagName must be string")
   };
-  let local_tags = await localforage.getItem("tag")
-  local_tags = local_tags || []
+  let _tags = await localforage.getItem("tag")
+  _tags = _tags || []
 
-  let tagExist = local_tags.findIndex((e) => e.tagName === tagName);
+  let tagExist = _tags.findIndex((e) => e.tagName === tagName);
   if (tagExist >= 0) {
-    local_tags[tagExist].ref++;
+    _tags[tagExist].ref++;
   } else {
-    local_tags.push({ tagName, ref: 1 });
+    _tags.push({ tagName, ref: 1 });
   }
-  localforage.setItem("tag", local_tags);
+  localforage.setItem("tag", _tags);
 }
 // 将tag插入indexedDB.taggedSongs
 const insertTaggedSongs = async (tagName) => {
@@ -111,7 +112,7 @@ const insertTaggedSongs = async (tagName) => {
   if (songExist >= 0) {
     taggedSong[songExist].tagName.push(tagName);
   } else {
-    taggedSong.push({ songId, tagName: [tagName] });
+    taggedSong.push({ songId, tagName: [tagName], ...props.songInfo });
   }
   // 存入indexedDB
   localforage.setItem('taggedSong', taggedSong);

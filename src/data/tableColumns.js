@@ -42,11 +42,26 @@ export function getSongTableColumns(tableInstance, tableData) {
             }
         },
         {
+            title: "album",
+            render(row) {
+                return h(
+                    'div',
+                    {},
+                    row.al.name
+                )
+            }
+        },
+        {
             title: 'tag',
             width: '600px',
             render(row, index) {
                 return h(TagInput, {
-                    songId: row.id
+                    songId: row.id,
+                    songInfo: {
+                        name: row.name,
+                        artist: row.ar.map(artist => artist.name).join(' / '),
+                        album: row.al.name
+                    }
                 })
             }
         }
