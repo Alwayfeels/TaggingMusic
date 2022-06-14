@@ -1,31 +1,32 @@
 <template>
   <div class="play-bar w-full h-20 fixed z-10 bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
     <div class="w-full h-full px-10 flex items-center justify-center">
-      <!-- <img :src="state.playOption.coverImage" class="w-16 h-16" alt=""> -->
-      <img src="https://p1.music.126.net/6B1bLRt0zzHdRsuF1bNa-w==/109951165181909869.jpg?param=64y64" class="w-16 h-16"
-        alt="">
+      <img v-if="globalPlayer.currPlaySong?.al?.picUrl" :src="`${globalPlayer.currPlaySong?.al?.picUrl}?param=64y64`"
+        class="w-16 h-16" alt="">
       <div class="ml-4 flex items-center">
-        <n-icon size="24" :component="Previous24Filled" />
-        <n-icon v-if="player.isPlay" size="48" :component="Pause48Filled" @click="audioPause" />
-        <n-icon v-else size="48" :component="Play48Filled" @click="audioPlay" />
+        <n-icon size="24" :component="Previous24Filled" @click="play" />
+        <n-spin :show="globalPlayer.loading">
+          <n-icon v-if="globalPlayer.isPlay" size="48" :component="Pause48Filled" @click="pause" />
+          <n-icon v-else size="48" :component="Play48Filled" @click="play" />
+        </n-spin>
         <n-icon size="24" :component="Next24Filled" />
       </div>
       <div class="ml-4 flex flex-col">
-        <div class="text-lg">{{ state.playOption.songName }}</div>
-        <div>{{ state.playOption.artist.join(' / ') }}</div>
+        <div class="text-lg">{{ globalPlayer.currPlaySong?.name }}</div>
+        <div>{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
       <div class="w-96 ml-4">
         <n-slider v-model:value="state.playerSlider" :max="state.playerSliderMax" :format-tooltip="timeFormatter"
           :step="1" />
       </div>
     </div>
-    <audio ref="audio" :src="player.src" @canplay="getDuration" @pause="pause" @timeupdate="timeupdate" @play="play"
+    <audio ref="audio" :src="player.url" @canplay="getDuration" @pause="pause" @timeupdate="timeupdate" @play="play"
       style="display: none"></audio>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled } from '@vicons/fluent'
 import api from '@/api/http'
 import { usePlayerStore } from '@/store/player';
@@ -34,20 +35,16 @@ const globalPlayer = usePlayerStore()
 const audio = ref(null)
 
 const player = reactive({
-  isPlay: false,
-  src: '',
-  loading: false,
-  duration: 188107,
-  currentTime: 0
+  url: ''
 })
 const state = reactive({
   musicId: 1900054586,
   playlist: [],
   songData: null,
-  playerSlider: 0,
+  playerSlider: computed(() => globalPlayer.currentTime),
   playerSliderMax: computed(() => {
-    if (!player.duration || typeof player.duration !== 'number') return 0
-    return Number((state.playOption.duration / 1000).toFixed(0))
+    if (!globalPlayer.duration || typeof globalPlayer.duration !== 'number') return 0
+    return Number((globalPlayer.duration / 1000).toFixed(0))
   }),
   playOption: {
     duration: 213440, // 歌曲总时长，毫秒
@@ -55,15 +52,14 @@ const state = reactive({
     artist: ['aaa', 'bbb'],
     src: '',
     title: '',
-    coverImage: 'https://p1.music.126.net/6B1bLRt0zzHdRsuF1bNa-w==/109951165181909869.jpg?param=40y40',
     coverRotate: true
   }
 })
 onMounted(async () => {
-  const res = await api.getSync('/song/url', { id: state.musicId, br: 320000 })
-  let songData = res.data[0]
-  state.songData = songData
-  player.src = songData.url
+  // const res = await api.getSync('/song/url', { id: state.musicId, br: 320000 })
+  // let songData = res.data[0]
+  // state.songData = songData
+  // player.src = songData.url
   // 初始化音乐播放器
   // const audio = new Audio()
   // audio.src = 'http://www.ytmp3.cn/down/56467.mp3'
@@ -77,39 +73,65 @@ onMounted(async () => {
 /**
  * 播放音乐
  */
-function audioPlay() {
-  player.isPlay = true;
-  audio.value.play();
-};
-// 暂停音乐
-function audioPause() {
-  player.isPlay = false;
-  audio.value.pause();
-};
+watch(() => globalPlayer.isPlay, (val) => {
+  if (val) {
+    audio.value.play()
+  } else {
+    audio.value.pause()
+  }
+})
+
+globalPlayer.$onAction(async ({ name, globalPlayer, args, after, onError }) => {
+  if (name === 'setCurrentSong') {
+    let songId = args[0].id
+    const res = await api.getSync('/song/url', { id: songId, br: 320000 })
+    let songUrl = res.data[0].url
+    player.url = songUrl
+  }
+})
+
+function play() {
+  globalPlayer.isPlay = true;
+  audio.value.play()
+}
+function pause() {
+  globalPlayer.isPlay = false;
+  audio.value.pause()
+}
+// function audioPlay() {
+//   player.isPlay = true;
+//   audio.value.play();
+// };
+// // 暂停音乐
+// function audioPause() {
+//   player.isPlay = false;
+//   audio.value.pause();
+// };
 /**
  * 控制播放按钮
  * 通过paused属性，判断当前音频播放状态
  */
-function controlPlay() {
-  if (!audio.value.paused) {
-    audio.value.pause(); // 停止播放
-  } else {
-    audio.value.play(); // 开始播放
-  }
-};
+// function controlPlay() {
+//   if (!audio.value.paused) {
+//     audio.value.pause(); // 停止播放
+//   } else {
+//     audio.value.play(); // 开始播放
+//   }
+// };
 /**
  * 获取音乐时长
  */
 const getDuration = () => {
   // 此时可以拿到音频时长（audio.value.duration）;
   console.log('此时可以拿到音频时长（' + audio.value.duration + '）')
+  globalPlayer.duration = audio.value.duration;
 }
 /**
  * 更新当前时间
  * 如果当前音频进度 = 总时长，则自动播放下一首
  */
 const timeupdate = (e) => {
-  player.currentTime = e.target.currentTime;
+  globalPlayer.currentTime = e.target.currentTime;
   // if (e.target.currentTime === player.endTime) {
   //   nextPlay();
   // }

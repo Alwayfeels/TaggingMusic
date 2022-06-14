@@ -15,9 +15,8 @@
                 <n-data-table :columns="state.tableColumn" :data="state.songlist" :pagination="state.pagination"
                     :bordered="false" />
             </div>
-        </n-spin>
-        <template #footer>
-            <div class="flex items-center justify-end">
+            <n-divider />
+            <div class="mt-4 flex items-center justify-end">
                 <n-popover placement="top" trigger="manual" :show="state.showTips">
                     <template #trigger>
                         <n-button class="ml-2" strong type="success" @click="submit">生成</n-button>
@@ -26,7 +25,7 @@
                 </n-popover>
                 <n-button class="ml-2" strong type="error" @click="emits('update:showDialog', false)">取消</n-button>
             </div>
-        </template>
+        </n-spin>
     </n-modal>
 </template>
 

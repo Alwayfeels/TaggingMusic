@@ -1,7 +1,9 @@
 import { h, getCurrentInstance } from 'vue'
 import { NAvatar, NTag } from 'naive-ui'
 import TagInput from '@/components/TagInput.vue'
+import { usePlayerStore } from '@/store/player';
 
+const globalPlayer = usePlayerStore()
 
 export function getSongTableColumns(tableInstance, tableData) {
     return [
@@ -18,7 +20,11 @@ export function getSongTableColumns(tableInstance, tableData) {
                     NAvatar,
                     {
                         src: songImgUrl,
-                        class: 'img40'
+                        class: 'img40',
+                        onclick: () => {
+                            globalPlayer.isPlayerShow = true;
+                            globalPlayer.setCurrentSong(row)
+                        }
                     }
                 )
             }

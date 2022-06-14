@@ -4,6 +4,10 @@ import api from '@/api/http'
 export const usePlayerStore = defineStore("player", {
   state: () => {
     return {
+      loading: false,
+      currentTime: 0,
+      duration: 0,
+      isPlay: false,
       isPlayerShow: false,
       count: 0,
       currPlayIndex: 0,
@@ -12,10 +16,22 @@ export const usePlayerStore = defineStore("player", {
   },
   getters: {
     currPlaySong: (state) => {
-      return state.playList[state.currPlayIndex];
+      return state.playList[state.currPlayIndex] || {};
     }
   },
   actions: {
+    setCurrentSong(song) {
+      this.setPlayList(song)
+    },
+    setPlayList(playList) {
+      this.playList = [playList]
+    },
+    showLoading() {
+      this.loading = true
+    }, 
+    hideLoading() {
+      this.loading = false
+    },
     increment() {
       this.count++;
     },
@@ -27,6 +43,12 @@ export const usePlayerStore = defineStore("player", {
       if (this.playList.length > 0) {
         this.isPlayerShow = true
       }
+    },
+    play() {
+      this.isPlay = true
+    },
+    pause() {
+      this.isPlay = false
     },
     showPlayer() {
       this.isPlayerShow = true;
