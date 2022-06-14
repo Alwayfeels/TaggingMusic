@@ -20,7 +20,7 @@ export function getSongTableColumns(tableInstance, tableData) {
                     NAvatar,
                     {
                         src: songImgUrl,
-                        class: 'img40',
+                        class: 'img40 cursor-pointer',
                         onclick: () => {
                             globalPlayer.isPlayerShow = true;
                             globalPlayer.setCurrentSong(row)

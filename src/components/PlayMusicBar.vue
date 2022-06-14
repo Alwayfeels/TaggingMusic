@@ -16,7 +16,7 @@
         <div>{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
       <div class="w-96 ml-4">
-        <n-slider v-model:value="state.playerSlider" :max="state.playerSliderMax" :format-tooltip="timeFormatter"
+        <n-slider v-model:value="globalPlayer.currentTime" :max="globalPlayer.duration" :format-tooltip="timeFormatter"
           :step="1" />
       </div>
     </div>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
 import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled } from '@vicons/fluent'
 import api from '@/api/http'
 import { usePlayerStore } from '@/store/player';
@@ -41,11 +41,6 @@ const state = reactive({
   musicId: 1900054586,
   playlist: [],
   songData: null,
-  playerSlider: computed(() => globalPlayer.currentTime),
-  playerSliderMax: computed(() => {
-    if (!globalPlayer.duration || typeof globalPlayer.duration !== 'number') return 0
-    return Number((globalPlayer.duration / 1000).toFixed(0))
-  }),
   playOption: {
     duration: 213440, // 歌曲总时长，毫秒
     songName: 'Song Name',
@@ -73,13 +68,13 @@ onMounted(async () => {
 /**
  * 播放音乐
  */
-watch(() => globalPlayer.isPlay, (val) => {
-  if (val) {
-    audio.value.play()
-  } else {
-    audio.value.pause()
-  }
-})
+// watch(() => globalPlayer.isPlay, (val) => {
+//   if (val) {
+//     audio.value.play()
+//   } else {
+//     audio.value.pause()
+//   }
+// })
 
 globalPlayer.$onAction(async ({ name, globalPlayer, args, after, onError }) => {
   if (name === 'setCurrentSong') {
@@ -87,6 +82,9 @@ globalPlayer.$onAction(async ({ name, globalPlayer, args, after, onError }) => {
     const res = await api.getSync('/song/url', { id: songId, br: 320000 })
     let songUrl = res.data[0].url
     player.url = songUrl
+    nextTick(() => {
+      play()
+    })
   }
 })
 
@@ -98,26 +96,6 @@ function pause() {
   globalPlayer.isPlay = false;
   audio.value.pause()
 }
-// function audioPlay() {
-//   player.isPlay = true;
-//   audio.value.play();
-// };
-// // 暂停音乐
-// function audioPause() {
-//   player.isPlay = false;
-//   audio.value.pause();
-// };
-/**
- * 控制播放按钮
- * 通过paused属性，判断当前音频播放状态
- */
-// function controlPlay() {
-//   if (!audio.value.paused) {
-//     audio.value.pause(); // 停止播放
-//   } else {
-//     audio.value.play(); // 开始播放
-//   }
-// };
 /**
  * 获取音乐时长
  */
