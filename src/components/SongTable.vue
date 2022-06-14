@@ -44,10 +44,13 @@ const songTableColumns = ref(getSongTableColumns(tableInstance, () => props.tabl
 
 <style lang="scss" scoped>
 // 加宽 tag-input 组件的点击触发范围
+:deep(.n-data-table-tr .n-data-table-td) {
+  cursor: url(@/assets/Play.png) 0 0, pointer;
+}
 :deep(.n-data-table-tr .n-data-table-td:last-child) {
   padding: 0;
+  cursor: pointer;
 }
-
 :deep(.n-data-table-tr .n-data-table-td:last-child .n-dynamic-tags) {
   padding: 12px;
 }

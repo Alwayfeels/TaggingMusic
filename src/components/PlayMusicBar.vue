@@ -15,9 +15,10 @@
         <div class="text-lg">{{ globalPlayer.currPlaySong?.name }}</div>
         <div>{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
-      <div class="w-96 ml-4">
+      <div class="w-96 ml-4 flex flex-col">
         <n-slider v-model:value="globalPlayer.currentTime" :max="globalPlayer.duration" :format-tooltip="timeFormatter"
           :step="1" />
+        <div>{{ processInfo }}</div>
       </div>
     </div>
     <audio ref="audio" :src="player.url" @canplay="getDuration" @pause="pause" @timeupdate="timeupdate" @play="play"
@@ -49,6 +50,11 @@ const state = reactive({
     title: '',
     coverRotate: true
   }
+})
+const processInfo = computed(() => {
+  const curr = timeFormatter(Math.floor(globalPlayer.currentTime / 1000))
+  const dura = timeFormatter(Math.floor(globalPlayer.duration / 1000))
+  return `${curr} / ${dura}`
 })
 onMounted(async () => {
   // const res = await api.getSync('/song/url', { id: state.musicId, br: 320000 })
@@ -118,8 +124,8 @@ const timeupdate = (e) => {
 const timeFormatter = (value) => {
   if (value === 0) return '00:00'
   const minute = Math.floor(value / 60)
-  const second = value % 60
-  return `${minute < 10 ? '0' + minute : minute}:${second < 10 ? '0' + second : second}`
+  const second = Math.floor(value % 60)
+  return `${minute}:${second < 10 ? '0' + second : second}`
 }
 
 </script>
