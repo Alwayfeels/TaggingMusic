@@ -26,11 +26,10 @@ export function getSongTableColumns(tableInstance, tableData) {
         {
             title: "artist",
             render(row) {
-                return h(
-                    'div', {}, row.ar.map(artist => {
-                        return h(NTag, { class: 'mr-2' }, artist.name)
-                    })
-                )
+                const tags = row.ar.map(artist => {
+                    return h(NTag, { class: 'mr-2' }, { default: () => artist.name })
+                })
+                return tags
             }
         },
         {

@@ -8,8 +8,8 @@
             <n-button class="ml-2" strong secondary type="success" @click="generatePreview">预览</n-button>
         </div>
         <div class="mt-2" v-if="state.songlist.length > 0">
-            <n-data-table :columns="state.tableColumn" :data="state.songlist"
-                :pagination="state.pagination" :bordered="false" />
+            <n-data-table :columns="state.tableColumn" :data="state.songlist" :pagination="state.pagination"
+                :bordered="false" />
         </div>
         <template #footer>
             <div class="flex items-center justify-end">
@@ -50,14 +50,13 @@ const state = reactive({
         { title: 'artist', key: 'artist' },
         {
             title: 'tag', render(row) {
-                return h(
-                    'div', {}, row.tagName.map(tag => {
-                        return h(NTag,
-                            { class: 'mr-2' },
-                            tag
-                        )
-                    })
-                )
+                const tags = row.tagName.map(tag => {
+                    return h(NTag,
+                        { class: 'mr-2' },
+                        () => tag
+                    )
+                })
+                return tags
             }
         },
     ]
