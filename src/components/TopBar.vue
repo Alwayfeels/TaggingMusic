@@ -10,7 +10,7 @@
         </div>
         <img class="user-avatar rounded" :src="`${state.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
-      <n-button class="mr-2" size="large" strong type="success" @click="togglePlayerBar">{{ showPlayBar ? '隐藏播放器' :
+      <n-button class="mr-2" size="large" strong type="success" @click="togglePlayerBar">{{ globalPlayer.isPlayerShow ? '隐藏播放器' :
           '显示播放器'
       }}</n-button>
       <n-button class="mr-2" size="large" strong type="info" @click="state.showTaggingDialog = true">生成tag歌单

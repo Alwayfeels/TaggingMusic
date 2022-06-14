@@ -1,5 +1,5 @@
 <template>
-  <div class="play-bar w-full h-20 fixed z-10 bottom-0" :class="{ 'hidden-playbar': !showBar }">
+  <div class="play-bar w-full h-20 fixed z-10 bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
     <div class="w-full h-full px-10 flex items-center justify-center">
       <!-- <img :src="state.playOption.coverImage" class="w-16 h-16" alt=""> -->
       <img src="https://p1.music.126.net/6B1bLRt0zzHdRsuF1bNa-w==/109951165181909869.jpg?param=64y64" class="w-16 h-16"
@@ -26,24 +26,11 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useVModel } from '@vueuse/core'
 import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled } from '@vicons/fluent'
 import api from '@/api/http'
-import { usePlayBarStore } from '@/store/playBar'
+import { usePlayerStore } from '@/store/player';
 
-const playBar = usePlayBarStore()
-
-const props = defineProps({
-  visiable: {
-    type: Boolean,
-    default: false
-  }
-})
-const emit = defineEmits(['update:visiable'])
-const showBar = useVModel(props, 'visiable', emit)
-const closePlayBar = () => {
-  showBar.value = false
-}
+const globalPlayer = usePlayerStore()
 const audio = ref(null)
 
 const player = reactive({
