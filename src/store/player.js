@@ -36,7 +36,7 @@ export const usePlayerStore = defineStore("player", {
       this.count++;
     },
     async addPlaySong(songObj) {
-      const res = await api.getSync('/song/url', { id: songObj.id, br: 320000 })
+      const res = await api.getRemote('/song/url', { id: songObj.id, br: 320000 })
       let songDataUrl = res.data[0].url
       songObj.url = songDataUrl
       this.playList.push(songObj);

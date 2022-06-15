@@ -60,7 +60,7 @@ const renderMenuLabel = (option) => {
   return h('span', {}, option.label)
 }
 const getUserPlayList = async () => {
-  const res = await api.getSync('/user/playlist', {
+  const res = await api.getRemote('/user/playlist', {
     uid: state.profile.userId
   });
   if (res.playlist) {
@@ -86,7 +86,7 @@ const getSonglist = async () => {
   let targetId = state.currSonglistId;
   const songs = await localforage.getItem('songlist_' + targetId);
   if (!songs) {
-    const res = await api.getSync('/playlist/track/all', {
+    const res = await api.getRemote('/playlist/track/all', {
       id: state.currSonglistId
     });
     console.log('initSonglist', res);

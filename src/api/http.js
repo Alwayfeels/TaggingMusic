@@ -46,7 +46,7 @@ service.interceptors.response.use(
 * @param params 
 * @returns {Promise}
 */
-export function get(url, params = {}) {
+export function getRemote(url, params = {}) {
     return new Promise((resolve, reject) => {
         service.get(url, {
             params: { timestamp: new Date().getTime(), ...params }
@@ -66,7 +66,7 @@ export function get(url, params = {}) {
  * @param params
  * @returns {Promise}
  */
-export function post(url, params = {}) {
+export function postRemote(url, params = {}) {
     return new Promise((resolve, reject) => {
         service.post(url, { timestamp: new Date().getTime(), ...params })
             .then(res => {
@@ -85,7 +85,7 @@ export function post(url, params = {}) {
 * @param params 
 * @returns {Promise}
 */
-export function getSync(url, params = {}) {
+export function get(url, params = {}) {
     return new Promise((resolve, reject) => {
         service.get(url, {
             params
@@ -105,7 +105,7 @@ export function getSync(url, params = {}) {
  * @param params 
  * @returns {Promise}
  */
-export function postSync(url, params = {}) {
+export function post(url, params = {}) {
     return new Promise((resolve, reject) => {
         service.post(url, { timestamp: new Date().getTime(), ...params })
             .then(res => {
@@ -117,4 +117,4 @@ export function postSync(url, params = {}) {
     })
 }
 
-export default { get, post, postSync, getSync }
+export default { get, post, postRemote, getRemote }

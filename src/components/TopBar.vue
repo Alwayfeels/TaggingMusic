@@ -10,7 +10,8 @@
         </div>
         <img class="user-avatar rounded" :src="`${state.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
-      <n-button class="mr-2" size="large" strong type="success" @click="togglePlayerBar">{{ globalPlayer.isPlayerShow ? '隐藏播放器' :
+      <n-button class="mr-2" size="large" strong type="success" @click="togglePlayerBar">{{ globalPlayer.isPlayerShow ?
+          '隐藏播放器' :
           '显示播放器'
       }}</n-button>
       <n-button class="mr-2" size="large" strong type="info" @click="refreshSonglist">刷新songlist</n-button>
@@ -32,12 +33,15 @@ import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
 import { usePlayerStore } from '@/store/player';
+import { useGlobalData } from '@/store/globalData';
 
 // 全局player store
 const globalPlayer = usePlayerStore()
 const togglePlayerBar = () => {
   globalPlayer.togglePlayer()
 }
+// 全局数据中心
+const globalData = useGlobalData()
 
 const state = reactive({
   showLoginDialog: false,
@@ -52,11 +56,12 @@ const state = reactive({
 
 // init user info;
 onBeforeMount(async () => {
-  state.profile = await localforage.getItem('profile');
-  state.account = await localforage.getItem('account');
-  if (!state.profile) {
-    getUserInfo();
-  }
+  // state.profile = await localforage.getItem('profile');
+  // state.account = await localforage.getItem('account');
+  // if (!state.profile) {
+  //   getUserInfo();
+  // }
+  let userInfo = globalData.getRemoteUserInfo() // 初始化用户信息
 });
 
 // 获取用户数据
@@ -70,7 +75,7 @@ const getUserInfo = async () => {
   }
 }
 // refresh songlist
-function refreshSonglist() {}
+function refreshSonglist() { }
 </script>
 
 <style lang="scss" scoped>

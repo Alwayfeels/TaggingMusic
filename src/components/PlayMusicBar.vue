@@ -57,7 +57,7 @@ const processInfo = computed(() => {
   return `${curr} / ${dura}`
 })
 onMounted(async () => {
-  // const res = await api.getSync('/song/url', { id: state.musicId, br: 320000 })
+  // const res = await api.getRemote('/song/url', { id: state.musicId, br: 320000 })
   // let songData = res.data[0]
   // state.songData = songData
   // player.src = songData.url
@@ -85,7 +85,7 @@ onMounted(async () => {
 globalPlayer.$onAction(async ({ name, globalPlayer, args, after, onError }) => {
   if (name === 'setCurrentSong') {
     let songId = args[0].id
-    const res = await api.getSync('/song/url', { id: songId, br: 320000 })
+    const res = await api.getRemote('/song/url', { id: songId, br: 320000 })
     let songUrl = res.data[0].url
     player.url = songUrl
     nextTick(() => {
