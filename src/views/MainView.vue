@@ -3,12 +3,12 @@
     <n-layout-sider collapse-mode="width" :collapsed-width="120" :width="320" show-trigger="arrow-circle"
       content-style="padding: 24px;" bordered :native-scrollbar="false">
       <n-spin :show="state.playlistLoading">
-        <n-menu v-model:value="state.currSonglistId" :root-indent="36" :indent="12" :options="state.menuOptions"
+        <n-menu v-model:value="state.currSonglistId" :root-indent="36" :indent="12" key-field="id" :options="globalData.playlist"
           :render-icon="renderMenuIcon" :render-label="renderMenuLabel" :on-update:value="activeMenuChange" />
       </n-spin>
     </n-layout-sider>
     <n-layout-content content-style="padding: 24px;" :native-scrollbar="false">
-      <SongTable class="h-full" v-model:tableData="state.songlist" v-model:loading="state.songlistLoading" />
+      <SongTable class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
     </n-layout-content>
   </n-layout>
 </template>
@@ -16,86 +16,37 @@
 <script setup>
 import SongTable from '@/components/SongTable.vue';
 import { h, onMounted, reactive } from 'vue';
-import api from '@/api/http';
-import localforage from 'localforage';
 import { NMenu } from 'naive-ui';
 import { usePlayerStore } from '@/store/player';
+import { useGlobalData } from '@/store/globalData';
+
+// 全局数据中心
+const globalData = useGlobalData()
 
 // 全局player store
 const globalPlayer = usePlayerStore()
 
 const state = reactive({
-  profile: null,
   currSonglistId: null,
-  playlist: [], // 歌单列表
   playlistLoading: false,
-  songlist: [], // 歌曲列表
   songlistLoading: false,
-  menuOptions: [],
 });
 
 onMounted(async () => {
-  state.playlistLoading = true;
-  state.profile = await localforage.getItem('profile');
-  let playlist = await localforage.getItem('playlist');
-  if (!playlist) {
-    playlist = await getUserPlayList();
-  }
-  state.playlist = playlist
-  state.playlistLoading = false;
-  // 首选第一个playlist
-  initMenuOption()
-  state.currSonglistId = state.playlist[0].id
-  getSonglist()
+  state.currSonglistId = globalData.playlist[0].id || null;
 })
 
-const activeMenuChange = (key, item) => {
+const activeMenuChange = async (key, item) => {
   state.currSonglistId = key
-  getSonglist()
+  state.songlistLoading = true
+  await globalData.getRemoteSonglist(key)
+  state.songlistLoading = false
 }
 const renderMenuIcon = (option) => {
   return h('img', { src: option.coverImgUrl, class: 'w-8 h-8' })
 }
 const renderMenuLabel = (option) => {
-  return h('span', {}, option.label)
-}
-const getUserPlayList = async () => {
-  const res = await api.getRemote('/user/playlist', {
-    uid: state.profile.userId
-  });
-  if (res.playlist) {
-    localforage.setItem('playlist', res.playlist);
-    // 根据playlist构建menuOptions
-    return res.playlist
-  }
-}
-
-const initMenuOption = () => {
-  state.menuOptions = state.playlist.map(item => {
-    return {
-      key: item.id,
-      label: item.name,
-      coverImgUrl: item.coverImgUrl + '?param=32y32'
-    }
-  })
-  console.log(state.menuOptions);
-}
-// 先搜索本地, 没有则请求服务器
-const getSonglist = async () => {
-  state.songlistLoading = true
-  let targetId = state.currSonglistId;
-  const songs = await localforage.getItem('songlist_' + targetId);
-  if (!songs) {
-    const res = await api.getRemote('/playlist/track/all', {
-      id: state.currSonglistId
-    });
-    console.log('initSonglist', res);
-    state.songlist = res.songs
-    localforage.setItem('songlist_' + targetId, res.songs);
-  } else {
-    state.songlist = songs
-  }
-  state.songlistLoading = false
+  return h('span', {}, option.name)
 }
 </script>
 <style lang="scss" scoped>

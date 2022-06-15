@@ -1,7 +1,7 @@
 <template>
   <n-auto-complete size="small" ref="singleTagInput" v-model:value="state.inputValue" v-model:options="state.activeTags"
     :get-show="() => true" placeholder="请输入" @keypress.enter.prevent="enterHandler" @keydown.tab.prevent="tabHandler"
-    @keydown.esc.prevent="onBlur" :on-blur="blurHandler" :on-update:value="inputValChange" />
+    @keydown.esc.prevent="onBlur" :on-blur="blurHandler" />
 </template>
 
 <script setup>
@@ -9,40 +9,51 @@ import localforage from "localforage";
 import { NAutoComplete } from "naive-ui";
 import {
   ref,
-  onMounted,
+  computed,
   watch,
   nextTick,
   reactive,
 } from "vue";
+import { useGlobalData } from '@/store/globalData';
+// 全局数据中心
+const globalData = useGlobalData()
 const emit = defineEmits(["change", "blur", "pressTab"]);
 
 // 该组件应该是一个存粹的无状态输入组件
 // 根据 indexedDB.tag 中的数据联想
 const singleTagInput = ref(null);
+
 let state = reactive({
-  tag: [],
   inputValue: null,
-  activeTags: [],
+  tagList: computed(() => {
+    return globalData.tagList.map(e => ({ label: e.tagName, value: e.tagName }))
+  }),
+  activeTags: computed(() => {
+    if (state.inputValue) {
+      return state.tagList.filter(e => e.label.includes(state.inputValue))
+    }
+    return state.tagList
+  }),
 })
 
-onMounted(() => {
-  initTag()
-})
+// onMounted(() => {
+//   initTag()
+// })
 
-// 初始化输入联想的tag
-function initTag() {
-  localforage.getItem('tag').then(data => {
-    state.tag = data?.map(e => ({ label: e.tagName, value: e.tagName }))
-    state.activeTags = state.tag
-  })
-}
+// // 初始化输入联想的tag
+// function initTag() {
+//   localforage.getItem('tag').then(data => {
+//     state.tag = data?.map(e => ({ label: e.tagName, value: e.tagName }))
+//     state.activeTags = state.tag
+//   })
+// }
 
-function inputValChange(inputVal) {
-  state.activeTags = state.tag.filter((e) => {
-    return e.label.includes(inputVal);
-  });
-  state.inputValue = inputVal;
-}
+// function inputValChange(inputVal) {
+//   state.activeTags = globalData.tagList.filter((e) => {
+//     return e.label.includes(inputVal);
+//   });
+//   state.inputValue = inputVal;
+// }
 
 // 加载时 focus, 并展示所有 tag 供选择
 watch(singleTagInput, (el) => {

@@ -35,6 +35,9 @@ import SingleTagInput from "@/components/SingleTagInput.vue";
 import { NDataTable, NTag } from 'naive-ui';
 import localforage from 'localforage';
 import api from '@/api/http'
+import { useGlobalData } from '@/store/globalData';
+// 全局数据中心
+const globalData = useGlobalData()
 
 const props = defineProps({
     showDialog: {
@@ -91,8 +94,7 @@ const pagination = reactive({
 
 watch(() => props.showDialog, async (val) => {
     if (val) {
-        const res = await localforage.getItem('tag');
-        state.tagOptions = res.map(item => {
+        state.tagOptions = globalData.tagList.map(item => {
             return {
                 label: item.tagName,
                 value: item.tagName

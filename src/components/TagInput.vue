@@ -18,6 +18,9 @@ import { NDynamicTags, NSelect, NButton } from "naive-ui";
 import { ref, h, computed, nextTick, watch, reactive } from "vue";
 import SingleTagInput from "@/components/SingleTagInput.vue";
 import localforage from "localforage";
+import { useGlobalData } from '@/store/globalData';
+// 全局数据中心
+const globalData = useGlobalData()
 
 const props = defineProps({
   songId: Number,
@@ -27,13 +30,11 @@ const props = defineProps({
 const dynamicTags = ref(null)
 const state = reactive({
   tagInputVal: [],
-  _taggedSong: null
 })
 
 // 监听 songId 初始化 tagInputVal
 watch(() => props.songId, async (songId) => {
-  state._taggedSong = await localforage.getItem('taggedSong')
-  let existSong = state._taggedSong?.find(e => e.songId === songId)
+  let existSong = globalData.taggedSong?.find(e => e.songId === songId)
   if (existSong) {
     state.tagInputVal = existSong.tagName.map(e => e)
   } else {
@@ -70,6 +71,7 @@ function tabHandler(tag, submit, deactivate) {
     dynamicTags.value.showInput = true
   }, 0);
 }
+
 // 点击外部 关闭/开启 tagInput
 function clickHandler() {
   if (dynamicTags.value.showInput) return false
@@ -96,6 +98,7 @@ async function insertTag(tagName) {
   } else {
     _tags.push({ tagName, ref: 1 });
   }
+  globalData.tagList = _tags
   localforage.setItem("tag", _tags);
 }
 // 将tag插入indexedDB.taggedSongs
@@ -114,6 +117,7 @@ const insertTaggedSongs = async (tagName) => {
   } else {
     taggedSong.push({ songId, tagName: [tagName], ...props.songInfo });
   }
+  globalData.taggedSong = taggedSong
   // 存入indexedDB
   localforage.setItem('taggedSong', taggedSong);
 }
@@ -127,6 +131,7 @@ const removeTagInTaggedSong = async (tags) => {
   if (songExist >= 0) {
     taggedSong[songExist].tagName = taggedSong[songExist].tagName.filter(x => !tags.includes(x));
   }
+  globalData.taggedSong = taggedSong
   localforage.setItem("taggedSong", taggedSong);
 }
 
@@ -151,6 +156,7 @@ const removeTag = async (tags) => {
   })
   // 清除ref=0的tag
   local_tags = local_tags.filter((e) => e.ref > 0);
+  globalData.tagList = local_tags
   localforage.setItem("tag", local_tags);
 }
 </script>
