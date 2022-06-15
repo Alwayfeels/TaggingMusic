@@ -9,7 +9,6 @@
 <script setup>
 import TopBar from '@/components/TopBar.vue';
 import PlayMusicBar from '@/components/PlayMusicBar.vue';
-import api from '@/api/http'
 import { useGlobalData } from './store/globalData';
 
 const globalData = useGlobalData()

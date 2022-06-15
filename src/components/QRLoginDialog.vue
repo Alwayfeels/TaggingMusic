@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import api from '@/api/http'
 
 const props = defineProps({
@@ -38,7 +38,7 @@ const state = reactive({
     isQRcodeFailed: false, // 是否加载二维码失败
     isQRcodeScaning: false, // 是否正在扫描二维码
     isQRcodeOvertime: false, // 是否二维码超时
-    isPollingLoginStatus: false,
+    isPollingLoginStatus: false, // 是否正在轮询登录状态
     bodyStyle: {
         width: '600px'
     },
@@ -82,7 +82,6 @@ const initDialog = async () => {
     // 获取key
     const key = await api.get('/login/qr/key')
     state.unikey = key.data.unikey
-    console.log('key', state.unikey)
     // 根据key获取二维码
     const qrData = await api.get('login/qr/create', { key: state.unikey, qrimg: true })
     state.isQRcodeLoading = false
@@ -97,7 +96,6 @@ const initDialog = async () => {
     getLoginStatus()
 }
 const clearDialog = () => {
-    console.log('timer clear !!!!!!!!!!!')
     state.qrData = null
     state.isQRcodeLoading = false
     state.isQRcodeLoaded = false

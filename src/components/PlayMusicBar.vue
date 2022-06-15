@@ -29,7 +29,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
 import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled } from '@vicons/fluent'
-import api from '@/api/http'
 import { usePlayerStore } from '@/store/player';
 
 const globalPlayer = usePlayerStore()
@@ -81,18 +80,6 @@ onMounted(async () => {
 //     audio.value.pause()
 //   }
 // })
-
-globalPlayer.$onAction(async ({ name, globalPlayer, args, after, onError }) => {
-  if (name === 'setCurrentSong') {
-    let songId = args[0].id
-    const res = await api.getRemote('/song/url', { id: songId, br: 320000 })
-    let songUrl = res.data[0].url
-    player.url = songUrl
-    nextTick(() => {
-      play()
-    })
-  }
-})
 
 function play() {
   globalPlayer.isPlay = true;

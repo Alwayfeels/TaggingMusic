@@ -25,7 +25,6 @@
 </template>
 
 <script setup>
-import api from '@/api/http'
 import { computed, onBeforeMount, reactive } from 'vue';
 import { NButton } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';

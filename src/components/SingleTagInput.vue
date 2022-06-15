@@ -20,7 +20,7 @@ const globalData = useGlobalData()
 const emit = defineEmits(["change", "blur", "pressTab"]);
 
 // 该组件应该是一个存粹的无状态输入组件
-// 根据 indexedDB.tag 中的数据联想
+// 根据 globalData.tagList 中的数据联想
 const singleTagInput = ref(null);
 
 let state = reactive({
@@ -35,25 +35,6 @@ let state = reactive({
     return state.tagList
   }),
 })
-
-// onMounted(() => {
-//   initTag()
-// })
-
-// // 初始化输入联想的tag
-// function initTag() {
-//   localforage.getItem('tag').then(data => {
-//     state.tag = data?.map(e => ({ label: e.tagName, value: e.tagName }))
-//     state.activeTags = state.tag
-//   })
-// }
-
-// function inputValChange(inputVal) {
-//   state.activeTags = globalData.tagList.filter((e) => {
-//     return e.label.includes(inputVal);
-//   });
-//   state.inputValue = inputVal;
-// }
 
 // 加载时 focus, 并展示所有 tag 供选择
 watch(singleTagInput, (el) => {
