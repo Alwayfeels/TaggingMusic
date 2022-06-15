@@ -8,14 +8,13 @@
 <script setup>
 import { NDataTable, NButton } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive } from "vue";
-import mockData from "@/data/mockSong";
 import { getSongTableColumns } from "@/data/tableColumns";
 
 const props = defineProps({
   tableData: {
     type: Array,
     default: () => {
-      return mockData;
+      return [];
     }
   },
   loading: {
