@@ -35,6 +35,7 @@ export const usePlayerStore = defineStore("player", {
     // },
     // 插入歌曲并播放
     async insertSong(song) {
+      let insertIndex = this.currPlayIndex || 0;
       let readySong = await this.getSongUrl(song) // 带有url属性
       if (this.currPlayIndex != null) { 
         this.playerList.unshift(readySong);
