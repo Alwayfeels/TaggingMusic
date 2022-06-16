@@ -1,6 +1,7 @@
 <template>
-  <div class="view-container flex justify-center flex-col w-full items-center">
-
+  <div class="view-container  w-full mt-2 ml-10">
+    <p>这里是一个介绍页，在做了在做了</p>
+    <p>使用方法：登录 -> 查看歌单 -> 点击播放音乐 -> 记录你的tag -> 右上角点击生成歌单</p>
   </div>
 </template>
 

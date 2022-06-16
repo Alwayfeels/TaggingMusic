@@ -4,24 +4,27 @@
       <img v-if="globalPlayer.currPlaySong?.al?.picUrl" :src="`${globalPlayer.currPlaySong?.al?.picUrl}?param=64y64`"
         class="w-16 h-16" alt="">
       <div class="ml-4 flex items-center">
-        <n-icon size="24" :component="Previous24Filled" @click="play" />
+        <n-icon size="24" class="cursor-not-allowed" :component="Previous24Filled" @click="play" />
         <n-spin :show="globalPlayer.loading">
-          <n-icon v-if="globalPlayer.isPlay" size="48" :component="Pause48Filled" @click="pause" />
-          <n-icon v-else size="48" :component="Play48Filled" @click="play" />
+          <n-icon class="cursor-pointer" v-if="globalPlayer.isPlay" size="48" :component="Pause48Filled" @click="pause" />
+          <n-icon class="cursor-pointer" v-else size="48" :component="Play48Filled" @click="play" />
         </n-spin>
-        <n-icon size="24" :component="Next24Filled" />
+        <n-icon size="24" class="cursor-not-allowed" :component="Next24Filled" />
       </div>
       <div class="ml-4 flex flex-col">
         <div class="text-lg">{{ globalPlayer.currPlaySong?.name }}</div>
         <div>{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
-      <div class="w-96 ml-4 flex flex-col">
+      <div class="w-96 ml-6 pt-1 flex flex-col">
         <n-slider v-model:value="globalPlayer.currentTime" :max="globalPlayer.duration" :format-tooltip="timeFormatter"
-          :step="1" />
-        <div>{{ processInfo }}</div>
+          :step="1" disabled />
+        <div class="mt-2 flex justify-between">
+          <span>320kbps</span>
+          <span>{{processInfo}}</span>
+        </div>
       </div>
     </div>
-    <audio ref="audio" :src="player.url" @canplay="getDuration" @pause="pause" @timeupdate="timeupdate" @play="play"
+    <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause" @timeupdate="timeupdate" @play="play"
       style="display: none"></audio>
   </div>
 </template>
@@ -34,9 +37,6 @@ import { usePlayerStore } from '@/store/player';
 const globalPlayer = usePlayerStore()
 const audio = ref(null)
 
-const player = reactive({
-  url: ''
-})
 const state = reactive({
   musicId: 1900054586,
   playlist: [],
@@ -51,10 +51,14 @@ const state = reactive({
   }
 })
 const processInfo = computed(() => {
-  const curr = timeFormatter(Math.floor(globalPlayer.currentTime / 1000))
-  const dura = timeFormatter(Math.floor(globalPlayer.duration / 1000))
+  const curr = timeFormatter(Math.floor(globalPlayer.currentTime))
+  const dura = timeFormatter(Math.floor(globalPlayer.duration))
   return `${curr} / ${dura}`
 })
+
+watch(() => globalPlayer.currPlaySong, (val) => {
+  play()
+}, { immediate: true })
 onMounted(async () => {
   // const res = await api.getRemote('/song/url', { id: state.musicId, br: 320000 })
   // let songData = res.data[0]
@@ -83,11 +87,11 @@ onMounted(async () => {
 
 function play() {
   globalPlayer.isPlay = true;
-  audio.value.play()
+  audio.value?.play()
 }
 function pause() {
   globalPlayer.isPlay = false;
-  audio.value.pause()
+  audio.value?.pause()
 }
 /**
  * 获取音乐时长

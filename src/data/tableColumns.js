@@ -22,8 +22,8 @@ export function getSongTableColumns(tableInstance, tableData) {
                         src: songImgUrl,
                         class: 'img40 cursor-pointer',
                         onclick: () => {
+                            globalPlayer.insertSong(row)
                             globalPlayer.isPlayerShow = true;
-                            globalPlayer.setCurrentSong(row)
                         }
                     }
                 )
