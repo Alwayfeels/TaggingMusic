@@ -13,9 +13,9 @@
       <n-button class="mr-2" size="large" strong type="success" @click="togglePlayerBar">
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
-      <n-button class="mr-2" size="large" strong type="info" @click="refreshSonglist">刷新歌单列表</n-button>
-      <n-button class="mr-2" size="large" strong type="info" @click="state.showTaggingDialog = true">生成tag歌单</n-button>
-      <n-button size="large" strong type="error" @click="state.showLoginDialog = true">
+      <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info" @click="refreshSonglist">刷新歌单列表</n-button>
+      <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info" @click="state.showTaggingDialog = true">生成tag歌单</n-button>
+      <n-button v-if="state.isMainPage" size="large" strong type="error" @click="state.showLoginDialog = true">
         {{ state.isLogged ? '切换用户' : '登录' }}
       </n-button>
     </div>
@@ -25,15 +25,18 @@
 </template>
 
 <script setup>
-import { computed, onBeforeMount, reactive } from 'vue';
+import { computed, onBeforeMount, onMounted, reactive } from 'vue';
 import { NButton } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
 import { usePlayerStore } from '@/store/player';
 import { useGlobalData } from '@/store/globalData';
+import { useRouter, useRoute } from 'vue-router'
 // 全局数据中心
 const globalData = useGlobalData()
+const route = useRoute()
+const router = useRouter()
 
 // 全局player store
 const globalPlayer = usePlayerStore()
@@ -42,6 +45,9 @@ const togglePlayerBar = () => {
 }
 
 const state = reactive({
+  isMainPage: computed(() => {
+    return route.path === '/main'
+  }),
   showLoginDialog: false,
   showTaggingDialog: false,
   isLogged: computed(() => {
