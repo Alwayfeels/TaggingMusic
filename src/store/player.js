@@ -36,14 +36,16 @@ export const usePlayerStore = defineStore("player", {
     // 插入歌曲并播放
     async insertSong(song) {
       let insertIndex = this.currPlayIndex || 0;
-      let readySong = await this.getSongUrl(song) // 带有url属性
+      let id = song.id
       if (this.currPlayIndex != null) { 
-        this.playerList.unshift(readySong);
+        this.playerList.unshift(song);
         this.currPlayIndex = 0
       } else {
         // 将insert的歌曲插入到当前播放歌曲之前
-        this.playerList.splice(this.currPlayIndex, 0, readySong);
+        this.playerList.splice(this.currPlayIndex, 0, song);
       }
+      let readySong = await this.getSongUrl(song) // 带有url属性
+      this.playerList[insertIndex] = readySong;
     },
     async pushSong(song) {
       let readySong = await this.getSongUrl(song) // 带有url属性

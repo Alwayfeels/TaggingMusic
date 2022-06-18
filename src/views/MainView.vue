@@ -33,7 +33,7 @@ const state = reactive({
 });
 
 onMounted(async () => {
-  state.currSonglistId = globalData.playlist[0].id || null;
+  state.currSonglistId = globalData.playlist[0]?.id || null;
 })
 
 const activeMenuChange = async (key, item) => {

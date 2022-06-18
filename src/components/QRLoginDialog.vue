@@ -4,8 +4,7 @@
         <div class="flex justify-center items-center flex-col">
             <p>Recommand to use QRcode log in</p>
             <n-spin :show="state.isQRcodeLoading || state.isQRcodeScaning">
-                <img v-if="state.qrData" :src="state.qrData.data?.qrimg" alt="登陆二维码"
-                    @click="refreshQRcode">
+                <img v-if="state.qrData" :src="state.qrData.data?.qrimg" alt="登陆二维码" @click="refreshQRcode">
                 <div v-else class="bg-stripes flex items-center justify-center" @click="refreshQRcode">
                     <p v-if="state.isQRcodeFailed">二维码加载失败</p>
                 </div>
@@ -80,10 +79,10 @@ watch(() => props.showDialog, (val) => {
 const initDialog = async () => {
     state.isQRcodeLoading = true
     // 获取key
-    const key = await api.get('/login/qr/key')
+    const key = await api.getRemote('/login/qr/key')
     state.unikey = key.data.unikey
     // 根据key获取二维码
-    const qrData = await api.get('login/qr/create', { key: state.unikey, qrimg: true })
+    const qrData = await api.getRemote('login/qr/create', { key: state.unikey, qrimg: true })
     state.isQRcodeLoading = false
     if (qrData.code !== 200) {
         // 显示失败提示
@@ -116,7 +115,7 @@ const refreshQRcode = () => {
 // polling to get login status
 const getLoginStatus = async () => {
     const key = state.unikey
-    const res = await api.get('login/qr/check', { key })
+    const res = await api.getRemote('login/qr/check', { key })
     if (!state.isPollingLoginStatus) return false
     // 800 为二维码过期,801 为等待扫码,802 为待确认,803 为授权登录成功(803 状态码下会返回 cookies)
     // isPollingLoginStatus 是否开启登录状态轮询
@@ -135,7 +134,7 @@ const getLoginStatus = async () => {
             break
         case 803:
             state.isPollingLoginStatus = false
-            emits('closeDialog')
+            emits('update:showDialog', false)
             emits('refreshLoginStatus')
             break
     }
