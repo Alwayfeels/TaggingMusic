@@ -8,12 +8,14 @@ const globalPlayer = usePlayerStore()
 export function getSongTableColumns(tableInstance, tableData) {
     return [
         {
-            title: "name",
+            title: "歌曲名称",
             key: "name",
+            minWidth: '200px',
         },
         {
-            title: "avatar",
+            title: "封面",
             key: "al.picUrl",
+            minWidth: '50px',
             render(row) {
                 let songImgUrl = `${row.al.picUrl}?param=40y40`
                 return h(
@@ -26,7 +28,8 @@ export function getSongTableColumns(tableInstance, tableData) {
             }
         },
         {
-            title: "artist",
+            title: "歌手",
+            minWidth: '200px',
             render(row) {
                 const tags = row.ar.map(artist => {
                     return h(NTag, { class: 'mr-2 play-point' }, { default: () => artist.name })
@@ -35,7 +38,8 @@ export function getSongTableColumns(tableInstance, tableData) {
             }
         },
         {
-            title: "album",
+            title: "专辑",
+            minWidth: '200px',
             render(row) {
                 return h(
                     'div',
@@ -45,8 +49,8 @@ export function getSongTableColumns(tableInstance, tableData) {
             }
         },
         {
-            title: 'tag',
-            width: '600px',
+            title: 'Tag',
+            minWidth: '300px',
             render(row, index) {
                 return h(TagInput, {
                     songId: row.id,

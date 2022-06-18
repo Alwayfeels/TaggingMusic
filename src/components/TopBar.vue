@@ -1,6 +1,7 @@
 <template>
   <div class="top-bar w-full h-20 flex items-center">
-    <div class="text-2xl">Tagging Music</div>
+    <n-icon class="cursor-pointer mr-2" size="32" :component="LogoGithub" @click="toGithub" />
+    <div class="text-2xl cursor-pointer" @click="toGithub">Tagging Music</div>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <div class="ml-auto flex items-center">
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">
@@ -10,11 +11,18 @@
         </div>
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
-      <n-button class="mr-2" secondary size="large" strong type="success" @click="togglePlayerBar">
+      <n-button v-if="state.isMainPage" class="mr-2" secondary size="large" strong type="success"
+        @click="togglePlayerBar">
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
-      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info" @click="refreshSonglist">刷新歌单列表</n-button>
-      <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info" @click="state.showTaggingDialog = true">生成tag歌单</n-button>
+      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info" @click="refreshSonglist">
+        刷新歌单列表</n-button>
+      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info"
+        @click="exportTaggedSong">导出Tag</n-button>
+      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info"
+        @click="importTaggedSong">导入Tag</n-button>
+      <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info"
+        @click="state.showTaggingDialog = true">生成tag歌单</n-button>
       <n-button v-if="state.isMainPage" size="large" strong type="error" @click="state.showLoginDialog = true">
         {{ state.isLogged ? '切换用户' : '登录' }}
       </n-button>
@@ -33,6 +41,8 @@ import localforage from 'localforage';
 import { usePlayerStore } from '@/store/player';
 import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
+import { LogoGithub } from '@vicons/ionicons4'
+
 // 全局数据中心
 const globalData = useGlobalData()
 const route = useRoute()
@@ -69,12 +79,24 @@ const getUserInfo = async () => {
 function refreshSonglist() {
   globalData.getRemotePlaylist()
 }
+// export tagged song
+function exportTaggedSong() {
+  globalData.exportTaggedSong()
+}
+// import tagged song
+async function importTaggedSong() {
+  globalData.importTaggedSong()
+}
+function toGithub() {
+  window.open('https://github.com/Alwayfeels/TaggingMusic', '_blank')
+}
 </script>
 
 <style lang="scss" scoped>
 .top-bar {
-  background-color: #cccccc;
+  background-color: white;
   box-sizing: border-box;
+  border-bottom: 1px solid #eee;
   padding: 0 40px;
 
   .user-name {
