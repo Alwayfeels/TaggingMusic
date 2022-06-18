@@ -108,10 +108,11 @@ export const useGlobalData = defineStore("globalData", {
       let playlist = res.playlist;
       if (playlist) {
         // 筛选需要的key保留到store
-        // let needProps = ["id", "name", "al", "ar"];
         let needProps = ["id", "name", "coverImgUrl", "trackCount"];
-        this.playlist = this.filterUsefulProps(playlist, needProps);
-        return playlist
+        playlist = this.filterUsefulProps(playlist, needProps);
+        this.playlist = playlist;
+        localforage.setItem("playlist", playlist);
+        return playlist;
       }
       console.error("getRemotePlaylist error");
       return [];
@@ -131,7 +132,7 @@ export const useGlobalData = defineStore("globalData", {
         let needProps = ["id", "name", "al", "ar"];
         this.songlist = this.filterUsefulProps(songlist, needProps);
       }
-      localforage.setItem(`songlist_${playlistId}`, res);
+      localforage.setItem(`songlist_${playlistId}`, songlist);
       return res;
     },
     // 导出TaggedSong
@@ -174,17 +175,18 @@ export const useGlobalData = defineStore("globalData", {
       // 触发上传文件
       input.click();
     },
-    // 导入文件
-    importFile() {},
     // 筛选objArray中需要的prop，筛选后返回
     filterUsefulProps(objArray, usefulPropsArray) {
-      return objArray.map((item) => {
-        let newItem = {};
-        usefulPropsArray.forEach((key) => {
-          newItem[key] = item[key];
+      if (objArray && objArray.length) {
+        return objArray.map((item) => {
+          let newItem = {};
+          usefulPropsArray.forEach((key) => {
+            newItem[key] = item[key];
+          });
+          return newItem;
         });
-        return newItem;
-      });
+      }
+      return [];
     },
   },
 });

@@ -2,7 +2,7 @@
     <n-modal v-model:show="showDialog" class="custom-card" preset="card" :style="state.bodyStyle" title="登录" size="huge"
         :bordered="false" :segmented="state.segmented" :on-update:show="showChangeHandler">
         <div class="flex justify-center items-center flex-col">
-            <p>Recommand to use QRcode log in</p>
+            <p>请使用手机端网易云音乐扫码登录</p>
             <n-spin :show="state.isQRcodeLoading || state.isQRcodeScaning">
                 <img v-if="state.qrData" :src="state.qrData.data?.qrimg" alt="登陆二维码" @click="refreshQRcode">
                 <div v-else class="bg-stripes flex items-center justify-center" @click="refreshQRcode">
@@ -12,7 +12,7 @@
             <p>{{ state.qrCodeTips }}</p>
         </div>
         <template #footer>
-            <p>tagging music would not upload your personal data</p>
+            <p class="text-sm text-gray-500">虽然后续可能支持其他的登录方式，但是扫码登录总归是安全的</p>
         </template>
     </n-modal>
 </template>
@@ -155,6 +155,6 @@ const getLoginStatus = async () => {
     height: 150px;
     background-image: linear-gradient(45deg, var(--stripes-color) 12.5%, transparent 12.5%, transparent 50%, var(--stripes-color) 50%, var(--stripes-color) 62.5%, transparent 62.5%, transparent 100%);
     background-size: 5.66px 5.66px;
-    --stripes-color: rgba(14, 165, 233, 0.4);
+    --stripes-color: #18a058;
 }
 </style>

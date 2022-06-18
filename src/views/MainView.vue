@@ -39,7 +39,7 @@ onMounted(async () => {
 const activeMenuChange = async (key, item) => {
   state.currSonglistId = key
   state.songlistLoading = true
-  await globalData.getRemoteSonglist(key)
+  await globalData.initSonglist(key)
   state.songlistLoading = false
 }
 const renderMenuIcon = (option) => {

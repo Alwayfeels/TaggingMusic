@@ -1,7 +1,7 @@
 <template>
   <div class="top-bar w-full h-20 flex items-center">
     <n-icon class="cursor-pointer mr-2" size="32" :component="LogoGithub" @click="toGithub" />
-    <div class="text-2xl cursor-pointer" @click="toGithub">Tagging Music</div>
+    <div class="text-2xl cursor-pointer" @click="toEntry">Tagging Music</div>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <div class="ml-auto flex items-center">
       <!--用户 -->
@@ -94,6 +94,9 @@ async function importTaggedSong() {
 }
 function toGithub() {
   window.open('https://github.com/Alwayfeels/TaggingMusic', '_blank')
+}
+function toEntry() {
+  router.push('/')
 }
 </script>
 

@@ -27,12 +27,6 @@ export const usePlayerStore = defineStore("player", {
     }
   },
   actions: {
-    // setCurrentSong(song) {
-    //   this.setPlayerList(song)
-    // },
-    // setPlayerList(playerList) {
-    //   this.playerList = [playerList]
-    // },
     // 插入歌曲并播放
     async insertSong(song) {
       let insertIndex = this.currPlayIndex || 0;

@@ -1,7 +1,7 @@
 <template>
   <n-spin :show="loading">
     <n-data-table class="commonTable" :columns="songTableColumns" :data="tableData" :pagination="pagination"
-      :bordered="false" :row-props="tConfig.rowProps" pagination-behavior-on-filter="first" :paginate-single-page="false"/>
+      :bordered="false" :row-props="tConfig.rowProps" pagination-behavior-on-filter="first" :paginate-single-page="false" />
   </n-spin>
 </template>
 

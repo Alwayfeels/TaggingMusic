@@ -1,11 +1,11 @@
 <template>
   <div class="view-container flex flex-col items-center w-full h-full mt-2 ml-10">
     <h1 class="text-5xl mt-32">Tagging Music</h1>
-    <p class="text-2xl text-slate-400">使用 Tag 标记歌曲，然后快速生成歌单</p>
+    <p class="text-2xl text-slate-400">使用 Tag 标记歌曲，快速生成丰富的分类歌单</p>
     <NButton class="my-4" type="primary" size="large" @click="toMainView">开始使用</NButton>
     <n-divider />
     <div class="detail flex flex-1">
-      <div v-for="item in detailInfo" class="flex-1 pr-8">
+      <div v-for="item in detailInfo" class="flex-1 px-4">
         <div class="title text-xl">{{ item.title }}</div>
         <div class="content mt-4 text-slate-500">
           <p v-for="row in item.content">{{ row }}</p>
