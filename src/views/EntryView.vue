@@ -31,7 +31,8 @@ const detailInfo = ref([
   {
     title: '技术栈',
     content: [
-      'Tagging Music 基于 NeteaseCloudMusicApi 开发（目前只支持网易云），使用 indexedDB 缓存数据',
+      'Tagging Music 基于 NeteaseCloudMusicApi 开发（目前只支持网易云），使用 indexedDB 缓存数据。',
+      '清除浏览器缓存将会丢失所有Tag数据，清除缓存前请记得导出数据避免数据丢失。',
       '技术栈：Vue3(setup-script) + Vite + Pinia + NaiveUI + TailwindCSS + Localforage，欢迎 star, fork 和 PR'
     ]
   },

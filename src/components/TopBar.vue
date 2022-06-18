@@ -4,6 +4,7 @@
     <div class="text-2xl cursor-pointer" @click="toGithub">Tagging Music</div>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <div class="ml-auto flex items-center">
+      <!--用户 -->
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">
         <div class="user-name mr-4 flex items-center flex-col">
           <span>{{ globalData.user.profile.nickname }}</span>
@@ -11,19 +12,20 @@
         </div>
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
-      <n-button v-if="state.isMainPage" class="mr-2" secondary size="large" strong type="success"
+      <!--控制台 -->
+      <n-button v-if="state.showControlBtn" class="mr-2" secondary size="large" strong type="success"
         @click="togglePlayerBar">
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
-      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info" @click="refreshSonglist">
+      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info" @click="refreshSonglist">
         刷新歌单列表</n-button>
-      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info"
+      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="exportTaggedSong">导出Tag</n-button>
-      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info"
+      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="importTaggedSong">导入Tag</n-button>
-      <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info"
+      <n-button v-if="state.showControlBtn" class="mr-2" size="large" strong type="info"
         @click="state.showTaggingDialog = true">生成tag歌单</n-button>
-      <n-button v-if="state.isMainPage" size="large" strong type="error" @click="state.showLoginDialog = true">
+      <n-button size="large" strong type="error" @click="state.showLoginDialog = true">
         {{ state.isLogged ? '切换用户' : '登录' }}
       </n-button>
     </div>
@@ -55,6 +57,9 @@ const togglePlayerBar = () => {
 }
 
 const state = reactive({
+  showControlBtn: computed(() => {
+    return state.isMainPage && state.isLogged
+  }),
   isMainPage: computed(() => {
     return route.path === '/main'
   }),

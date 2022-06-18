@@ -39,7 +39,7 @@ export function getSongTableColumns(tableInstance, tableData) {
         },
         {
             title: "专辑",
-            minWidth: '200px',
+            minWidth: '150px',
             render(row) {
                 return h(
                     'div',

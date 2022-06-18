@@ -21,8 +21,10 @@ export const useGlobalData = defineStore("globalData", {
       this.initTaggedSong();
       this.initTag();
       await this.initUser();
-      await this.initPlaylist();
-      await this.initSonglist(this.playlist[0].id);
+      if (this.user.id) {
+        await this.initPlaylist();
+        await this.initSonglist(this.playlist[0]?.id);
+      }
     },
     // 初始化 已标记歌曲
     async initTaggedSong() {
@@ -109,6 +111,7 @@ export const useGlobalData = defineStore("globalData", {
         // let needProps = ["id", "name", "al", "ar"];
         let needProps = ["id", "name", "coverImgUrl", "trackCount"];
         this.playlist = this.filterUsefulProps(playlist, needProps);
+        return playlist
       }
       console.error("getRemotePlaylist error");
       return [];
@@ -122,7 +125,7 @@ export const useGlobalData = defineStore("globalData", {
       const res = await api.getRemote("/playlist/track/all", {
         id: playlistId,
       });
-      let songlist = res.songs
+      let songlist = res.songs;
       if (songlist) {
         // 筛选需要的key保留到store
         let needProps = ["id", "name", "al", "ar"];
@@ -174,7 +177,7 @@ export const useGlobalData = defineStore("globalData", {
     // 导入文件
     importFile() {},
     // 筛选objArray中需要的prop，筛选后返回
-    filterUsefulProps(objArray, usefulPropsArray) { 
+    filterUsefulProps(objArray, usefulPropsArray) {
       return objArray.map((item) => {
         let newItem = {};
         usefulPropsArray.forEach((key) => {
@@ -182,6 +185,6 @@ export const useGlobalData = defineStore("globalData", {
         });
         return newItem;
       });
-    }
+    },
   },
 });
