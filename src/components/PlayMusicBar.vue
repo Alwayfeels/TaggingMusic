@@ -3,82 +3,94 @@
     <div class="w-full h-full px-10 flex items-center justify-center">
       <img v-if="globalPlayer.currPlaySong?.al?.picUrl" :src="`${globalPlayer.currPlaySong?.al?.picUrl}?param=64y64`"
         class="w-16 h-16" alt="">
+      <!-- 播放控制 -->
       <div class="ml-4 flex items-center">
         <n-icon size="24" class="cursor-not-allowed" :component="Previous24Filled" @click="play" />
         <n-spin :show="state.isLoading">
-          <n-icon class="cursor-pointer" v-if="globalPlayer.isPlay" size="48" :component="Pause48Filled" @click="pause" />
+          <n-icon class="cursor-pointer" v-if="globalPlayer.isPlay" size="48" :component="Pause48Filled"
+            @click="pause" />
           <n-icon class="cursor-pointer" v-else size="48" :component="Play48Filled" @click="play" />
         </n-spin>
         <n-icon size="24" class="cursor-not-allowed" :component="Next24Filled" />
       </div>
+      <!-- 歌曲信息 -->
       <div class="ml-4 flex flex-col">
         <div class="text-lg">{{ globalPlayer.currPlaySong?.name }}</div>
         <div>{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
+      <!-- 进度条 -->
       <div class="w-96 ml-6 pt-1 flex flex-col">
-        <n-slider v-model:value="globalPlayer.currentTime" :max="globalPlayer.duration" :format-tooltip="timeFormatter"
-          :step="1" disabled />
+        <n-slider v-model:value="state.currentTime" :max="globalPlayer.duration" :format-tooltip="timeFormatter" :step="1"
+          :onUpdate:value="dragHandler" @mousedown="dragHandlerStart" @mouseup="dragHandlerEnd" />
         <div class="mt-2 flex justify-between">
           <span>320kbps</span>
-          <span>{{processInfo}}</span>
+          <span>{{ processInfo }}</span>
         </div>
       </div>
+      <!-- 音量 -->
       <div class="volume ml-8 flex w-36 items-center">
-          <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumnComponent" @click="state.isMute = !state.isMute" />
-          <n-slider v-model:value="state.volumn" :max="100" :step="1" />
+        <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent"
+          @click="state.isMute = !state.isMute" />
+        <n-slider v-model:value="state.volume" :max="100" :step="1" />
       </div>
     </div>
-    <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause" @timeupdate="timeupdate" @play="play"
-      style="display: none"></audio>
+    <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause"
+      @timeupdate="timeupdate" @play="play" style="display: none"></audio>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
-import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled } from '@vicons/fluent'
+import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular } from '@vicons/fluent'
 import { usePlayerStore } from '@/store/player';
-import {IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff} from '@vicons/ionicons4'
+import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 
 const globalPlayer = usePlayerStore()
 const audio = ref(null)
 
 const state = reactive({
   isLoading: false,
-  musicId: 1900054586,
   playlist: [],
-  songData: null,
-  volumn: 1, // max 100
+  isProgressDrag: false,
+  progressVal: 0,
+  currentTime: computed({
+    get() {
+      if (state.isProgressDrag) {
+        return state.progressVal
+      } else {
+        return globalPlayer.currentTime
+      }
+    },
+    set(val) {
+      state.progressVal = val
+    }
+  }),
+  volume: 100, // max 100
   isMute: false,
-  volumnComponent: computed(() => {
+  volumeComponent: computed(() => {
     if (state.isMute) return IosVolumeOff
-    if (state.volumn < 25) return IosVolumeMute
-    if (state.volumn < 65) return IosVolumeLow
+    if (state.volume < 25) return IosVolumeMute
+    if (state.volume < 65) return IosVolumeLow
     return IosVolumeHigh
   }),
-  playOption: {
-    duration: 213440, // 歌曲总时长，毫秒
-    songName: 'Song Name',
-    artist: ['aaa', 'bbb'],
-    src: '',
-    title: '',
-    coverRotate: true
-  }
 })
+
+// 播放进度文字格式化
 const processInfo = computed(() => {
-  const curr = timeFormatter(Math.floor(globalPlayer.currentTime))
+  const curr = timeFormatter(Math.floor(state.currentTime))
   const dura = timeFormatter(Math.floor(globalPlayer.duration))
   return `${curr} / ${dura}`
 })
 
 // 控制音量大小
-watch(() => state.volumn, (val) => {
+watch(() => state.volume, (val) => {
   audio.value.volume = val / 100
 })
 watch(() => state.isMute, (val) => {
   if (val === true) {
     audio.value.volume = 0
   } else {
-    audio.value.volume = state.volumn / 100
+    audio.value.volume = state.volume / 100
   }
 })
 
@@ -118,7 +130,17 @@ onMounted(async () => {
 //     audio.value.pause()
 //   }
 // })
-
+function dragHandler(val) {
+  state.progressVal = val
+}
+function dragHandlerStart() {
+  state.isProgressDrag = true
+}
+function dragHandlerEnd() {
+  globalPlayer.currentTime = state.progressVal
+  audio.value.currentTime = state.progressVal
+  state.isProgressDrag = false
+}
 function play() {
   globalPlayer.isPlay = true;
   audio.value?.play()

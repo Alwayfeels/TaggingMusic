@@ -10,10 +10,10 @@
         </div>
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
-      <n-button class="mr-2" size="large" strong type="success" @click="togglePlayerBar">
+      <n-button class="mr-2" secondary size="large" strong type="success" @click="togglePlayerBar">
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
-      <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info" @click="refreshSonglist">刷新歌单列表</n-button>
+      <n-button v-if="state.isMainPage" secondary class="mr-2" size="large" strong type="info" @click="refreshSonglist">刷新歌单列表</n-button>
       <n-button v-if="state.isMainPage" class="mr-2" size="large" strong type="info" @click="state.showTaggingDialog = true">生成tag歌单</n-button>
       <n-button v-if="state.isMainPage" size="large" strong type="error" @click="state.showLoginDialog = true">
         {{ state.isLogged ? '切换用户' : '登录' }}
