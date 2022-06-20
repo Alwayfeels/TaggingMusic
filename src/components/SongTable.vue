@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import { NDataTable, NButton } from "naive-ui";
+import { NDataTable, NButton, NSpin } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive } from "vue";
 import { getSongTableColumns } from "@/data/tableColumns";
 import { usePlayerStore } from '@/store/player';

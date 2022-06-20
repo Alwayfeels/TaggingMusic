@@ -19,6 +19,7 @@
 
 <script setup>
 import { computed, reactive, watch } from 'vue'
+import { NModal, NSpin } from 'naive-ui'
 import api from '@/api/http'
 
 const props = defineProps({

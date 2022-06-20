@@ -15,7 +15,8 @@
           <n-icon-wrapper :size="48" :border-radius="48">
             <n-icon class="cursor-pointer" v-if="globalPlayer.isPlay" :size="24" :component="Pause48Filled"
               @click="pause" />
-            <n-icon v-else :class="globalPlayer.currPlaySong ? 'cursor-pointer': 'cursor-not-allowed'" :size="24" :component="Play48Filled" @click="play" />
+            <n-icon v-else :class="globalPlayer.currPlaySong ? 'cursor-pointer' : 'cursor-not-allowed'" :size="24"
+              :component="Play48Filled" @click="play" />
           </n-icon-wrapper>
         </n-spin>
         <!-- <n-icon size="24" class="cursor-not-allowed" :component="Next24Filled" /> -->
@@ -46,7 +47,8 @@ import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
 import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular } from '@vicons/fluent'
 import { usePlayerStore } from '@/store/player';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
-import {LogoGithub} from '@vicons/ionicons4'
+import { LogoGithub } from '@vicons/ionicons4'
+import { NIcon, NSlider } from  'naive-ui'
 
 const globalPlayer = usePlayerStore()
 const audio = ref(null)

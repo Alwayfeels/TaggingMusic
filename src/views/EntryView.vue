@@ -21,7 +21,7 @@
 
 <script setup>
 import playMusicBar from '@/components/PlayMusicBar.vue';
-import { NDataTable, NButton } from "naive-ui";
+import { NDataTable, NButton, NDivider } from "naive-ui";
 import { reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 

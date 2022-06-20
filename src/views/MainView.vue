@@ -1,24 +1,29 @@
 <template>
   <n-layout class="main-container" :class="globalPlayer.isPlayerShow ? 'min-height' : 'full-height'" has-sider>
-    <n-layout-sider collapse-mode="width" :collapsed-width="120" :width="320" show-trigger="arrow-circle"
+    <n-layout-sider v-if="isLogin" collapse-mode="width" :collapsed-width="120" :width="320" show-trigger="arrow-circle"
       content-style="padding: 24px;" bordered :native-scrollbar="false">
       <n-spin :show="state.playlistLoading">
-        <n-menu v-model:value="state.currSonglistId" :root-indent="36" :indent="12" key-field="id" :options="globalData.playlist"
-          :render-icon="renderMenuIcon" :render-label="renderMenuLabel" :on-update:value="activeMenuChange" />
+        <n-menu v-model:value="state.currSonglistId" :root-indent="36" :indent="12" key-field="id"
+          :options="globalData.playlist" :render-icon="renderMenuIcon" :render-label="renderMenuLabel"
+          :on-update:value="activeMenuChange" />
       </n-spin>
     </n-layout-sider>
-    <n-layout-content content-style="padding: 24px;" :native-scrollbar="false">
+    <n-layout-content v-if="isLogin" content-style="padding: 24px;" :native-scrollbar="false">
       <SongTable class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
+    </n-layout-content>
+    <n-layout-content v-else content-style="padding: 24px;">
+      <Unlogin />
     </n-layout-content>
   </n-layout>
 </template>
 
 <script setup>
 import SongTable from '@/components/SongTable.vue';
-import { h, onMounted, reactive } from 'vue';
-import { NMenu } from 'naive-ui';
+import { h, onMounted, reactive, ref } from 'vue';
+import { NMenu, NLayout, NLayoutContent, NSpin, NLayoutSider } from 'naive-ui';
 import { usePlayerStore } from '@/store/player';
 import { useGlobalData } from '@/store/globalData';
+import Unlogin from '../components/Unlogin.vue';
 
 // 全局数据中心
 const globalData = useGlobalData()
@@ -26,6 +31,7 @@ const globalData = useGlobalData()
 // 全局player store
 const globalPlayer = usePlayerStore()
 
+const isLogin = ref(Boolean(globalData.user.id))
 const state = reactive({
   currSonglistId: null,
   playlistLoading: false,

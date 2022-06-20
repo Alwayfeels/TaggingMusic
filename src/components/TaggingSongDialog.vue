@@ -32,7 +32,7 @@
 <script setup>
 import { computed, onMounted, reactive, watch, h } from 'vue'
 import SingleTagInput from "@/components/SingleTagInput.vue";
-import { NDataTable, NTag } from 'naive-ui';
+import { NDataTable, NTag, NModal, NInput, NSelect, NButton, NPopover } from 'naive-ui';
 import localforage from 'localforage';
 import api from '@/api/http'
 import { useGlobalData } from '@/store/globalData';

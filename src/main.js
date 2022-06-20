@@ -1,6 +1,5 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import naive from 'naive-ui'
 import router from './router/index.js'
 import 'vfonts/Lato.css'
 import 'vfonts/FiraCode.css'
@@ -15,6 +14,5 @@ localforage.config({
 
 createApp(App)
     .use(router)
-    .use(naive)
     .use(createPinia())
     .mount('#app')

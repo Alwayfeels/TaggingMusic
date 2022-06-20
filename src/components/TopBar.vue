@@ -36,7 +36,7 @@
 
 <script setup>
 import { computed, onBeforeMount, onMounted, reactive } from 'vue';
-import { NButton } from 'naive-ui';
+import { NButton, NIcon } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
