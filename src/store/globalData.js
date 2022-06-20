@@ -65,8 +65,8 @@ export const useGlobalData = defineStore("globalData", {
     // 初始化 歌曲列表
     async initSonglist(playlistId) {
       if (!playlistId) {
-        console.error("playlistId is required");
-        return [];
+        console.warn('playlistId is required')
+        return []
       }
       let songlist = await localforage.getItem(`songlist_${playlistId}`);
       if (songlist) {
@@ -92,14 +92,14 @@ export const useGlobalData = defineStore("globalData", {
         localforage.setItem("account", account);
         return { profile, account };
       } else {
-        console.error("getRemoteUserInfo error: 可能用户未登录");
-        return { profile: null, account: null };
+        console.warn('getRemoteUserInfo error: 可能用户未登录')
+        return { profile: null, account: null }
       }
     },
     // 获取远端歌单列表, 返回数据并缓存到store, indexedDB
     async getRemotePlaylist() {
       if (!this.user.id) {
-        console.error("this.user.id is required");
+        console.warn('this.user.id is required')
         return [];
       }
       const res = await api.getRemote("/user/playlist", {
@@ -113,23 +113,14 @@ export const useGlobalData = defineStore("globalData", {
         this.playlist = this.filterUsefulProps(playlist, needProps);
         return playlist
       }
-      console.error("getRemotePlaylist error");
-      return [];
+      console.warn('getRemotePlaylist error')
+      return []
     },
     // 获取远端歌单详情, 返回数据并缓存到store, indexedDB
     async getRemoteSonglist(playlistId = "") {
       if (!playlistId) {
-        console.error("getRemoteSonglist error: playlistId is required");
-        return [];
-      }
-      const res = await api.getRemote("/playlist/track/all", {
-        id: playlistId,
-      });
-      let songlist = res.songs;
-      if (songlist) {
-        // 筛选需要的key保留到store
-        let needProps = ["id", "name", "al", "ar"];
-        this.songlist = this.filterUsefulProps(songlist, needProps);
+        console.warn('getRemoteSonglist error: playlistId is required')
+        return []
       }
       localforage.setItem(`songlist_${playlistId}`, res);
       return res;
