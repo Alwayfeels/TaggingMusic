@@ -4,7 +4,7 @@
         <div class="flex justify-center items-center flex-col">
             <p>Recommand to use QRcode log in</p>
             <n-spin :show="state.isQRcodeLoading || state.isQRcodeScaning">
-                <img v-if="state.qrData" :src="state.qrData.data?.qrimg" alt="登陆二维码" @click="refreshQRcode">
+                <img v-if="state.qrData" :src="state.qrData.data?.qrimg" alt="登录二维码" @click="refreshQRcode">
                 <div v-else class="bg-stripes flex items-center justify-center" @click="refreshQRcode">
                     <p v-if="state.isQRcodeFailed">二维码加载失败</p>
                 </div>
@@ -19,7 +19,7 @@
 
 <script setup>
 import { computed, reactive, watch } from 'vue'
-import { NModal, NSpin } from 'naive-ui'
+import { NModal, NSpin, useNotification } from 'naive-ui'
 import api from '@/api/http'
 
 const props = defineProps({
@@ -29,6 +29,7 @@ const props = defineProps({
     }
 })
 const emits = defineEmits(['refreshLoginStatus'])
+const notification = useNotification()
 
 // state
 const state = reactive({
@@ -135,6 +136,10 @@ const getLoginStatus = async () => {
             break
         case 803:
             state.isPollingLoginStatus = false
+            notification.success({
+                title: "登录成功",
+                duration: 3000
+            })
             emits('update:showDialog', false)
             emits('refreshLoginStatus')
             break

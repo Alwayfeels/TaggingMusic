@@ -44,7 +44,7 @@ const pagination = reactive({
   page: 1,
   pageSize: 30,
   showSizePicker: true,
-  pageSizes: [10, 30, 50, 100, 500],
+  pageSizes: [10, 30, 50],
   onChange: (page) => {
     pagination.page = page;
   },

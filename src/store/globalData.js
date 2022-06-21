@@ -36,7 +36,8 @@ export const useGlobalData = defineStore("globalData", {
     },
     // 初始化所有标签
     async initTag() {
-      const tagList = await localforage.getItem("tag");
+      const tagList = await this.updateTagFromTaggedSong();
+      // const tagList = await localforage.getItem("tag");
       if (tagList) {
         this.tagList = tagList;
       }
@@ -189,6 +190,26 @@ export const useGlobalData = defineStore("globalData", {
       }
       const res = await api.getRemote("/search", { keywords: key });
       console.log('res = ', res)
+    },
+    // 根据taggedSong 重新生成 tag 以及 ref
+    async updateTagFromTaggedSong() {
+      let taggedSong = await localforage.getItem("taggedSong");
+      if (!taggedSong) return [];
+      let allTag = [];
+      taggedSong.forEach((song) => {
+        if (song.tagName?.length) {
+          song.tagName.forEach((tag) => {
+            let existTag = allTag.find((item) => item.tagName === tag);
+            if (existTag) {
+              existTag.ref++;
+            } else {
+              allTag.push({tagName: tag, ref: 1});
+            }
+          })
+        }
+      })
+      localforage.setItem("tag", allTag);
+      return allTag;
     }
   },
 });
