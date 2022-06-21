@@ -1,12 +1,11 @@
 <template>
-  <n-spin :show="loading">
-    <n-data-table class="commonTable" :columns="songTableColumns" :data="tableData" :pagination="pagination"
-      :bordered="false" :row-props="tConfig.rowProps" pagination-behavior-on-filter="first" :paginate-single-page="false"/>
-  </n-spin>
+  <n-data-table class="songTable" :loading="loading" :columns="songTableColumns" :data="tableData"
+    :pagination="pagination" :bordered="false" :flex-height="true" :row-props="tConfig.rowProps"
+    pagination-behavior-on-filter="first" :paginate-single-page="false" />
 </template>
 
 <script setup>
-import { NDataTable, NButton, NSpin } from "naive-ui";
+import { NDataTable, NButton } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive } from "vue";
 import { getSongTableColumns } from "@/data/tableColumns";
 import { usePlayerStore } from '@/store/player';
@@ -40,9 +39,9 @@ const tConfig = reactive({
 
 const pagination = reactive({
   page: 1,
-  pageSize: 10,
+  pageSize: 30,
   showSizePicker: true,
-  pageSizes: [10, 20, 50, 100, 500],
+  pageSizes: [10, 30, 50, 100, 500],
   onChange: (page) => {
     pagination.page = page;
   },
@@ -59,6 +58,10 @@ const songTableColumns = ref(getSongTableColumns(tableInstance, () => props.tabl
 
 <style lang="scss" scoped>
 // 加宽 tag-input 组件的点击触发范围
+.songTable {
+  height: 100%;
+}
+
 :deep(.n-data-table-tr .n-data-table-td) {
   cursor: url(@/assets/Play.png) 16 16, pointer;
 }

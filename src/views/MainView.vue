@@ -8,7 +8,7 @@
           :on-update:value="activeMenuChange" />
       </n-spin>
     </n-layout-sider>
-    <n-layout-content v-if="isLogin" content-style="padding: 24px;" :native-scrollbar="false">
+    <n-layout-content v-if="isLogin" content-style="padding: 24px; height: 100%;" :native-scrollbar="false">
       <SongTable class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
     </n-layout-content>
     <n-layout-content v-else content-style="padding: 24px;">

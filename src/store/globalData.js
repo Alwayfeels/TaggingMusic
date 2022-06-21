@@ -181,5 +181,13 @@ export const useGlobalData = defineStore("globalData", {
         return newItem;
       });
     },
+    async searchSong(key = '') {
+      if (!key) {
+        console.warn('searchSong: key is required')
+        return [];
+      }
+      const res = await api.getRemote("/search", { keywords: key });
+      console.log('res = ', res)
+    }
   },
 });

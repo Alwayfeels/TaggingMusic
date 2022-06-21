@@ -3,7 +3,11 @@
     <n-icon class="cursor-pointer mr-2" size="32" :component="LogoGithub" @click="toGithub" />
     <div class="text-2xl cursor-pointer" @click="toGithub">Tagging Music</div>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
+    <!-- 搜索 -->
     <div class="ml-auto flex items-center">
+      <div class="mr-8 w-80">
+        <n-input v-model:value="state.searchKey" round placeholder="搜索音乐 / 专辑 / 歌手" @keypress.enter="searchHandler" />
+      </div>
       <!--用户 -->
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">
         <div class="user-name mr-4 flex items-center flex-col">
@@ -59,6 +63,7 @@ const togglePlayerBar = () => {
 
 const notification = useNotification()
 const state = reactive({
+  searchKey: '',
   showControlBtn: computed(() => {
     return state.isMainPage && state.isLogged
   }),
@@ -71,6 +76,12 @@ const state = reactive({
     return Boolean(globalData.user.account)
   }),
 });
+async function searchHandler() {
+  notification.error({
+    title: '在做了在做了',
+  })
+  // globalData.searchSong(state.searchKey)
+}
 // 登陆后重新init globalData
 const refreshLoginStatus = async () => {
   globalData.init()
@@ -80,15 +91,20 @@ function refreshSonglist() {
   globalData.getRemotePlaylist()
 }
 // export tagged song
-function exportTaggedSong() {
-  globalData.exportTaggedSong()
+async function exportTaggedSong() {
+  await globalData.exportTaggedSong()
+  notification.success({
+    title: "成功",
+    content: '导出完成！',
+    duration: 3000
+  })
 }
 // import tagged song
 async function importTaggedSong() {
   let res = await globalData.importTaggedSong()
   notification.success({
     title: "成功",
-    content: '导入完成，刷新页面可查看',
+    content: '导入完成！刷新页面可查看',
     duration: 3000
   })
 }

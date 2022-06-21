@@ -12,7 +12,6 @@
 import TopBar from '@/components/TopBar.vue';
 import PlayMusicBar from '@/components/PlayMusicBar.vue';
 import { useGlobalData } from './store/globalData';
-import { NNotificationProvider } from 'naive-ui';
 
 const globalData = useGlobalData()
 globalData.init()
