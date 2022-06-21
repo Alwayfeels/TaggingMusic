@@ -1,21 +1,23 @@
 <template>
-  <div id="app">
-    <TopBar />
-    <router-view />
-    <PlayMusicBar />
-  </div>
+  <n-notification-provider>
+    <div id="app">
+      <TopBar />
+      <router-view />
+      <PlayMusicBar />
+    </div>
+  </n-notification-provider>
 </template>
 
 <script setup>
 import TopBar from '@/components/TopBar.vue';
 import PlayMusicBar from '@/components/PlayMusicBar.vue';
 import { useGlobalData } from './store/globalData';
+import { NNotificationProvider } from 'naive-ui';
 
 const globalData = useGlobalData()
-globalData.initGlobalData()
+globalData.init()
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-
 </script>
 
 <style>

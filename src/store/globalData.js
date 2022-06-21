@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import api from "@/api/http";
 import localforage from "localforage";
+// naive UI 就算用最新的 2.29.0 版本也会报错
 // import { createDiscreteApi } from "naive-ui";
 
 // const { message, notification, dialog, loadingBar } = createDiscreteApi(["message", "dialog", "notification", "loadingBar"], {});
@@ -17,7 +18,7 @@ export const useGlobalData = defineStore("globalData", {
   getters: {},
   actions: {
     // 初始化 globalData
-    async initGlobalData() {
+    async init() {
       this.initTaggedSong();
       this.initTag();
       await this.initUser();
@@ -119,11 +120,20 @@ export const useGlobalData = defineStore("globalData", {
     // 获取远端歌单详情, 返回数据并缓存到store, indexedDB
     async getRemoteSonglist(playlistId = "") {
       if (!playlistId) {
-        console.warn('getRemoteSonglist error: playlistId is required')
-        return []
+        console.error("getRemoteSonglist error: playlistId is required");
+        return [];
       }
-      localforage.setItem(`songlist_${playlistId}`, res);
-      return res;
+      const res = await api.getRemote("/playlist/track/all", {
+        id: playlistId,
+      });
+      let songlist = res.songs;
+      if (songlist) {
+        // 筛选需要的key保留到store
+        let needProps = ["id", "name", "al", "ar"];
+        this.songlist = this.filterUsefulProps(songlist, needProps);
+      }
+      localforage.setItem(`songlist_${playlistId}`, songlist);
+      return songlist;
     },
     // 导出TaggedSong
     async exportTaggedSong() {
@@ -135,38 +145,32 @@ export const useGlobalData = defineStore("globalData", {
     },
     // 导入TaggedSong
     async importTaggedSong() {
-      // notification.create({ title: "Notification" });
       let _this = this;
-      // 创建一个file input
-      let input = document.createElement("input");
-      input.type = "file";
-      // 绑定onchange事件
-      input.onchange = (event) => {
-        let files = event.target.files;
-        if (!files || !files.length) {
-          input = null;
-          throw new Error("No files");
-        }
-        // 当选择文件后，使用FileReader API读取文件，返回数据
-        let reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            let data = JSON.parse(event.target.result);
+      return new Promise((resolve, reject) => {
+        // 创建一个file input
+        let input = document.createElement("input");
+        // 绑定onchange事件
+        input.type = "file";
+        input.onchange = (e) => {
+          let file = e.target.files[0];
+          console.log('file = ', file)
+          if (!file) {
+            input = null;
+            reject('file is null')
+          }
+          // 当选择文件后，使用FileReader API读取文件，返回数据
+          let reader = new FileReader();
+          reader.readAsText(file);
+          reader.onload = (e) => {
+            let data = JSON.parse(e.target.result);
             localforage.setItem("taggedSong", data);
             _this.taggedSong = data;
-            window.$message.success("导入成功");
-            return data;
-          } catch (e) {
-            throw new Error(e);
-          }
+            resolve(data);
+          };
         };
-        reader.readAsText(files[0]);
-      };
-      // 触发上传文件
-      input.click();
+        input.click();
+      })
     },
-    // 导入文件
-    importFile() {},
     // 筛选objArray中需要的prop，筛选后返回
     filterUsefulProps(objArray, usefulPropsArray) {
       return objArray.map((item) => {

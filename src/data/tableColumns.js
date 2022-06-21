@@ -31,10 +31,10 @@ export function getSongTableColumns(tableInstance, tableData) {
             title: "歌手",
             minWidth: '200px',
             render(row) {
-                const tags = row.ar.map(artist => {
-                    return h(NTag, { class: 'mr-2 play-point' }, { default: () => artist.name })
-                })
-                return tags
+                // const tags = row.ar.map(artist => {
+                //     return h(NTag, { class: 'mr-2 play-point' }, { default: () => artist.name })
+                // })
+                return row.ar.map(artist => artist.name).join(' / ')
             }
         },
         {

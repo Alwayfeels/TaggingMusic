@@ -17,7 +17,8 @@
         @click="togglePlayerBar">
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info" @click="refreshSonglist">
+      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
+        @click="refreshSonglist">
         刷新歌单列表</n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="exportTaggedSong">导出Tag</n-button>
@@ -29,14 +30,14 @@
         {{ state.isLogged ? '切换用户' : '登录' }}
       </n-button>
     </div>
-    <QRLoginDialog v-model:showDialog="state.showLoginDialog" @refreshLoginStatus="getUserInfo" />
+    <QRLoginDialog v-model:showDialog="state.showLoginDialog" @refreshLoginStatus="refreshLoginStatus" />
     <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" />
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeMount, onMounted, reactive } from 'vue';
-import { NButton, NIcon } from 'naive-ui';
+import { NButton, NIcon, useNotification } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
@@ -56,6 +57,7 @@ const togglePlayerBar = () => {
   globalPlayer.togglePlayer()
 }
 
+const notification = useNotification()
 const state = reactive({
   showControlBtn: computed(() => {
     return state.isMainPage && state.isLogged
@@ -69,16 +71,9 @@ const state = reactive({
     return Boolean(globalData.user.account)
   }),
 });
-
-// 获取用户数据, 优先从缓存中获取
-const getUserInfo = async () => {
-  let [profile, account] = await Promise.all([
-    localforage.getItem('profile'),
-    localforage.getItem('account'),
-  ])
-  if (!profile || !account) {
-    ({ profile, account } = await globalData.getRemoteUserInfo())
-  }
+// 登陆后重新init globalData
+const refreshLoginStatus = async () => {
+  globalData.init()
 }
 // refresh songlist
 function refreshSonglist() {
@@ -90,7 +85,12 @@ function exportTaggedSong() {
 }
 // import tagged song
 async function importTaggedSong() {
-  globalData.importTaggedSong()
+  let res = await globalData.importTaggedSong()
+  notification.success({
+    title: "成功",
+    content: '导入完成，刷新页面可查看',
+    duration: 3000
+  })
 }
 function toGithub() {
   window.open('https://github.com/Alwayfeels/TaggingMusic', '_blank')

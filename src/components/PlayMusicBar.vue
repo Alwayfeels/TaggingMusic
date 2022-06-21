@@ -48,7 +48,7 @@ import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat2
 import { usePlayerStore } from '@/store/player';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { LogoGithub } from '@vicons/ionicons4'
-import { NIcon, NSlider } from  'naive-ui'
+import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
 
 const globalPlayer = usePlayerStore()
 const audio = ref(null)
@@ -110,31 +110,10 @@ watch(() => globalPlayer.currPlaySong, (song) => {
     state.isLoading = true
   }
 }, { immediate: true, deep: true })
-onMounted(async () => {
-  // const res = await api.getRemote('/song/url', { id: state.musicId, br: 320000 })
-  // let songData = res.data[0]
-  // state.songData = songData
-  // player.src = songData.url
-  // 初始化音乐播放器
-  // const audio = new Audio()
-  // audio.src = 'http://www.ytmp3.cn/down/56467.mp3'
-  // audio.play()
-  // audio.pause()
-  // audio.currentTime = 0
-  // audio.volume = 0.5
-  // audio.loop = true
-  // audio.play()
-})
-/**
- * 播放音乐
- */
-// watch(() => globalPlayer.isPlay, (val) => {
-//   if (val) {
-//     audio.value.play()
-//   } else {
-//     audio.value.pause()
-//   }
-// })
+
+function togglePlayer() {
+  debugger
+}
 function dragHandler(val) {
   state.progressVal = val
 }

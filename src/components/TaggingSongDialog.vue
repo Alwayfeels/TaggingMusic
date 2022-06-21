@@ -106,7 +106,7 @@ watch(() => props.showDialog, async (val) => {
 // methods
 function submit() {
     if (!state.songlistName) {
-        state.tips = '生成的歌单名称需要填一下'
+        state.tips = '生成的歌单名称需要填一下呢'
         state.showTips = true
         setTimeout(() => {
             state.showTips = false
