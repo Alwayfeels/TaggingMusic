@@ -78,7 +78,7 @@ const state = reactive({
 });
 async function searchHandler() {
   notification.error({
-    title: '在做了在做了',
+    title: '在做了在做了 QAQ',
     duration: 3000,
   })
   // globalData.searchSong(state.searchKey)

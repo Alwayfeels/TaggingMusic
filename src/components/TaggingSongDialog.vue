@@ -11,9 +11,9 @@
                     :options="state.tagOptions" />
                 <n-button class="ml-2" strong secondary type="success" @click="generatePreview">预览</n-button>
             </div>
-            <div class="mt-2" v-if="state.songlist.length > 0">
-                <n-data-table :columns="state.tableColumn" :data="state.songlist" :pagination="state.pagination"
-                    :bordered="false" />
+            <div class="mt-2 preview-table" v-if="state.songlist.length > 0">
+                <n-data-table class="h-full" :columns="state.tableColumn" :flex-height="true"
+                    :data="state.songlist" :pagination="pagination" :bordered="false" />
             </div>
             <n-divider />
             <div class="mt-4 flex items-center justify-end">
@@ -55,7 +55,7 @@ const state = reactive({
     choosedTag: [],
     tagOptions: [],
     bodyStyle: {
-        width: '600px'
+        width: '800px'
     },
     segmented: {
         content: 'soft',
@@ -63,8 +63,8 @@ const state = reactive({
     },
     songlist: [], // 预览生成的歌单
     tableColumn: [
-        { title: 'name', key: 'name' },
-        { title: 'artist', key: 'artist' },
+        { title: '歌曲名称', key: 'name', width: 200, },
+        { title: '歌手', key: 'artist',  width: 160, },
         {
             title: 'tag', render(row) {
                 const tags = row.tagName.map(tag => {
@@ -82,7 +82,7 @@ const pagination = reactive({
     page: 1,
     pageSize: 10,
     showSizePicker: true,
-    pageSizes: [10, 20, 50, 100, 500],
+    pageSizes: [10, 20, 30],
     onChange: (page) => {
         pagination.page = page;
     },
@@ -150,3 +150,9 @@ async function generatePreview() {
     state.songlist = songlist;
 }
 </script>
+
+<style lang="scss" scoped>
+.preview-table {
+    height: 35rem;
+}
+</style>
