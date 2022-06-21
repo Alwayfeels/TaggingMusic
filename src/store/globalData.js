@@ -112,6 +112,7 @@ export const useGlobalData = defineStore("globalData", {
         // let needProps = ["id", "name", "al", "ar"];
         let needProps = ["id", "name", "coverImgUrl", "trackCount"];
         this.playlist = this.filterUsefulProps(playlist, needProps);
+        localforage.setItem('playlist', playlist);
         return playlist
       }
       console.warn('getRemotePlaylist error')

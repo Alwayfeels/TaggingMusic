@@ -10,6 +10,9 @@ import { h, ref, getCurrentInstance, reactive } from "vue";
 import { getSongTableColumns } from "@/data/tableColumns";
 import { usePlayerStore } from '@/store/player';
 
+import { NAvatar, NTag } from 'naive-ui'
+import TagInput from '@/components/TagInput.vue'
+
 const globalPlayer = usePlayerStore()
 
 const props = defineProps({
@@ -52,7 +55,59 @@ const pagination = reactive({
 });
 
 const tableInstance = getCurrentInstance();
-const songTableColumns = ref(getSongTableColumns(tableInstance, () => props.tableData));
+// const songTableColumns = getSongTableColumns(tableInstance, () => props.tableData);
+const songTableColumns = [
+  {
+    title: "歌曲名称",
+    key: "name",
+    minWidth: 200,
+    width: 300,
+  },
+  {
+    title: "封面",
+    key: "al.picUrl",
+    width: '80px',
+    render(row) {
+      let songImgUrl = `${row.al.picUrl}?param=40y40`
+      return h(
+        NAvatar,
+        {
+          src: songImgUrl,
+          class: 'img40',
+        }
+      )
+    }
+  },
+  {
+    title: "歌手",
+    minWidth: 100,
+    render(row) {
+      return row.ar.map(artist => artist.name).join(' / ')
+    }
+  },
+  {
+    title: "专辑",
+    minWidth: 100,
+    render(row) {
+      return h('div', {}, row.al.name)
+    }
+  },
+  {
+    title: 'Tag',
+    minWidth: 500,
+    width: 700,
+    render(row, index) {
+      return h(TagInput, {
+        songId: row.id,
+        songInfo: {
+          name: row.name,
+          artist: row.ar.map(artist => artist.name).join(' / '),
+          album: row.al.name
+        }
+      })
+    }
+  }
+]
 
 </script>
 
