@@ -22,9 +22,6 @@
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="refreshSonglist">
-        刷新歌单列表</n-button>
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="exportTaggedSong">导出Tag</n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="importTaggedSong">导入Tag</n-button>
@@ -86,10 +83,6 @@ async function searchHandler() {
 // 登录后重新init globalData
 const refreshLoginStatus = async () => {
   globalData.init()
-}
-// refresh songlist
-function refreshSonglist() {
-  globalData.getRemotePlaylist()
 }
 // export tagged song
 async function exportTaggedSong() {

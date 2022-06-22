@@ -18,7 +18,8 @@
     "sass-loader": "^13.0.0",
     "vue": "^3.2.25",
     "vue-router": "^4.0.3",
-    "vue3-audio-player": "^1.0.4"
+    "vue3-audio-player": "^1.0.4",
+    "vue3-menus": "^1.1.2"
   },
   "devDependencies": {
     "@vicons/fluent": "^0.12.0",

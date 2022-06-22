@@ -27,6 +27,13 @@ export const useGlobalData = defineStore("globalData", {
         await this.initSonglist(this.playlist[0]?.id);
       }
     },
+    async refreshLoginStatus() {
+      await this.initUser();
+      if (this.user.id) {
+        await this.initPlaylist();
+        await this.initSonglist(this.playlist[0]?.id);
+      }
+    },
     // 初始化 已标记歌曲
     async initTaggedSong() {
       const taggedSong = await localforage.getItem("taggedSong");

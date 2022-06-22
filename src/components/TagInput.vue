@@ -3,7 +3,7 @@
     :on-update:value="dynamicTagsChange">
     <template #input="{ submit, deactivate }">
       <single-tag-input @change="changeHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler(deactivate)"></single-tag-input>
+        @pressTab="tabHandler($event, submit, deactivate)" @blur="changeHandler($event, submit, deactivate)"></single-tag-input>
     </template>
     <template #trigger="{ activate, disabled }">
       <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
