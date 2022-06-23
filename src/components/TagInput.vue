@@ -3,7 +3,7 @@
     :on-update:value="dynamicTagsChange">
     <template #input="{ submit, deactivate }">
       <single-tag-input @change="changeHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="changeHandler($event, submit, deactivate)"></single-tag-input>
+        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler(deactivate)"></single-tag-input>
     </template>
     <template #trigger="{ activate, disabled }">
       <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
@@ -87,7 +87,8 @@ function blurHandler(deactivate) {
 // 将tag插入indexedDB.tag
 async function insertTag(tagName) {
   if (typeof tagName !== "string") {
-    throw error("insertTag(): tagName must be string")
+    console.error("insertTag(): tagName must be string", tagName)
+    return false;
   };
   let _tags = await localforage.getItem("tag")
   _tags = _tags || []
@@ -104,7 +105,8 @@ async function insertTag(tagName) {
 // 将tag插入indexedDB.taggedSongs
 const insertTaggedSongs = async (tagName) => {
   if (typeof tagName !== "string") {
-    throw error("insertTaggedSongs(): tagName must be string")
+    console.error("insertTaggedSongs(): tagName must be string", tagName)
+    return false;
   };
   let taggedSong = await localforage.getItem('taggedSong');
   taggedSong = taggedSong ? taggedSong : [];

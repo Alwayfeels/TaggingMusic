@@ -151,6 +151,11 @@ export const useGlobalData = defineStore("globalData", {
       link.download = "标签歌曲数据.json";
       link.href = "data:text/plain," + JSON.stringify(exportTaggedSong);
       link.click();
+      window.$notification.success({
+        title: "成功",
+        content: '导出完成！',
+        duration: 3000
+      })
     },
     // 导入TaggedSong
     async importTaggedSong() {
@@ -174,6 +179,11 @@ export const useGlobalData = defineStore("globalData", {
             let data = JSON.parse(e.target.result);
             localforage.setItem("taggedSong", data);
             _this.taggedSong = data;
+            window.$notification.success({
+              title: "成功",
+              content: '导入完成！',
+              duration: 3000
+            })
             resolve(data);
           };
         };
@@ -210,7 +220,7 @@ export const useGlobalData = defineStore("globalData", {
             if (existTag) {
               existTag.ref++;
             } else {
-              allTag.push({tagName: tag, ref: 1});
+              allTag.push({ tagName: tag, ref: 1 });
             }
           })
         }

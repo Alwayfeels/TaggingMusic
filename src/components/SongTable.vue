@@ -118,7 +118,7 @@ const songTableColumns = [
 }
 
 :deep(.n-data-table-tr .n-data-table-td) {
-  cursor: url(@/assets/Play.png) 16 16, pointer;
+  cursor: url(@/assets/Play.svg) 8 8, pointer;
 }
 
 :deep(.n-data-table-tr .n-data-table-td:last-child) {

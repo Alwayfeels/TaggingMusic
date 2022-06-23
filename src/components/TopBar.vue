@@ -4,8 +4,9 @@
     <div class="text-2xl cursor-pointer" @click="toGithub">Tagging Music</div>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <!-- 搜索 -->
-    <div  v-if="state.showControlBtn" class="mx-8 flex-1 flex justify-center">
-      <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索音乐 / 专辑 / 歌手" @keypress.enter="searchHandler" />
+    <div v-if="state.showControlBtn" class="mx-8 flex-1 flex justify-center">
+      <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索音乐 / 专辑 / 歌手"
+        @keypress.enter="searchHandler" />
     </div>
     <div class="ml-auto flex items-center">
       <!--用户 -->
@@ -85,22 +86,12 @@ const refreshLoginStatus = async () => {
   globalData.init()
 }
 // export tagged song
-async function exportTaggedSong() {
-  await globalData.exportTaggedSong()
-  notification.success({
-    title: "成功",
-    content: '导出完成！',
-    duration: 3000
-  })
+function exportTaggedSong() {
+  globalData.exportTaggedSong()
 }
 // import tagged song
-async function importTaggedSong() {
-  let res = await globalData.importTaggedSong()
-  notification.success({
-    title: "成功",
-    content: '导入完成！刷新页面可查看',
-    duration: 3000
-  })
+function importTaggedSong() {
+  globalData.importTaggedSong()
 }
 function toGithub() {
   window.open('https://github.com/Alwayfeels/TaggingMusic', '_blank')
@@ -117,6 +108,7 @@ function toGithub() {
   .user-name {
     font-weight: 500;
   }
+
   .search-input {
     max-width: 400px;
   }
