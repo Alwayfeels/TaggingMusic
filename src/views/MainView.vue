@@ -99,7 +99,12 @@ const renderMenuIcon = (option) => {
   return h('img', { src: option.coverImgUrl, class: 'w-8 h-8' })
 }
 const renderMenuLabel = (option) => {
-  return h('span', {}, option.name)
+  console.log(option);
+  let el = h('div', {style: 'display: flex;'},  { default: () => [
+    h('div', {style: 'flex: 1; text-overflow: ellipsis;'}, option.name),
+    h('div', {style: 'margin: 0 0.5rem;'}, option.trackCount)
+  ]})
+  return el
 }
 
 // 订阅 action 设置 loading
@@ -144,5 +149,18 @@ globalData.$onAction(({
 .min-height {
   height: calc(100vh - 10rem);
 }
+// :v-deep(.custom-menu) {
+//   display: flex;
+
+//   :v-deep(.custom-menu-text) {
+//     flex: 1;
+//     text-overflow: ellipsis;
+//     overflow: hidden;
+//   }
+//   :v-deep(.track-count) {
+//     margin-left: 0.5rem;
+
+//   }
+// }
 
 </style>
