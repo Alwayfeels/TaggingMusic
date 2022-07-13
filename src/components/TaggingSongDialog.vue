@@ -37,7 +37,6 @@
 
 <script setup>
 import { computed, onMounted, reactive, watch, h } from 'vue'
-import SingleTagInput from "@/components/SingleTagInput.vue";
 import { NDataTable, NTag, NModal, NInput, NSelect, NButton, NPopover } from 'naive-ui';
 import { CheckboxChecked24Filled, DismissSquare24Filled } from '@vicons/fluent'
 import localforage from 'localforage';

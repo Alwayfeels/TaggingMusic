@@ -2,8 +2,8 @@
   <NDynamicTags ref="dynamicTags" v-model:value="state.tagInputVal" @mousedown.self="clickHandler" @click.stop
     :on-update:value="dynamicTagsChange">
     <template #input="{ submit, deactivate }">
-      <single-tag-input @change="changeHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler(deactivate)"></single-tag-input>
+      <SingleTagInput @change="changeHandler($event, submit, deactivate)"
+        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler(deactivate)"></SingleTagInput>
     </template>
     <template #trigger="{ activate, disabled }">
       <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
@@ -23,9 +23,17 @@ import { useGlobalData } from '@/store/globalData';
 const globalData = useGlobalData()
 
 const props = defineProps({
+  // 是否仅仅作为input使用，不储存至indexDb
+  inputOnly: {
+    type: Boolean,
+    default: false,
+  },
+  // 父组件 v-model 的值
+  value: Array,
   songId: Number,
   songInfo: Object,
 });
+const emits = defineEmits(['update:value'])
 
 const dynamicTags = ref(null)
 const state = reactive({
@@ -34,6 +42,7 @@ const state = reactive({
 
 // 监听 songId 初始化 tagInputVal
 watch(() => props.songId, async (songId) => {
+  if (!songId) return;
   let existSong = globalData.taggedSong?.find(e => e.songId === songId)
   if (existSong) {
     state.tagInputVal = existSong.tagName.map(e => e)
@@ -46,26 +55,34 @@ watch(() => props.songId, async (songId) => {
 
 // taginput 事件处理
 function dynamicTagsChange(newVal) {
+  state.tagInputVal = newVal
+  if (props.inputOnly) {
+    emits('update:value', newVal);
+    return;
+  }
   // remove tag
   if (newVal.length < state.tagInputVal.length) {
     let needRemoveTag = state.tagInputVal.filter(x => !newVal.includes(x))
     removeTag(needRemoveTag)
     removeTagInTaggedSong(needRemoveTag)
   }
-  state.tagInputVal = newVal
 }
 // singleTagInput 事件处理
 function changeHandler(tag, submit, deactivate) {
   tag ? submit(tag) : deactivate();
-  insertTag(tag);
-  insertTaggedSongs(tag)
+  if (!props.inputOnly) {
+    insertTag(tag);
+    insertTaggedSongs(tag)
+  }
 }
 function tabHandler(tag, submit, deactivate) {
   // when you press tab, save and open next <tagInput>
   if (!tag) return false;
   tag ? submit(tag) : deactivate();
-  insertTag(tag);
-  insertTaggedSongs(tag)
+  if (!props.inputOnly) {
+    insertTag(tag);
+    insertTaggedSongs(tag)
+  }
   // focus 下一个 tagInput
   setTimeout(() => {
     dynamicTags.value.showInput = true

@@ -18,6 +18,7 @@
     </n-layout-content>
   </n-layout>
   <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" :playlist="state.currSonglist" />
+  <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist" />
 </template>
 
 <script setup>
@@ -29,6 +30,7 @@ import { usePlayerStore } from '@/store/player';
 import { useGlobalData } from '@/store/globalData';
 import Unlogin from '../components/Unlogin.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
+import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
 import { useNotification } from 'naive-ui'
 
 window.$notification = useNotification()
@@ -40,6 +42,7 @@ const globalPlayer = usePlayerStore()
 const state = reactive({
   isLogin: computed(() => Boolean(globalData.user.id)),
   showTaggingDialog: false,
+  showTaggingPlaylistDialog: false,
   currSonglistId: null,
   currSonglist: null,
   playlistLoading: false,
@@ -80,6 +83,12 @@ const menus = shallowRef({
       tip: '',
       click: () => {
         state.showTaggingDialog = true
+      }
+    }, {
+      label: '为当前歌单的所有歌曲添加 tag',
+      tip: '',
+      click: () => {
+        state.showTaggingPlaylistDialog = true
       }
     }
   ]
