@@ -262,6 +262,27 @@ export const useGlobalData = defineStore("globalData", {
       this.taggedSong = taggedSong;
       this.status.updateTagInput = new Date().getTime(); // 通知所有 tagInput 组件更新数据
       this.updateTagFromTaggedSong() // 重新统计 tag 的引用次数
+    },
+    // 批量给当前展示歌单删除 tag
+    // tagName: string[]
+    async batchRemoveTag(tagName = []) {
+      if (!this.songlist.length || !tagName.length) {
+        console.warn('batchSetTag: this.songlist and tagName are required')
+        return false;
+      }
+      let taggedSong = await localforage.getItem("taggedSong") || [];
+      for (let i = 0; i < this.songlist.length; i++) {
+        let song = this.songlist[i];
+        let existSong = taggedSong.find(e => e.songId === song.id);
+        if (existSong) {
+          // 如果歌曲已经存在tag，则删除tag后去重
+          existSong.tagName = existSong.tagName.filter(tag => tagName.indexOf(tag) === -1);
+        }
+      }
+      await localforage.setItem("taggedSong", taggedSong);
+      this.taggedSong = taggedSong;
+      this.status.updateTagInput = new Date().getTime(); // 通知所有 tagInput 组件更新数据
+      this.updateTagFromTaggedSong() // 重新统计 tag 的引用次数
     }
   },
 });

@@ -85,7 +85,7 @@ const menus = shallowRef({
         state.showTaggingDialog = true
       }
     }, {
-      label: '为当前歌单的所有歌曲添加 tag',
+      label: '批量操作当前歌单的所有歌曲tag',
       tip: '',
       click: () => {
         state.showTaggingPlaylistDialog = true

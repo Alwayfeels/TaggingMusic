@@ -3,8 +3,15 @@
     size="huge" :bordered="false" :segmented="state.segmented" :on-update:show="showChangeHandler">
     <div class="mb-4 flex items-center">
       <span class="w-48"> 为该歌单的所有歌曲 tag：</span>
+      <div class="w-40">
+        <n-select size="medium" v-model:value="state.operation" :options="state.operationMap" />
+      </div>
     </div>
-    <TagInput v-model:value="inputTag" :inputOnly="true"></TagInput>
+    <div>
+      <TagInput v-if="state.operation === 'add'" v-model:value="inputTag" :inputOnly="true"></TagInput>
+      <n-select v-else filterable clearable :placeholder="'需要删除的tag'" v-model:value="deleteTag" multiple
+        :options="state.tagOptions" />
+    </div>
     <div class="mt-12 flex items-center justify-end">
       <NPopover placement="top" trigger="manual" :show="state.showTips">
         <template #trigger>
@@ -40,8 +47,14 @@ const props = defineProps({
 const emits = defineEmits(['update:showDialog'])
 
 const inputTag = ref([]);
+const deleteTag = ref([]);
 const state = reactive({
-  // ==============
+  operation: 'remove',
+  operationMap: [
+    { label: '添加', value: 'add' },
+    { label: '删除', value: 'remove' }
+  ],
+  tagOptions: [],
   tips: '',
   showTips: false,
   bodyStyle: {
@@ -53,8 +66,19 @@ const state = reactive({
   },
 })
 
+watch(() => props.showDialog, async (val) => {
+  if (val) {
+    state.tagOptions = globalData.tagList.map(item => {
+      return {
+        label: item.tagName,
+        value: item.tagName
+      }
+    })
+  }
+})
+
 // methods
-async function submit() {
+async function submitAdd() {
   if (inputTag.value.length === 0) {
     state.tips = '请输入 tag'
     state.showTips = true
@@ -71,6 +95,33 @@ async function submit() {
   })
   closeDialog();
 }
+
+async function submitDelete() {
+  if (deleteTag.value.length === 0) {
+    state.tips = '请选择 tag'
+    state.showTips = true
+    setTimeout(() => {
+      state.showTips = false
+    }, 1000)
+    return
+  }
+  const tags = deleteTag.value;
+  await globalData.batchRemoveTag([...tags]);
+  window.$notification.success({
+    title: "批量删除 tag 成功",
+    duration: 3000
+  })
+  closeDialog();
+}
+
+function submit() {
+  if (state.operation === 'add') {
+    submitAdd();
+  } else {
+    submitDelete();
+  }
+}
+
 function closeDialog() {
   clearState();
   emits('update:showDialog', false)
