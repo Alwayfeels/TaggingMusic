@@ -41,9 +41,9 @@ const state = reactive({
 })
 
 // 监听 songId 初始化 tagInputVal
-watch(() => props.songId, async (songId) => {
-  if (!songId) return;
-  let existSong = globalData.taggedSong?.find(e => e.songId === songId)
+watch(() => props.songId, async (propSongId) => {
+  if (!propSongId) return;
+  let existSong = globalData.taggedSong?.find(tagged => tagged.songId === propSongId)
   if (existSong) {
     state.tagInputVal = existSong.tagName.map(e => e)
   } else {
@@ -51,6 +51,21 @@ watch(() => props.songId, async (songId) => {
   }
 }, {
   immediate: true
+})
+
+// 根据globalData重新初始化tagInputVal
+function refresh() {
+  if (!props.songId) return;
+  let existSong = globalData.taggedSong?.find(e => e.songId === props.songId)
+  if (existSong) {
+    state.tagInputVal = existSong.tagName.map(e => e)
+  } else {
+    state.tagInputVal = []
+  }
+}
+
+watch(() => globalData.status?.updateTagInput, () => {
+  refresh()
 })
 
 // taginput 事件处理
@@ -101,7 +116,7 @@ function blurHandler(deactivate) {
 }
 
 // 数据处理
-// 将tag插入indexedDB.tag
+// 将tag插入indexedDB.tag, 并更新 globalData.tag
 async function insertTag(tagName) {
   if (typeof tagName !== "string") {
     console.error("insertTag(): tagName must be string", tagName)
@@ -119,7 +134,7 @@ async function insertTag(tagName) {
   globalData.tagList = _tags
   localforage.setItem("tag", _tags);
 }
-// 将tag插入indexedDB.taggedSongs
+// 将tag插入indexedDB.taggedSongs 并更新 globalData.taggedSong
 const insertTaggedSongs = async (tagName) => {
   if (typeof tagName !== "string") {
     console.error("insertTaggedSongs(): tagName must be string", tagName)

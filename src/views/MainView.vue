@@ -11,14 +11,14 @@
     </n-layout-sider>
     <n-layout-content v-if="state.isLogin" content-style="padding: 24px; height: 100%;" :native-scrollbar="false"
       v-menus:right="menus">
-      <SongTable class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
+      <SongTable ref="songTable" class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
     </n-layout-content>
     <n-layout-content v-else content-style="padding: 24px;">
       <Unlogin />
     </n-layout-content>
   </n-layout>
   <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" :playlist="state.currSonglist" />
-  <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist" />
+  <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist"/>
 </template>
 
 <script setup>
@@ -108,7 +108,6 @@ const renderMenuIcon = (option) => {
   return h('img', { src: option.coverImgUrl, class: 'w-8 h-8' })
 }
 const renderMenuLabel = (option) => {
-  console.log(option);
   let el = h('div', {style: 'display: flex;'},  { default: () => [
     h('div', {style: 'flex: 1; text-overflow: ellipsis;'}, option.name),
     h('div', {style: 'margin: 0 0.5rem;'}, option.trackCount)
@@ -117,28 +116,31 @@ const renderMenuLabel = (option) => {
 }
 
 // 订阅 action 设置 loading
-globalData.$onAction(({
-  name, // action 的名字
-  store, // store 实例
-  args, // 调用这个 action 的参数
-  after, // 在这个 action 执行完毕之后，执行这个函数
-  onError, // 在这个 action 抛出异常的时候，执行这个函数
-}) => {
-  if (name === 'initSonglist') {
-    state.songlistLoading = true
-  }
-  if (name === 'initPlaylist') {
-    state.playlistLoading = true
-  }
-  after(result => {
-    if (name === 'initSonglist') {
-      state.songlistLoading = false
-    }
-    if (name === 'initPlaylist') {
-      state.playlistLoading = true
-    }
-  })
-})
+// globalData.$onAction(({
+//   name, // action 的名字
+//   store, // store 实例
+//   args, // 调用这个 action 的参数
+//   after, // 在这个 action 执行完毕之后，执行这个函数
+//   onError, // 在这个 action 抛出异常的时候，执行这个函数
+// }) => {
+//   if (name === 'initSonglist') {
+//     console.log('initSonglist name=', name)
+//     state.songlistLoading = true
+//   }
+//   if (name === 'initPlaylist') {
+//     console.log('initPlaylist name=', name)
+//     state.playlistLoading = true
+//   }
+//   after(result => {
+//     console.log('finish name=', name)
+//     if (name === 'initSonglist') {
+//       state.songlistLoading = false
+//     }
+//     if (name === 'initPlaylist') {
+//       state.playlistLoading = true
+//     }
+//   })
+// })
 
 </script>
 <style lang="scss" scoped>

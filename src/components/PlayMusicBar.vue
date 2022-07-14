@@ -111,9 +111,6 @@ watch(() => globalPlayer.currPlaySong, (song) => {
   }
 }, { immediate: true, deep: true })
 
-function togglePlayer() {
-  debugger
-}
 function dragHandler(val) {
   state.progressVal = val
 }

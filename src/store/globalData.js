@@ -14,6 +14,9 @@ export const useGlobalData = defineStore("globalData", {
     tagList: [], // 标签列表
     taggedSong: [], // 已标记的歌曲列表
     playerList: [], // 播放列表
+    status: {
+      updateTagInput: null
+    }
   }),
   getters: {},
   actions: {
@@ -72,7 +75,7 @@ export const useGlobalData = defineStore("globalData", {
       }
     },
     // 初始化 歌曲列表
-    async initSonglist(playlistId) {
+    async initSonglist(playlistId = "") {
       if (!playlistId) {
         console.warn('playlistId is required')
         return []
@@ -191,6 +194,8 @@ export const useGlobalData = defineStore("globalData", {
       })
     },
     // 筛选objArray中需要的prop，筛选后返回
+    // objArray: object[]
+    // props: string[]
     filterUsefulProps(objArray, usefulPropsArray) {
       return objArray.map((item) => {
         let newItem = {};
@@ -208,7 +213,7 @@ export const useGlobalData = defineStore("globalData", {
       const res = await api.getRemote("/search", { keywords: key });
       console.log('res = ', res)
     },
-    // 根据taggedSong 重新生成 tag 以及 ref
+    // 根据taggedSong 重新生成 tag 以及 ref 次数
     async updateTagFromTaggedSong() {
       let taggedSong = await localforage.getItem("taggedSong");
       if (!taggedSong) return [];
@@ -227,6 +232,36 @@ export const useGlobalData = defineStore("globalData", {
       })
       localforage.setItem("tag", allTag);
       return allTag;
+    },
+    // 批量给当前展示歌单添加 tag
+    // tagName: string[]
+    async batchAddTag(tagName = []) {
+      if (!this.songlist.length || !tagName.length) {
+        console.warn('batchSetTag: this.songlist and tagName are required')
+        return false;
+      }
+      let taggedSong = await localforage.getItem("taggedSong") || [];
+      for (let i = 0; i < this.songlist.length; i++) {
+        let song = this.songlist[i];
+        let existSong = taggedSong.find(e => e.songId === song.id);
+        if (existSong) {
+          // 如果歌曲已经存在tag，则添加tag后去重
+          existSong.tagName = Array.from(new Set([...existSong.tagName, ...tagName]));
+        } else {
+          // 如果歌曲不存在tag，新增对象
+          taggedSong.push({
+            songId: song.id,
+            name: song.name,
+            artist: song.ar.map(artist => artist.name).join(' / '),
+            album: song.al.name,
+            tagName: tagName
+          })
+        }
+      }
+      await localforage.setItem("taggedSong", taggedSong);
+      this.taggedSong = taggedSong;
+      this.status.updateTagInput = new Date().getTime(); // 通知所有 tagInput 组件更新数据
+      this.updateTagFromTaggedSong() // 重新统计 tag 的引用次数
     }
   },
 });
