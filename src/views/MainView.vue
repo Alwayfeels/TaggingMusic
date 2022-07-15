@@ -17,6 +17,7 @@
       <Unlogin />
     </n-layout-content>
   </n-layout>
+  <MergePlaylistDialog v-model:showDialog="globalData.status.showMergeDialog" />
   <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" :playlist="state.currSonglist" />
   <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist"/>
 </template>
@@ -31,6 +32,7 @@ import { useGlobalData } from '@/store/globalData';
 import Unlogin from '../components/Unlogin.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
+import MergePlaylistDialog from '@/components/MergePlaylistDialog.vue';
 import { useNotification } from 'naive-ui'
 
 window.$notification = useNotification()
@@ -85,7 +87,7 @@ const menus = shallowRef({
         state.showTaggingDialog = true
       }
     }, {
-      label: '批量操作当前歌单的所有歌曲tag',
+      label: '歌单全体添加或删除 tag',
       tip: '',
       click: () => {
         state.showTaggingPlaylistDialog = true
@@ -145,6 +147,7 @@ const renderMenuLabel = (option) => {
 </script>
 <style lang="scss" scoped>
 .main-container {
+  margin-top: 5rem;
   overflow: hidden;
   transition: height 0.5s ease-out;
 

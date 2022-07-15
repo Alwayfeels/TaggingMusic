@@ -2,10 +2,15 @@
   <n-modal v-model:show="showDialog" class="custom-card" preset="card" :style="state.bodyStyle" title="为所有歌曲操作 Tag"
     size="huge" :bordered="false" :segmented="state.segmented" :on-update:show="showChangeHandler">
     <div class="mb-4 flex items-center">
-      <span class="w-48"> 为该歌单的所有歌曲 tag：</span>
-      <div class="w-40">
-        <n-select size="medium" v-model:value="state.operation" :options="state.operationMap" />
+      <div class="flex items-center flex-row">
+        将为
+        <div class="text-green-700 mx-2 font-bold max-w-xs text-center text-ellipsis">{{ props.playlist?.name }}</div>
+        歌单的所有歌曲的 tag 执行
       </div>
+      <div class="w-20 mx-2">
+        <n-select size="small" v-model:value="state.operation" :options="state.operationMap" />
+      </div>
+      <div class="ml-2">操作</div>
     </div>
     <div>
       <TagInput v-if="state.operation === 'add'" v-model:value="inputTag" :inputOnly="true"></TagInput>
@@ -15,7 +20,7 @@
     <div class="mt-12 flex items-center justify-end">
       <NPopover placement="top" trigger="manual" :show="state.showTips">
         <template #trigger>
-          <n-button class="ml-2" strong type="success" @click="submit">生成</n-button>
+          <n-button class="ml-2" strong type="success" @click="submit">确认</n-button>
         </template>
         <span>{{ state.tips }}</span>
       </NPopover>

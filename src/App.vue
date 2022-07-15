@@ -1,8 +1,8 @@
 <template>
   <n-notification-provider>
     <div id="app">
-      <TopBar />
-      <router-view />
+      <TopBar class="fixed shadow z-10" />
+      <router-view class="mt-20" />
       <PlayMusicBar />
     </div>
   </n-notification-provider>
@@ -21,6 +21,7 @@ globalData.init()
 
 <style>
 #app {
+  overflow: hidden;
   font-family: "Inter", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   /* font-family: Avenir, Helvetica, Arial, sans-serif; */
   -webkit-font-smoothing: antialiased;

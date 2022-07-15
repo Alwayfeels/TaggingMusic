@@ -15,8 +15,9 @@ export const useGlobalData = defineStore("globalData", {
     taggedSong: [], // 已标记的歌曲列表
     playerList: [], // 播放列表
     status: {
-      updateTagInput: null
-    }
+      updateTagInput: null,
+      showMergeDialog: false,
+    },
   }),
   getters: {},
   actions: {
