@@ -1,13 +1,18 @@
 <template>
   <n-modal v-model:show="showDialog" class="custom-card" preset="card" :style="{ width: '800px' }" title="合并歌单"
     :segmented="state.segmented" :on-update:show="showChangeHandler">
-    <div class="mb-4 flex items-center">
-      选择歌单，并将其中所有的歌曲合并后生成新的歌单
-      <div class="ml-2 w-48">
-        <n-select size="small" multiple v-model:value="state.playlist" :options="state.playlistOptions" />
+    <div class="mb-4 items-center">
+      选择指定歌单，将其中所有的歌曲合并后生成新的歌单
+      <div class="flex ml-2 mt-6 w-full items-center">
+        <div class="w-24">被合并歌单：</div>
+        <n-select size="small" multiple max-tag-count="responsive" v-model:value="state.playlist" :options="state.playlistOptions" />
+      </div>
+      <div class="flex ml-2 mt-2 w-full items-center">
+        <div class="w-24">新歌单名称：</div>
+        <n-input size="small" v-model:value="state.newPlaylistName" type="text" />
       </div>
     </div>
-    <div class="mt-12 flex items-center justify-center">
+    <div class="mt-12 flex items-center justify-end">
       <n-button strong type="success" @click="generate">确认</n-button>
       <n-button class="ml-2" strong @click="closeDialog">关闭</n-button>
     </div>
@@ -37,7 +42,8 @@ const state = reactive({
     label: e.name,
     value: e.id
   })),
-  playlist: []
+  playlist: [],
+  newPlaylistName: ''
 })
 
 watch(() => props.showDialog, async (val) => {
