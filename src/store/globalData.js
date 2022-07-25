@@ -284,6 +284,37 @@ export const useGlobalData = defineStore("globalData", {
       this.taggedSong = taggedSong;
       this.status.updateTagInput = new Date().getTime(); // 通知所有 tagInput 组件更新数据
       this.updateTagFromTaggedSong() // 重新统计 tag 的引用次数
+    },
+    // 合并歌单
+    mergePlaylist(playlistIds = [], newPlaylistName = '') {
+      if (!playlistIds.length || !newPlaylistName) return false;
+      // 对所有id发起请求
+      Promise.all(
+        playlistIds.map((id) => {
+          return this.getRemoteSonglist(id)
+        })
+      ).then(res => {
+        let songs = [];
+        res.forEach((item) => {
+          let ids = item.map(e => e.id);
+          songs = songs.concat(ids);
+        })
+        // 去重id
+        songs = Array.from(new Set(songs));
+        // 创建新歌单
+        return this.createPlaylist(newPlaylistName, songs);
+      })
+    },
+    // 创建歌单
+    async createPlaylist(name, songIds = []) {
+      if (!name || !songIds.length) return false;
+      const playlist = await api.getRemote("/playlist/create", { name });
+      const res = await api.getRemote("/playlist/tracks", {
+        op: "add",
+        pid: playlist.id,
+        tracks: songIds.join(',')
+      })
+      return res;
     }
   },
 });
