@@ -1,9 +1,11 @@
 import { defineStore } from "pinia";
 import api from "@/api/http";
 import localforage from "localforage";
+// import useProgress from "@/store/progress";
 // naive UI 就算用最新的 2.29.0 版本也会报错
 // import { createDiscreteApi } from "naive-ui";
 
+// const progress = useProgress()
 // const { message, notification, dialog, loadingBar } = createDiscreteApi(["message", "dialog", "notification", "loadingBar"], {});
 // 整个应用的数据中心
 export const useGlobalData = defineStore("globalData", {
@@ -31,6 +33,7 @@ export const useGlobalData = defineStore("globalData", {
         await this.initSonglist(this.playlist[0]?.id);
       }
     },
+    // 更新登录状态
     async refreshLoginStatus() {
       await this.initUser();
       if (this.user.id) {
@@ -286,25 +289,25 @@ export const useGlobalData = defineStore("globalData", {
       this.updateTagFromTaggedSong() // 重新统计 tag 的引用次数
     },
     // 合并歌单
-    mergePlaylist(playlistIds = [], newPlaylistName = '') {
-      if (!playlistIds.length || !newPlaylistName) return false;
-      // 对所有id发起请求
-      Promise.all(
-        playlistIds.map((id) => {
-          return this.getRemoteSonglist(id)
-        })
-      ).then(res => {
-        let songs = [];
-        res.forEach((item) => {
-          let ids = item.map(e => e.id);
-          songs = songs.concat(ids);
-        })
-        // 去重id
-        songs = Array.from(new Set(songs));
-        // 创建新歌单
-        return this.createPlaylist(newPlaylistName, songs);
-      })
-    },
+    // mergePlaylist(playlistIds = [], newPlaylistName = '') {
+    //   if (!playlistIds.length || !newPlaylistName) return false;
+    //   // 对所有id发起请求
+    //   Promise.all(
+    //     playlistIds.map((id) => {
+    //       return this.getRemoteSonglist(id)
+    //     })
+    //   ).then(res => {
+    //     let songs = [];
+    //     res.forEach((item) => {
+    //       let ids = item.map(e => e.id);
+    //       songs = songs.concat(ids);
+    //     })
+    //     // 去重id
+    //     songs = Array.from(new Set(songs));
+    //     // 创建新歌单
+    //     return this.createPlaylist(newPlaylistName, songs);
+    //   })
+    // },
     // 创建歌单
     async createPlaylist(name, songIds = []) {
       if (!name || !songIds.length) return false;

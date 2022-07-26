@@ -11,18 +11,6 @@
         <n-input size="small" v-model:value="form.newPlaylistName" type="text" />
       </n-form-item>
     </n-form>
-    <!-- <div class="mb-4 items-center">
-      选择指定歌单，将其中所有的歌曲合并后生成新的歌单
-      <div class="flex ml-2 mt-6 w-full items-center">
-        <div class="w-24 flex-shrink-0">被合并歌单：</div>
-        <n-select size="small" multiple filterable max-tag-count="responsive" v-model:value="state.playlist"
-          :options="state.playlistOptions" />
-      </div>
-      <div class="flex ml-2 mt-2 w-full items-center">
-        <div class="w-24 flex-shrink-0">新歌单名称：</div>
-        <n-input size="small" v-model:value="state.newPlaylistName" type="text" />
-      </div>
-    </div> -->
     <div class="mt-12 flex items-center justify-end">
       <n-button strong type="success" @click="onSubmit">确认</n-button>
       <n-button class="ml-2" strong @click="onClose">关闭</n-button>
@@ -93,7 +81,7 @@ watch(() => props.showDialog, async (val) => {
 function onSubmit() {
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      const res = await globalData.mergePlaylist(form.playlist, form.newPlaylistName)
+      const res = mergePlaylist()
       if (res) {
         notification.success({
           message: '合并成功'
@@ -105,6 +93,20 @@ function onSubmit() {
 function onClose() {
   emits('update:showDialog', false)
 }
+
+// 合并歌单
+function mergePlaylist() {
+  const playlist = form.playlist
+  const newPlaylistName = form.newPlaylistName
+  const playlistIds = playlist.filter(e => e !== 'all')
+  // 请求所有歌单的歌曲
+  const songs = []
+  playlistIds.map(async e => {
+    globalData.getRemoteSonglist
+    return res.data.playlist.tracks.map(e => e.id)
+  })
+}
+
 </script>
 
 <style lang="scss" scoped>
