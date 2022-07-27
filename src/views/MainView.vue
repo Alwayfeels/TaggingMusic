@@ -178,3 +178,8 @@ const renderMenuLabel = (option) => {
 // }
 
 </style>
+<style>
+html {
+  overflow-y: auto;
+}
+</style>

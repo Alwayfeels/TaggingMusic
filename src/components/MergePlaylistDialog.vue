@@ -11,6 +11,7 @@
         <n-input size="small" v-model:value="form.newPlaylistName" type="text" />
       </n-form-item>
     </n-form>
+    <Progress ref="progressRef" />
     <div class="mt-12 flex items-center justify-end">
       <n-button strong type="success" @click="onSubmit">确认</n-button>
       <n-button class="ml-2" strong @click="onClose">关闭</n-button>
@@ -25,6 +26,8 @@ import { NDataTable, NTag, NModal, NInput, NSelect, NButton, NPopover, useNotifi
 import localforage from 'localforage';
 import api from '@/api/http'
 import { useGlobalData } from '@/store/globalData';
+import Progress from '@/components/Progress.vue';
+
 // 全局数据中心
 const globalData = useGlobalData()
 const notification = useNotification()
@@ -38,11 +41,14 @@ const props = defineProps({
 const emits = defineEmits(['update:showDialog'])
 
 const formRef = ref(null);
+const progressRef = ref(null);
+
 const form = reactive({
-  playlist: '',
+  playlist: [],
   newPlaylistName: ''
 })
 const state = reactive({
+  showProgress: false,
   playlistOptions: computed(() => {
     const options = globalData.playlist.map(e => ({
       label: e.name,
@@ -62,7 +68,14 @@ const state = reactive({
     newPlaylistName: [
       { required: true, message: '请输入歌单名称' }
     ]
-  }
+  },
+  playlist_Map: computed(() => {
+    const map = {}
+    globalData.playlist.forEach(e => {
+      map[e.id] = e
+    })
+    return map
+  }),
 })
 watch(() => form.playlist, (next, prev) => {
   if (next.includes('all') && !prev.includes('all')) {
@@ -79,32 +92,109 @@ watch(() => props.showDialog, async (val) => {
 })
 
 function onSubmit() {
-  formRef.value?.validate(async (errors) => {
-    if (!errors) {
-      const res = mergePlaylist()
-      if (res) {
-        notification.success({
-          message: '合并成功'
-        })
-      }
-    }
-  })
+  console.log(progressRef.value)
+  // mergePlaylist()
+  // formRef.value?.validate(async (errors) => {
+  //   if (!errors) {
+  //     mergePlaylist()
+  //     // const res = mergePlaylist()
+  //     // if (res) {
+  //     //   notification.success({
+  //     //     message: '合并成功'
+  //     //   })
+  //     // }
+  //   }
+  // })
 }
 function onClose() {
   emits('update:showDialog', false)
 }
 
+const mockPromise = (time) => {
+  console.log('请求发送，time=', time)
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(time)
+    }, time)
+  })
+}
+async function mergePlaylist() {
+  const playlistIds = form.playlist.filter(e => e !== 'all')
+  const progressTask = playlistIds.map(id => ({
+    name: `歌单 ${state.playlist_Map[id].name} 加载完成`,
+    percentage: Math.floor(70 / playlistIds.length)
+  }))
+  progressTask.push({ name: '正在新建歌单', percentage: 1 })
+  progressTask.push({ name: '新歌单创建完成', percentage: 29 })
+  progressRef.value?.setProgressTask(progressTask)
+  state.showProgress = true
+  // =======
+  for (let i = 0; i < playlistIds.length; i++) {
+    const _id = playlistIds[i]
+    const name = `歌单 ${state.playlist_Map[_id].name} 加载完成`
+    mockPromise(1000).then(res => {
+      progressRef.value?.setProgressDone(name)
+    })
+  }
+  progressRef.value?.setProgressDone('正在新建歌单')
+  await mockPromise(1000)
+  progressRef.value?.setProgressDone('新歌单创建完成')
+  await mockPromise(1000)
+}
+
 // 合并歌单
-function mergePlaylist() {
+async function mergePlaylist1() {
   const playlist = form.playlist
   const newPlaylistName = form.newPlaylistName
   const playlistIds = playlist.filter(e => e !== 'all')
+  // 设置进度条task
+  const progressTask = playlistIds.map(id => ({
+    name: `歌单 ${state.playlist_Map[id].name} 加载完成`,
+    percentage: Math.floor(70 / playlistIds.length)
+  }))
+  progressTask.push({ name: '新歌单创建完成', percentage: 30 })
+  progressRef.value?.setProgressTask(progressTask)
+  state.showProgress = true
   // 请求所有歌单的歌曲
   const songs = []
-  playlistIds.map(async e => {
-    globalData.getRemoteSonglist
-    return res.data.playlist.tracks.map(e => e.id)
+  playlistIds.forEach(async (id) => {
+    let name = `歌单 ${state.playlist_Map[id].name} 加载完成`
+    globalData.getRemoteSonglist(id).then(res => {
+      progressRef.value.setProgressDone(name)
+      songs.push(...res.songs?.map(e => e.id))
+    })
+    // 根据 res 状态设置进度
+    if (res) {
+      progressRef.value.setProgressDone(name)
+      songs.push(...res.songs?.map(e => e.id))
+    } else {
+      progressRef.value.setProgressError(name)
+    }
   })
+  songs = Array.from(new Set(songs));
+  const createRes = await globalData.createPlaylist(newPlaylistName, songs);
+  progressRef.value?.setProgressDone('新歌单创建完成')
+}
+
+// 请求所有歌单的歌曲，并设置进度条
+async function getAllPlaylist(playlistIds) {
+  const songs = [] // merge歌单的歌曲Id集合
+  playlistIds.forEach(async (id) => {
+    let name = `歌单 ${state.playlist_Map[id].name} 加载完成`
+    const res = await globalData.getRemoteSonglist(id);
+    // 根据 res 状态设置进度
+    if (res) {
+      progressRef.value.setProgressDone(name)
+      songs.push(...res.songs?.map(e => e.id))
+    } else {
+      progressRef.value.setProgressError(name)
+    }
+  })
+  return songs
+}
+
+function showChangeHandler(show) {
+  emits('update:showDialog', show)
 }
 
 </script>

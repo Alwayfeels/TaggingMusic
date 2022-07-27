@@ -1,7 +1,7 @@
 <template>
   <div class="view-container flex flex-col items-center w-full h-full mt-2 ml-10">
     <h1 class="text-5xl mt-32">Tagging Music</h1>
-    <p class="text-2xl text-slate-400">使用 Tag 标记歌曲，然后快速生成歌单</p>
+    <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
     <NButton class="my-4" type="primary" size="large" @click="toMainView">开始使用</NButton>
     <n-divider />
     <div class="detail flex flex-1">

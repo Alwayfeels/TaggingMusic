@@ -7,13 +7,13 @@ const mockPromise = (time) => {
     }, time)
   })
 }
-let test = [1000, 2000]
+let test = [1000, 2000, 3000]
 
 // foreach 顺序, 先log所有的请求发送，在根据时间顺序log请求的resolve
 async function FOR_EACH_TEST() {
   test.forEach(async (e) => {
     let res = await mockPromise(e)
-    console.log('forEach log', res)
+    console.log('进度增加', res)
   })
 }
 
@@ -24,6 +24,13 @@ async function FOR_TEST() {
     console.log('for log', res)
   }
 }
+
+async function testFn() {
+  await FOR_EACH_TEST()
+  console.log('==============================')
+}
+
+testFn()
 
 // FOR_TEST();
 // 请求发送，time= 1000

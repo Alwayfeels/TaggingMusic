@@ -36,16 +36,16 @@ const progress = reactive({
     }
   }),
   taskList: [
-    { name: 'step1', percentage: 10, isDone: false, isError: false },
-    { name: 'step2', percentage: 20, isDone: false, isError: false },
-    { name: 'step3', percentage: 30, isDone: false, isError: false },
-    { name: 'step4', percentage: 40, isDone: false, isError: false }
+    // { name: 'step1', percentage: 10, isDone: false, isError: false },
+    // { name: 'step2', percentage: 20, isDone: false, isError: false },
+    // { name: 'step3', percentage: 30, isDone: false, isError: false },
+    // { name: 'step4', percentage: 40, isDone: false, isError: false }
   ],
 })
 
-onMounted(() => {
-  mainProgress();
-})
+// onMounted(() => {
+//   mainProgress();
+// })
 
 const mockPromise = (time) => {
   return new Promise((resolve) => {
@@ -55,17 +55,17 @@ const mockPromise = (time) => {
   })
 }
 
-const mainProgress = async () => {
-  const step1 = await mockPromise(1000);
-  setProgressDone('step1')
-  const step2 = await mockPromise(2000);
-  setProgressDone('step2')
-  const step3 = await mockPromise(1000);
-  setProgressError('step3')
-  return false;
-  const step4 = await mockPromise(2000);
-  setProgressDone('step4')
-}
+// const mainProgress = async () => {
+//   const step1 = await mockPromise(1000);
+//   setProgressDone('step1')
+//   const step2 = await mockPromise(2000);
+//   setProgressDone('step2')
+//   const step3 = await mockPromise(1000);
+//   setProgressError('step3')
+//   return false;
+//   const step4 = await mockPromise(2000);
+//   setProgressDone('step4')
+// }
 
 // Interface TaskList {
 //   name: string;
