@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full">
+  <div v-show="progress.isShow" class="w-full">
     <n-progress type="line" :percentage="progress.percentage" :indicator-placement="'inside'"
       :processing="progress.percentage < 100" :status="progress.status" />
     <div class="text-center transition-all" :class="progress.tips.class">
@@ -8,22 +8,28 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch, h, onMounted } from 'vue'
+import { computed, reactive, ref, watch, h, onMounted, defineExpose } from 'vue'
 import { NProgress } from 'naive-ui';
 
+defineExpose({
+  setProgressTask,
+  setProgressDone,
+  setProgressError
+})
+
+const TIP_CLASS_MAP = {
+  success: 'text-green-600',
+  error: 'text-red-500'
+}
 const progress = reactive({
   percentage: 0,
+  isShow: false,
+  isError: false,
   tips: {
     ctx: '正在启动任务...',
-    type: 'info', // success, info, warning, error
+    type: 'info', // success | error
     class: computed(() => {
-      if (progress.tips.type === 'success') {
-        return 'text-green-600'
-      } else if (progress.tips.type === 'error') {
-        return 'text-red-500'
-      } else {
-        return ''
-      }
+      return TIP_CLASS_MAP[progress.tips.type] || '';
     })
   },
   status: computed(() => {
@@ -35,17 +41,8 @@ const progress = reactive({
       return 'default'
     }
   }),
-  taskList: [
-    // { name: 'step1', percentage: 10, isDone: false, isError: false },
-    // { name: 'step2', percentage: 20, isDone: false, isError: false },
-    // { name: 'step3', percentage: 30, isDone: false, isError: false },
-    // { name: 'step4', percentage: 40, isDone: false, isError: false }
-  ],
+  taskList: [],
 })
-
-// onMounted(() => {
-//   mainProgress();
-// })
 
 const mockPromise = (time) => {
   return new Promise((resolve) => {
@@ -55,23 +52,28 @@ const mockPromise = (time) => {
   })
 }
 
-// const mainProgress = async () => {
-//   const step1 = await mockPromise(1000);
-//   setProgressDone('step1')
-//   const step2 = await mockPromise(2000);
-//   setProgressDone('step2')
-//   const step3 = await mockPromise(1000);
-//   setProgressError('step3')
-//   return false;
-//   const step4 = await mockPromise(2000);
-//   setProgressDone('step4')
-// }
+function resetProgress() {
+  progress.percentage = 0
+  progress.isError = false
+  progress.tips.ctx = '正在启动任务...'
+  progress.tips.type = 'info'
+  progress.taskList = []
+}
+
+function hideProgress() {
+  progress.isShow = false
+  resetProgress()
+}
+
+function showProgress() {
+  progress.isShow = true
+}
 
 // Interface TaskList {
 //   name: string;
 //   percentage: number <= 100;
 // }
-const setProgressTask = (taskList) => {
+function setProgressTask(taskList) {
   // 如果 taskList有没有 percentage 属性的元素，则均分设置
   let noPercentItem = taskList.filter(e => !e.percentage)
   if (noPercentItem.length > 0) {
@@ -92,11 +94,13 @@ const setProgressTask = (taskList) => {
 }
 
 // 设置任务完成
-const setProgressDone = (name) => {
+function setProgressDone(name) {
+  if (progress.isError) return false;
   let progressItem = progress.taskList.find(e => e.name === name)
   if (progressItem) {
     progressItem.isDone = true
-    progress.percentage += progressItem.percentage
+    let percentage = Math.round((progress.percentage + progressItem.percentage) * 10) / 10
+    progress.percentage = percentage > 100 ? 100 : percentage
     progress.tips.ctx = `已完成 ${name}`
     progress.tips.type = 'success'
   } else {
@@ -105,14 +109,16 @@ const setProgressDone = (name) => {
 }
 
 // 设置任务错误
-const setProgressError = (name) => {
+function setProgressError(name) {
   let progressItem = progress.taskList.find(e => e.name === name)
   if (progressItem) {
     progressItem.isError = true
+    progress.isError = true
     progress.tips.ctx = `执行 ${name} 时出错了😭`
     progress.tips.type = 'error'
   } else {
     console.error(`setProgressError: ${name} task 不存在`)
   }
 }
+
 </script>

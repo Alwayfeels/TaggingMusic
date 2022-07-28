@@ -92,8 +92,7 @@ watch(() => props.showDialog, async (val) => {
 })
 
 function onSubmit() {
-  console.log(progressRef.value)
-  // mergePlaylist()
+  mergePlaylist()
   // formRef.value?.validate(async (errors) => {
   //   if (!errors) {
   //     mergePlaylist()
@@ -110,11 +109,11 @@ function onClose() {
   emits('update:showDialog', false)
 }
 
-const mockPromise = (time) => {
+const mockPromise = (time, res) => {
   console.log('请求发送，time=', time)
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(time)
+      resolve(res)
     }, time)
   })
 }
@@ -122,20 +121,31 @@ async function mergePlaylist() {
   const playlistIds = form.playlist.filter(e => e !== 'all')
   const progressTask = playlistIds.map(id => ({
     name: `歌单 ${state.playlist_Map[id].name} 加载完成`,
-    percentage: Math.floor(70 / playlistIds.length)
+    percentage: Math.round((70 / playlistIds.length * 10).toFixed(1)) / 10
   }))
   progressTask.push({ name: '正在新建歌单', percentage: 1 })
   progressTask.push({ name: '新歌单创建完成', percentage: 29 })
   progressRef.value?.setProgressTask(progressTask)
+  console.log('progressTask', progressTask)
   state.showProgress = true
   // =======
-  for (let i = 0; i < playlistIds.length; i++) {
-    const _id = playlistIds[i]
-    const name = `歌单 ${state.playlist_Map[_id].name} 加载完成`
-    mockPromise(1000).then(res => {
-      progressRef.value?.setProgressDone(name)
-    })
+  // const requests = playlistIds.map(async id => {
+  //   const name = `歌单 ${state.playlist_Map[id].name} 加载完成`
+  //   return mockPromise(100, name).then(res => {
+  //     console.log('mockPromis =>', res)
+  //     progressRef.value?.setProgressDone(name)
+  //   })
+  // })
+  // =======
+  for(let i = 0; i < playlistIds.length; i++) {
+    const id = playlistIds[i]
+    const name = `歌单 ${state.playlist_Map[id].name} 加载完成`
+    const resName = await mockPromise(200, name)
+    progressRef.value?.setProgressDone(resName)
   }
+  // console.log('requests>>>>>', requests)
+  // const res = await Promise.all(requests)
+  // console.log('All请求完成，res=', res)
   progressRef.value?.setProgressDone('正在新建歌单')
   await mockPromise(1000)
   progressRef.value?.setProgressDone('新歌单创建完成')
