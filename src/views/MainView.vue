@@ -11,7 +11,7 @@
     </n-layout-sider>
     <n-layout-content v-if="state.isLogin" content-style="padding: 24px; height: 100%;" :native-scrollbar="false"
       v-menus:right="menus">
-      <SongTable ref="songTable" class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
+      <SongTable ref="songTableRef" class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
     </n-layout-content>
     <n-layout-content v-else content-style="padding: 24px;">
       <Unlogin />
@@ -51,6 +51,7 @@ const state = reactive({
   songlistLoading: false
 });
 
+const songTableRef = ref(null)
 const menus = shallowRef({
   menus: [
     // 菜单使用示例：https://github.com/xfy520/vue3-menus
@@ -105,6 +106,7 @@ const activeMenuChange = async (key, item) => {
   state.currSonglist = item
   state.currSonglistId = key
   await globalData.initSonglist(key)
+  songTableRef.value.resetPager()
 }
 const renderMenuIcon = (option) => {
   return h('img', { src: option.coverImgUrl, class: 'w-8 h-8' })

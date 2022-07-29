@@ -6,7 +6,7 @@
 
 <script setup>
 import { NDataTable, NButton } from "naive-ui";
-import { h, ref, getCurrentInstance, reactive } from "vue";
+import { h, ref, getCurrentInstance, reactive, defineExpose } from "vue";
 import { getSongTableColumns } from "@/data/tableColumns";
 import { usePlayerStore } from '@/store/player';
 
@@ -14,6 +14,7 @@ import { NAvatar, NTag } from 'naive-ui'
 import TagInput from '@/components/TagInput.vue'
 
 const globalPlayer = usePlayerStore()
+defineExpose({ resetPager })
 
 const props = defineProps({
   tableData: {
@@ -53,6 +54,10 @@ const pagination = reactive({
     pagination.page = 1;
   }
 });
+
+function resetPager() {
+  pagination.page = 1;
+}
 
 const tableInstance = getCurrentInstance();
 // const songTableColumns = getSongTableColumns(tableInstance, () => props.tableData);
