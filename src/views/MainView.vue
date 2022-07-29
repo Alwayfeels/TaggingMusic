@@ -111,7 +111,7 @@ const renderMenuIcon = (option) => {
 }
 const renderMenuLabel = (option) => {
   let el = h('div', {style: 'display: flex;'},  { default: () => [
-    h('div', {style: 'flex: 1; text-overflow: ellipsis;'}, option.name),
+    h('div', {style: 'flex: 1; overflow: hidden; text-overflow: ellipsis;'}, option.name),
     h('div', {style: 'margin: 0 0.5rem;'}, option.trackCount)
   ]})
   return el
