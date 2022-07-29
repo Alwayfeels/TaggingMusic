@@ -5,9 +5,9 @@
     <n-form ref="formRef" :model="form" :rules="state.rules">
       <n-form-item path="playlist" label="被合并歌单：">
         <n-select size="small" multiple filterable max-tag-count="responsive" v-model:value="form.playlist"
-          :options="state.playlistOptions" />
+          :options="state.playlistOptions" :on-update:value="selectChange" />
       </n-form-item>
-      <n-form-item path="newPlaylistName" label="被合并歌单：">
+      <n-form-item path="newPlaylistName" label="新歌单名称：">
         <n-input size="small" v-model:value="form.newPlaylistName" type="text" />
       </n-form-item>
     </n-form>
@@ -48,12 +48,14 @@ const form = reactive({
   newPlaylistName: ''
 })
 const state = reactive({
-  showProgress: false,
+  isSelectAll: computed(() => {
+    form.playlist?.includes('all')
+  }),
   playlistOptions: computed(() => {
     const options = globalData.playlist.map(e => ({
       label: e.name,
       value: e.id,
-      disabled: state.playlist?.includes('all')
+      disabled: state.isSelectAll
     }))
     options.unshift({
       label: '全部歌单',
@@ -77,33 +79,59 @@ const state = reactive({
     return map
   }),
 })
-watch(() => form.playlist, (next, prev) => {
-  if (next.includes('all') && !prev.includes('all')) {
-    form.playlist = state.playlistOptions.map(e => e.value)
-  }
-  if (prev.includes('all') && !next.includes('all')) {
-    form.playlist = []
-  }
-})
+// watch(() => form.playlist, (next, prev) => {
+//   let isNextSelectAll = next.includes('all');
+//   let isPrevSelectAll = prev.includes('all');
+//   let userSelectAll = isNextSelectAll && !isPrevSelectAll;
+//   let userRemoveAll = !isNextSelectAll && isPrevSelectAll;
+//   if (userSelectAll) {
+//     form.playlist = state.playlistOptions.map(e => e.value)
+//   } else if (userRemoveAll) {
+//     form.playlist = []
+//   } else if (next.length === state.playlistOptions.length - 1) {
+//     form.playlist = ['all']
+//   } else if (prev.length === state.playlistOptions.length) {
+//     let allIndex = next.indexOf('all');
+//     if (allIndex > -1) {
+//       next.splice(allIndex, 1)
+//     }
+//   }
+// })
 
-watch(() => props.showDialog, async (val) => {
-  if (val) {
+function selectChange(val, options) {
+  let isCurrExistAll = val.includes('all');
+  let isPrevExistAll = form.playlist.includes('all');
+  let userSelectAll = isCurrExistAll && !isPrevExistAll;
+  let userRemoveAll = !isCurrExistAll && isPrevExistAll;
+  if (userSelectAll) {
+    val = state.playlistOptions.map(e => e.value)
+  } else if (userRemoveAll) {
+    val = []
+  } else if (isCurrExistAll && val.length !== state.playlistOptions.length) {
+    let allIndex = val.indexOf('all');
+    if (allIndex > -1) {
+      val.splice(allIndex, 1)
+    }
+  } else if (!isCurrExistAll && val.length === state.playlistOptions.length - 1) {
+    val.push('all')
   }
-})
+  form.playlist = val;
+}
 
 function onSubmit() {
-  mergePlaylist()
-  // formRef.value?.validate(async (errors) => {
-  //   if (!errors) {
-  //     mergePlaylist()
-  //     // const res = mergePlaylist()
-  //     // if (res) {
-  //     //   notification.success({
-  //     //     message: '合并成功'
-  //     //   })
-  //     // }
-  //   }
-  // })
+  // TEST_mergePlaylist()
+  // return false;
+  formRef.value?.validate(async (errors) => {
+    if (!errors) {
+      mergePlaylist()
+      // const res = mergePlaylist()
+      // if (res) {
+      //   notification.success({
+      //     message: '合并成功'
+      //   })
+      // }
+    }
+  })
 }
 function onClose() {
   emits('update:showDialog', false)
@@ -114,76 +142,89 @@ const mockPromise = (time, res) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(res)
-    }, time)
+    }, Math.random() * time * 2)
   })
 }
-async function mergePlaylist() {
+async function TEST_mergePlaylist() {
   const playlistIds = form.playlist.filter(e => e !== 'all')
   const progressTask = playlistIds.map(id => ({
-    name: `歌单 ${state.playlist_Map[id].name} 加载完成`,
+    name: `${state.playlist_Map[id].name}`,
     percentage: Math.round((70 / playlistIds.length * 10).toFixed(1)) / 10
   }))
   progressTask.push({ name: '正在新建歌单', percentage: 1 })
   progressTask.push({ name: '新歌单创建完成', percentage: 29 })
   progressRef.value?.setProgressTask(progressTask)
+  progressRef.value?.showProgress()
   console.log('progressTask', progressTask)
-  state.showProgress = true
-  // =======
-  // const requests = playlistIds.map(async id => {
-  //   const name = `歌单 ${state.playlist_Map[id].name} 加载完成`
-  //   return mockPromise(100, name).then(res => {
-  //     console.log('mockPromis =>', res)
-  //     progressRef.value?.setProgressDone(name)
-  //   })
-  // })
-  // =======
-  for(let i = 0; i < playlistIds.length; i++) {
+  let requests = []
+  for (let i = 0; i < playlistIds.length; i++) {
     const id = playlistIds[i]
-    const name = `歌单 ${state.playlist_Map[id].name} 加载完成`
-    const resName = await mockPromise(200, name)
-    progressRef.value?.setProgressDone(resName)
+    const name = `${state.playlist_Map[id].name}`
+    // const resName = await mockPromise(900, name)
+    // progressRef.value?.setProgressDone(resName)
+    requests.push(mockPromise(900, name).then(resName => {
+      progressRef.value?.setProgressDone(resName)
+      return Promise.resolve(resName)
+    }))
   }
+  console.log('requests', requests);
+  debugger;
+  Promise.all(requests).then(async res => {
+    console.log('promise.all =>', res);
+    progressRef.value?.setProgressDone('正在新建歌单')
+    await mockPromise(1000)
+    progressRef.value?.setProgressDone('新歌单创建完成')
+    await mockPromise(1000)
+  })
   // console.log('requests>>>>>', requests)
   // const res = await Promise.all(requests)
   // console.log('All请求完成，res=', res)
-  progressRef.value?.setProgressDone('正在新建歌单')
-  await mockPromise(1000)
-  progressRef.value?.setProgressDone('新歌单创建完成')
-  await mockPromise(1000)
 }
 
 // 合并歌单
-async function mergePlaylist1() {
+async function mergePlaylist() {
   const playlist = form.playlist
   const newPlaylistName = form.newPlaylistName
   const playlistIds = playlist.filter(e => e !== 'all')
   // 设置进度条task
   const progressTask = playlistIds.map(id => ({
-    name: `歌单 ${state.playlist_Map[id].name} 加载完成`,
+    name: `${state.playlist_Map[id].name}`,
     percentage: Math.floor(70 / playlistIds.length)
   }))
-  progressTask.push({ name: '新歌单创建完成', percentage: 30 })
+  progressTask.push({ name: '构建歌单数据', percentage: 10 })
+  progressTask.push({ name: '新歌单创建', percentage: 20 })
   progressRef.value?.setProgressTask(progressTask)
-  state.showProgress = true
+  progressRef.value?.showProgress()
   // 请求所有歌单的歌曲
-  const songs = []
+  const requests = []
   playlistIds.forEach(async (id) => {
-    let name = `歌单 ${state.playlist_Map[id].name} 加载完成`
-    globalData.getRemoteSonglist(id).then(res => {
-      progressRef.value.setProgressDone(name)
-      songs.push(...res.songs?.map(e => e.id))
+    let name = `${state.playlist_Map[id].name}`
+    let req = globalData.getSonglist({ id }).then(res => {
+      console.log('getSonglist', res)
+      // 根据 res 状态设置进度
+      if (res) {
+        progressRef.value.setProgressDone(name)
+        return Promise.resolve(res)
+      } else {
+        progressRef.value.setProgressError(name)
+        return Promise.reject(res)
+      }
     })
-    // 根据 res 状态设置进度
-    if (res) {
-      progressRef.value.setProgressDone(name)
-      songs.push(...res.songs?.map(e => e.id))
+    requests.push(req);
+  })
+  Promise.all(requests).then(async resSongs => {
+    // 所有歌曲ID
+    progressRef.value.setProgressDone('构建歌单数据')
+    let idSongs = resSongs.map(item => item.map(e => e.id)).flat()
+    let songsSet = Array.from(new Set([...idSongs]));
+    const createRes = await globalData.createPlaylist(newPlaylistName, songsSet);
+    // const createRes = true
+    if (createRes) {
+      progressRef.value.setProgressDone('新歌单创建')
     } else {
-      progressRef.value.setProgressError(name)
+      progressRef.value.setProgressError('新歌单创建')
     }
   })
-  songs = Array.from(new Set(songs));
-  const createRes = await globalData.createPlaylist(newPlaylistName, songs);
-  progressRef.value?.setProgressDone('新歌单创建完成')
 }
 
 // 请求所有歌单的歌曲，并设置进度条

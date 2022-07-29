@@ -2,7 +2,7 @@
   <div v-show="progress.isShow" class="w-full">
     <n-progress type="line" :percentage="progress.percentage" :indicator-placement="'inside'"
       :processing="progress.percentage < 100" :status="progress.status" />
-    <div class="text-center transition-all" :class="progress.tips.class">
+    <div class="text-left transition-all" :class="progress.tips.class">
       {{ progress.tips.ctx }}</div>
   </div>
 </template>
@@ -14,7 +14,9 @@ import { NProgress } from 'naive-ui';
 defineExpose({
   setProgressTask,
   setProgressDone,
-  setProgressError
+  setProgressError,
+  hideProgress,
+  showProgress
 })
 
 const TIP_CLASS_MAP = {
@@ -73,6 +75,7 @@ function showProgress() {
 //   name: string;
 //   percentage: number <= 100;
 // }
+// 设置进度条任务列表
 function setProgressTask(taskList) {
   // 如果 taskList有没有 percentage 属性的元素，则均分设置
   let noPercentItem = taskList.filter(e => !e.percentage)
@@ -101,7 +104,7 @@ function setProgressDone(name) {
     progressItem.isDone = true
     let percentage = Math.round((progress.percentage + progressItem.percentage) * 10) / 10
     progress.percentage = percentage > 100 ? 100 : percentage
-    progress.tips.ctx = `已完成 ${name}`
+    progress.tips.ctx = `正在处理： ${name}`
     progress.tips.type = 'success'
   } else {
     console.error(`setProgressDone: ${name} task 不存在`)
@@ -114,7 +117,7 @@ function setProgressError(name) {
   if (progressItem) {
     progressItem.isError = true
     progress.isError = true
-    progress.tips.ctx = `执行 ${name} 时出错了😭`
+    progress.tips.ctx = `处理 ${name} 时出错了😭`
     progress.tips.type = 'error'
   } else {
     console.error(`setProgressError: ${name} task 不存在`)

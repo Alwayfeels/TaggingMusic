@@ -134,7 +134,7 @@ export const useGlobalData = defineStore("globalData", {
       return []
     },
     // 获取远端歌单详情, 返回数据并缓存到store, indexedDB
-    async getRemoteSonglist(playlistId = "") {
+    async getRemoteSonglist(playlistId = "", setStore = false) {
       if (!playlistId) {
         console.error("getRemoteSonglist error: playlistId is required");
         return [];
@@ -143,7 +143,7 @@ export const useGlobalData = defineStore("globalData", {
         id: playlistId,
       });
       let songlist = res.songs;
-      if (songlist) {
+      if (songlist && setStore) {
         // 筛选需要的key保留到store
         let needProps = ["id", "name", "al", "ar"];
         this.songlist = this.filterUsefulProps(songlist, needProps);
@@ -151,9 +151,32 @@ export const useGlobalData = defineStore("globalData", {
       localforage.setItem(`songlist_${playlistId}`, songlist);
       return songlist;
     },
+    // 获取歌单歌曲
+    // config: {id: Number, force: Boolean}
+    async getSonglist(config) {
+      let { id, force } = config;
+      if (!id) {
+        console.error("getRemoteSonglist error: playlistId is required");
+        return [];
+      }
+      if (force) {
+        return await this.getRemoteSonglist(id);
+      }
+      let songlist = await localforage.getItem(`songlist_${id}`);
+      if (songlist) return songlist;
+      return await this.getRemoteSonglist(id);
+    },
     // 导出TaggedSong
     async exportTaggedSong() {
       const exportTaggedSong = await localforage.getItem("taggedSong");
+      if (exportTaggedSong === null) {
+        window.$notification.warning({
+          title: "失败",
+          content: '当前没有任何带有标签的歌曲',
+          duration: 3000
+        })
+        return false;
+      }
       let link = document.createElement("a");
       link.download = "标签歌曲数据.json";
       link.href = "data:text/plain," + JSON.stringify(exportTaggedSong);
