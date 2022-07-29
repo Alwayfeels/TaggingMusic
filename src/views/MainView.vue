@@ -11,7 +11,8 @@
     </n-layout-sider>
     <n-layout-content v-if="state.isLogin" content-style="padding: 24px; height: 100%;" :native-scrollbar="false"
       v-menus:right="menus">
-      <SongTable ref="songTableRef" class="h-full" v-model:tableData="globalData.songlist" v-model:loading="state.songlistLoading" />
+      <SongTable ref="songTableRef" class="h-full" v-model:tableData="globalData.songlist"
+        v-model:loading="state.songlistLoading" />
     </n-layout-content>
     <n-layout-content v-else content-style="padding: 24px;">
       <Unlogin />
@@ -19,7 +20,7 @@
   </n-layout>
   <MergePlaylistDialog v-model:showDialog="globalData.status.showMergeDialog" />
   <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" :playlist="state.currSonglist" />
-  <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist"/>
+  <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist" />
 </template>
 
 <script setup>
@@ -52,7 +53,7 @@ const state = reactive({
 });
 
 const songTableRef = ref(null)
-const menus = shallowRef({
+const menus = reactive({
   menus: [
     // 菜单使用示例：https://github.com/xfy520/vue3-menus
     {
@@ -93,6 +94,18 @@ const menus = shallowRef({
       click: () => {
         state.showTaggingPlaylistDialog = true
       }
+    }, {
+    //   label: "应用配置",
+    //   divided: true,
+    //   children: [
+    //     {
+    //       label: '在 tag 失焦后如何处理标签',
+    //       tip: globalData.removeTagOnBlur ? '删除' : '保留',
+    //       click: () => {
+    //         globalData.toggleRemoveTagOnBlur()
+    //       }
+    //     }
+    //   ]
     }
   ]
 })
@@ -112,10 +125,12 @@ const renderMenuIcon = (option) => {
   return h('img', { src: option.coverImgUrl, class: 'w-8 h-8' })
 }
 const renderMenuLabel = (option) => {
-  let el = h('div', {style: 'display: flex;'},  { default: () => [
-    h('div', {style: 'flex: 1; overflow: hidden; text-overflow: ellipsis;'}, option.name),
-    h('div', {style: 'margin: 0 0.5rem;'}, option.trackCount)
-  ]})
+  let el = h('div', { style: 'display: flex;' }, {
+    default: () => [
+      h('div', { style: 'flex: 1; overflow: hidden; text-overflow: ellipsis;' }, option.name),
+      h('div', { style: 'margin: 0 0.5rem;' }, option.trackCount)
+    ]
+  })
   return el
 }
 
@@ -165,6 +180,7 @@ const renderMenuLabel = (option) => {
 .min-height {
   height: calc(100vh - 10rem);
 }
+
 // :v-deep(.custom-menu) {
 //   display: flex;
 
@@ -178,7 +194,6 @@ const renderMenuLabel = (option) => {
 
 //   }
 // }
-
 </style>
 <style>
 html {

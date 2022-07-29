@@ -3,7 +3,7 @@
         size="huge" :bordered="false" :segmented="state.segmented" :on-update:show="showChangeHandler">
         <n-spin :show="state.loading">
             <div class="mb-4 flex items-center">
-                <span class="w-40"> 选择 tag 生成歌单：</span>
+                <span class="w-40"> {{state.isCreatePlaylist ? '选择 tag 生成歌单：' : '选择 tag 导入歌单'}}</span>
                 <n-input v-if="state.isCreatePlaylist" v-model:value="state.songlistName" type="text"
                     placeholder="歌单名称" />
                 <n-input v-else :value="props.playlist.name" disabled type="text" />

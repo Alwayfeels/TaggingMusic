@@ -10,6 +10,7 @@ import localforage from "localforage";
 // 整个应用的数据中心
 export const useGlobalData = defineStore("globalData", {
   state: () => ({
+    removeTagOnBlur: false,
     playlist: [], // 歌单列表
     songlist: [], // 歌单歌曲数据
     user: {}, // 用户信息
@@ -311,26 +312,6 @@ export const useGlobalData = defineStore("globalData", {
       this.status.updateTagInput = new Date().getTime(); // 通知所有 tagInput 组件更新数据
       this.updateTagFromTaggedSong() // 重新统计 tag 的引用次数
     },
-    // 合并歌单
-    // mergePlaylist(playlistIds = [], newPlaylistName = '') {
-    //   if (!playlistIds.length || !newPlaylistName) return false;
-    //   // 对所有id发起请求
-    //   Promise.all(
-    //     playlistIds.map((id) => {
-    //       return this.getRemoteSonglist(id)
-    //     })
-    //   ).then(res => {
-    //     let songs = [];
-    //     res.forEach((item) => {
-    //       let ids = item.map(e => e.id);
-    //       songs = songs.concat(ids);
-    //     })
-    //     // 去重id
-    //     songs = Array.from(new Set(songs));
-    //     // 创建新歌单
-    //     return this.createPlaylist(newPlaylistName, songs);
-    //   })
-    // },
     // 创建歌单
     async createPlaylist(name, songIds = []) {
       if (!name || !songIds.length) return false;
@@ -341,6 +322,9 @@ export const useGlobalData = defineStore("globalData", {
         tracks: songIds.join(',')
       })
       return res;
+    },
+    toggleRemoveTagOnBlur() {
+      this.removeTagOnBlur = !this.removeTagOnBlur; 
     }
   },
 });
