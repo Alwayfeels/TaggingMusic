@@ -324,7 +324,8 @@ export const useGlobalData = defineStore("globalData", {
       return res;
     },
     toggleRemoveTagOnBlur() {
-      this.removeTagOnBlur = !this.removeTagOnBlur; 
+      this.removeTagOnBlur = !this.removeTagOnBlur;
+      return this.removeTagOnBlur
     }
   },
 });

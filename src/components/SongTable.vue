@@ -7,7 +7,6 @@
 <script setup>
 import { NDataTable, NButton } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive, defineExpose } from "vue";
-import { getSongTableColumns } from "@/data/tableColumns";
 import { usePlayerStore } from '@/store/player';
 
 import { NAvatar, NTag } from 'naive-ui'
@@ -60,7 +59,6 @@ function resetPager() {
 }
 
 const tableInstance = getCurrentInstance();
-// const songTableColumns = getSongTableColumns(tableInstance, () => props.tableData);
 const songTableColumns = [
   {
     title: "歌曲名称",

@@ -2,8 +2,8 @@
   <NDynamicTags ref="dynamicTags" v-model:value="state.tagInputVal" @mousedown.self="clickHandler" @click.stop
     :on-update:value="dynamicTagsChange">
     <template #input="{ submit, deactivate }">
-      <SingleTagInput @change="changeHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler(deactivate)"></SingleTagInput>
+      <SingleTagInput @pressEnter="enterHandler($event, submit, deactivate)"
+        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler($event, submit, deactivate)"></SingleTagInput>
     </template>
     <template #trigger="{ activate, disabled }">
       <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
@@ -83,13 +83,14 @@ function dynamicTagsChange(newVal) {
   }
 }
 // singleTagInput 事件处理
-function changeHandler(tag, submit, deactivate) {
+function enterHandler(tag, submit, deactivate) {
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
     insertTag(tag);
     insertTaggedSongs(tag)
   }
 }
+// tab 键盘事件处理
 function tabHandler(tag, submit, deactivate) {
   // when you press tab, save and open next <tagInput>
   if (!tag) return false;
@@ -111,8 +112,14 @@ function clickHandler() {
     dynamicTags.value.showInput = !dynamicTags.value.showInput
   }, 0);
 }
-function blurHandler(deactivate) {
-  deactivate()
+
+// 根据 globalDat.removeTagOnBlur 来决定是否在移除标签
+function blurHandler($event, submit, deactivate) {
+  if(globalData.removeTagOnBlur) {
+    deactivate()
+    return;
+  }
+  enterHandler($event, submit, deactivate)
 }
 
 // 数据处理

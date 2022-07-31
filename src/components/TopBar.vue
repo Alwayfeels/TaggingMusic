@@ -23,6 +23,8 @@
         {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
       </n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
+        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}</n-button>
+      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="showMergeDialog">合并歌单</n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="exportTaggedSong">导出Tag</n-button>

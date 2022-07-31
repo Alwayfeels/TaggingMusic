@@ -44,7 +44,7 @@ watch(singleTagInput, (el) => {
 });
 // 键盘输入处理
 function enterHandler(e) {
-  emit("change", state.inputValue);
+  emit("pressEnter", state.inputValue);
 }
 function tabHandler() {
   emit("pressTab", state.inputValue);
