@@ -36,6 +36,20 @@
           @click="state.isMute = !state.isMute" />
         <n-slider v-model:value="state.volume" :max="100" :step="1" />
       </div>
+      <!-- 播放列表 -->
+      <n-popover trigger="click">
+        <template #trigger>
+          <n-icon class="cursor-pointer ml-4" size="24" :component="TextBulletListLtr24Filled"
+            @click="togglePlaylist" />
+        </template>
+        <div class="w-full pb-1 mb-1" style="border-bottom: 1px solid #ccc">播放列表</div>
+        <div class="player-list w-full">
+          <div class="flex w-full hover:bg-gray-100 mb-2" v-for="item in globalPlayer.playerList" :key="item.id">
+            <div class="pl-1 flex-1 text-gray-500">{{ item.name }}</div>
+            <div class="pr-1 text-red-400 justify-items-end cursor-pointer hover:underline">删除</div>
+          </div>
+        </div>
+      </n-popover>
     </div>
     <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause"
       @timeupdate="timeupdate" @play="play" style="display: none"></audio>
@@ -44,7 +58,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
-import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular } from '@vicons/fluent'
+import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled } from '@vicons/fluent'
 import { usePlayerStore } from '@/store/player';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { LogoGithub } from '@vicons/ionicons4'
@@ -54,7 +68,8 @@ const globalPlayer = usePlayerStore()
 const audio = ref(null)
 
 const state = reactive({
-  isLoading: false,
+  isLoading: false, // 歌曲是否正在加载
+  showPlaylist: false,
   playlist: [],
   isProgressDrag: false,
   progressVal: 0,
@@ -157,6 +172,10 @@ const timeFormatter = (value) => {
   const second = Math.floor(value % 60)
   return `${minute}:${second < 10 ? '0' + second : second}`
 }
+// 切换播放列表显隐
+function togglePlaylist() {
+  state.showPlaylist = !state.showPlaylist
+}
 
 </script>
 
@@ -168,5 +187,13 @@ const timeFormatter = (value) => {
 
 .hidden-playbar {
   bottom: -80px
+}
+
+.player-list {
+  height: 200px;
+  width: 220px;
+  max-height: 320px;
+  max-width: 280px;
+  overflow: hidden;
 }
 </style>
