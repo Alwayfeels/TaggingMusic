@@ -47,7 +47,7 @@ import { NButton, NIcon, useNotification } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
-import { usePlayerStore } from '@/store/player';
+import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
 import { LogoGithub } from '@vicons/ionicons4'
@@ -58,7 +58,7 @@ const route = useRoute()
 const router = useRouter()
 
 // 全局player store
-const globalPlayer = usePlayerStore()
+const globalPlayer = useGlobalPlayer()
 const togglePlayerBar = () => {
   globalPlayer.togglePlayer()
 }

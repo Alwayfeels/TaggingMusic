@@ -7,12 +7,14 @@
 <script setup>
 import { NDataTable, NButton } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive, defineExpose } from "vue";
-import { usePlayerStore } from '@/store/player';
+import { useGlobalPlayer } from '@/store/globalPlayer';
+import { useGlobalData } from '@/store/globalData';
 
 import { NAvatar, NTag } from 'naive-ui'
 import TagInput from '@/components/TagInput.vue'
 
-const globalPlayer = usePlayerStore()
+const globalPlayer = useGlobalPlayer()
+const globalData = useGlobalData()
 defineExpose({ resetPager })
 
 const props = defineProps({
@@ -33,7 +35,7 @@ const tConfig = reactive({
   rowProps: (row) => {
     return {
       onClick: () => {
-        globalPlayer.insertSong(row)
+        globalPlayer.playSong(row)
         globalPlayer.isPlayerShow = true;
       }
     };

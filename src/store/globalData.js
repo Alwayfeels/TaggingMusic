@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import api from "@/api/http";
 import localforage from "localforage";
+import { useGlobalPlayer } from '@/store/globalPlayer';
 // import useProgress from "@/store/progress";
 // naive UI 就算用最新的 2.29.0 版本也会报错
 // import { createDiscreteApi } from "naive-ui";
@@ -16,7 +17,6 @@ export const useGlobalData = defineStore("globalData", {
     user: {}, // 用户信息
     tagList: [], // 标签列表
     taggedSong: [], // 已标记的歌曲列表
-    playerList: [], // 播放列表
     status: {
       updateTagInput: null,
       showMergeDialog: false,
@@ -85,14 +85,27 @@ export const useGlobalData = defineStore("globalData", {
         console.warn('playlistId is required')
         return []
       }
-      let songlist = await localforage.getItem(`songlist_${playlistId}`);
-      if (songlist) {
-        // 筛选需要的key保留到store
-        let needProps = ["id", "name", "al", "ar"];
-        this.songlist = this.filterUsefulProps(songlist, needProps);
-      } else {
-        await this.getRemoteSonglist(playlistId);
+      let songlist = await this.getSonglist({ id: playlistId });
+      // 筛选需要的key保留到store
+      let needProps = ["id", "name", "al", "ar"];
+      songlist = this.filterUsefulProps(songlist, needProps);
+      this.songlist = songlist;
+      return songlist;
+    },
+    // 获取歌单歌曲, 优先从本地获取，使用 force 直接从接口获取
+    // config: {id: Number, force: Boolean}
+    async getSonglist(config) {
+      let { id, force } = config;
+      if (!id) {
+        console.error("getRemoteSonglist error: playlistId is required");
+        return [];
       }
+      if (force) {
+        return await this.getRemoteSonglist(id);
+      }
+      let songlist = await localforage.getItem(`songlist_${id}`);
+      if (songlist) return songlist;
+      return await this.getRemoteSonglist(id);
     },
     // 获取远端用户信息, 返回数据并缓存到store, indexedDB
     async getRemoteUserInfo() {
@@ -151,21 +164,6 @@ export const useGlobalData = defineStore("globalData", {
       }
       localforage.setItem(`songlist_${playlistId}`, songlist);
       return songlist;
-    },
-    // 获取歌单歌曲
-    // config: {id: Number, force: Boolean}
-    async getSonglist(config) {
-      let { id, force } = config;
-      if (!id) {
-        console.error("getRemoteSonglist error: playlistId is required");
-        return [];
-      }
-      if (force) {
-        return await this.getRemoteSonglist(id);
-      }
-      let songlist = await localforage.getItem(`songlist_${id}`);
-      if (songlist) return songlist;
-      return await this.getRemoteSonglist(id);
     },
     // 导出TaggedSong
     async exportTaggedSong() {

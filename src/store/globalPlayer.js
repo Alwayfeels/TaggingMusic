@@ -1,11 +1,9 @@
 import { defineStore } from "pinia";
 import api from '@/api/http'
-// import { useGlobalData } from '@/store/globalData';
+import { useGlobalData } from '@/store/globalData';
+import { computed } from 'vue';
 
-// // 全局数据中心
-// const globalData = useGlobalData()
-
-export const usePlayerStore = defineStore("player", {
+export const useGlobalPlayer = defineStore("globalPlayer", {
   state: () => {
     return {
       isPlay: false, // 是否正在播放
@@ -14,7 +12,9 @@ export const usePlayerStore = defineStore("player", {
       duration: 0, // 歌曲总时长
       isPlayerShow: false, // 播放器是否显示
       currPlayIndex: null, // 当前播放歌曲索引
-      playerList: [], // 播放列表
+      playerList: computed(() => {
+        return useGlobalData().songlist;
+      }), // 播放列表
     };
   },
   getters: {
@@ -27,29 +27,25 @@ export const usePlayerStore = defineStore("player", {
     }
   },
   actions: {
-    // setCurrentSong(song) {
-    //   this.setPlayerList(song)
-    // },
-    // setPlayerList(playerList) {
-    //   this.playerList = [playerList]
-    // },
-    // 插入歌曲并播放
-    async insertSong(song) {
-      let insertIndex = this.currPlayIndex || 0;
+    initPlayerList(songlist) {
+      this.playerList = songlist
+    },
+    // 歌曲
+    async playSong(song) {
       let id = song.id
-      if (this.currPlayIndex != null) { 
-        this.playerList.unshift(song);
-        this.currPlayIndex = 0
-      } else {
-        // 将insert的歌曲插入到当前播放歌曲之前
+      let index = this.playerList.findIndex(item => item.id === id)
+      if (index < 0) {
+        index = this.currPlayIndex || 0;
         this.playerList.splice(this.currPlayIndex, 0, song);
+      } else {
+        this.currPlayIndex = index;
       }
-      let readySong = await this.getSongUrl(song) // 带有url属性
-      this.playerList[insertIndex] = readySong;
+      let readySong = await this.getSongUrl(song) // 添加url属性
+      this.playerList[index] = readySong;
     },
     async pushSong(song) {
       let readySong = await this.getSongUrl(song) // 带有url属性
-      if (this.currPlayIndex != null) { 
+      if (this.currPlayIndex != null) {
         this.playerList.unshift(readySong);
         this.currPlayIndex = 0
       } else {
@@ -63,20 +59,33 @@ export const usePlayerStore = defineStore("player", {
       song.url = songUrl // ready to play
       return song
     },
-    showLoading() {
-      this.loading = true
-    }, 
-    hideLoading() {
-      this.loading = false
-    },
     async addPlaySong(song) {
       const res = await api.getRemote('/song/url', { id: song.id, br: 320000 })
       let songUrl = res.data[0].url
       song.url = songUrl
-      this.playerList.push(song);
+      let isSongExist = this.playerList.some(item => item.id === song.id);
+      if (isSongExist) {
+        const index = this.playerList.findIndex(item => item.id === song.id);
+        this.currPlayIndex = index;
+      } else {
+        this.playerList.push(song);
+      }
       if (this.playerList.length > 0) {
         this.isPlayerShow = true
       }
+    },
+    // removePlayerList(id) {
+    //   if (!id) {
+    //     console.error('removePlayerList id is required')
+    //     return false;
+    //   }
+    //   this.playerList = this.playerList.filter(item => item.id != id)
+    // },
+    showLoading() {
+      this.loading = true
+    },
+    hideLoading() {
+      this.loading = false
     },
     play() {
       this.isPlay = true

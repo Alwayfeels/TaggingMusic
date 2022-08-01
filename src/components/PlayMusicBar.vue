@@ -32,8 +32,7 @@
       </div>
       <!-- 音量 -->
       <div class="volume ml-32 flex w-36 items-center">
-        <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent"
-          @click="state.isMute = !state.isMute" />
+        <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent" @click="state.volume = 0" />
         <n-slider v-model:value="state.volume" :max="100" :step="1" />
       </div>
       <!-- 播放列表 -->
@@ -42,15 +41,23 @@
           <n-icon class="cursor-pointer ml-4" size="24" :component="TextBulletListLtr24Filled"
             @click="togglePlaylist" />
         </template>
-        <div class="w-full pb-1 mb-1" style="border-bottom: 1px solid #ccc">播放列表</div>
-        <div class="player-list w-full">
-          <div class="flex w-full hover:bg-gray-100 mb-2" v-for="item in globalPlayer.playerList" :key="item.id">
-            <div class="pl-1 flex-1 text-gray-500">{{ item.name }}</div>
-            <div class="pr-1 text-red-400 justify-items-end cursor-pointer hover:underline">删除</div>
-          </div>
+        <div class="w-full p-1 mb-1">播放列表</div>
+        <div class="player-list w-full pt-1">
+          <n-scrollbar style="max-height: 200px">
+            <div class="flex w-full items-center cursor-pointer hover:bg-gray-100 box-border p-2 mr-2"
+              v-for="(item, index) in state.playerlist" :key="item.id" @click="onPlaylistClick(index)">
+              <n-icon v-if="globalPlayer.currPlaySong.id === item.id" color="#18a058" :size="16"
+                :component="Play12Filled" />
+              <div class="pl-1 flex-1 text-gray-500 leading-4">{{ item.name }}</div>
+              <!-- <div class="pr-2 text-red-400 justify-items-end leading-4 hover:underline"
+                @click="onRemovePlaylist(item)">
+                删除</div> -->
+            </div>
+          </n-scrollbar>
         </div>
       </n-popover>
     </div>
+    <!-- 播放器实例 -->
     <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause"
       @timeupdate="timeupdate" @play="play" style="display: none"></audio>
   </div>
@@ -58,19 +65,26 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
-import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled } from '@vicons/fluent'
-import { usePlayerStore } from '@/store/player';
+import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled, Play12Filled } from '@vicons/fluent'
+import { useGlobalPlayer } from '@/store/globalPlayer';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { LogoGithub } from '@vicons/ionicons4'
 import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
 
-const globalPlayer = usePlayerStore()
+const globalPlayer = useGlobalPlayer()
 const audio = ref(null)
 
 const state = reactive({
   isLoading: false, // 歌曲是否正在加载
   showPlaylist: false,
-  playlist: [],
+  playerlist: computed(() => {
+    let currPlayIndex = globalPlayer.currPlayIndex;
+    if (currPlayIndex < 3) {
+      return globalPlayer.playerList.slice(0, 10);
+    } else {
+      return globalPlayer.playerList.slice(currPlayIndex - 3, currPlayIndex + 7);
+    }
+  }), // 播放列表
   isProgressDrag: false,
   progressVal: 0,
   currentTime: computed({
@@ -86,9 +100,8 @@ const state = reactive({
     }
   }),
   volume: 100, // max 100
-  isMute: false,
   volumeComponent: computed(() => {
-    if (state.isMute) return IosVolumeOff
+    if (state.volume === 0) return IosVolumeOff
     if (state.volume < 25) return IosVolumeMute
     if (state.volume < 65) return IosVolumeLow
     return IosVolumeHigh
@@ -105,13 +118,6 @@ const processInfo = computed(() => {
 // 控制音量大小
 watch(() => state.volume, (val) => {
   audio.value.volume = val / 100
-})
-watch(() => state.isMute, (val) => {
-  if (val === true) {
-    audio.value.volume = 0
-  } else {
-    audio.value.volume = state.volume / 100
-  }
 })
 
 watch(() => globalPlayer.currPlaySong, (song) => {
@@ -176,7 +182,15 @@ const timeFormatter = (value) => {
 function togglePlaylist() {
   state.showPlaylist = !state.showPlaylist
 }
-
+// 删除播放列表歌曲
+// function onRemovePlaylist(item) {
+//   globalPlayer.removePlayerList(item.id)
+// }
+// 点击播放列表
+function onPlaylistClick(index) {
+  let song = state.playerlist[index];
+  globalPlayer.playSong(song)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -190,10 +204,9 @@ function togglePlaylist() {
 }
 
 .player-list {
+  border-top: 1px solid rgba($color: #cccccc, $alpha: 0.5);
   height: 200px;
-  width: 220px;
-  max-height: 320px;
-  max-width: 280px;
+  width: 280px;
   overflow: hidden;
 }
 </style>

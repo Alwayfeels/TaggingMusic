@@ -28,7 +28,7 @@ import SongTable from '@/components/SongTable.vue';
 import { h, onMounted, reactive, ref, shallowRef, computed } from 'vue';
 import { directive } from 'vue3-menus';
 import { NMenu, NLayout, NLayoutContent, NSpin, NLayoutSider, NScrollbar } from 'naive-ui';
-import { usePlayerStore } from '@/store/player';
+import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
 import Unlogin from '../components/Unlogin.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
@@ -36,11 +36,12 @@ import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
 import MergePlaylistDialog from '@/components/MergePlaylistDialog.vue';
 import { useNotification } from 'naive-ui'
 
+
 window.$notification = useNotification()
 // 全局数据中心
 const globalData = useGlobalData()
 // 全局player store
-const globalPlayer = usePlayerStore()
+const globalPlayer = useGlobalPlayer()
 
 const state = reactive({
   isLogin: computed(() => Boolean(globalData.user.id)),
@@ -95,17 +96,17 @@ const menus = reactive({
         state.showTaggingPlaylistDialog = true
       }
     }, {
-    //   label: "应用配置",
-    //   divided: true,
-    //   children: [
-    //     {
-    //       label: '在 tag 失焦后如何处理标签',
-    //       tip: globalData.removeTagOnBlur ? '删除' : '保留',
-    //       click: () => {
-    //         globalData.toggleRemoveTagOnBlur()
-    //       }
-    //     }
-    //   ]
+      //   label: "应用配置",
+      //   divided: true,
+      //   children: [
+      //     {
+      //       label: '在 tag 失焦后如何处理标签',
+      //       tip: globalData.removeTagOnBlur ? '删除' : '保留',
+      //       click: () => {
+      //         globalData.toggleRemoveTagOnBlur()
+      //       }
+      //     }
+      //   ]
     }
   ]
 })
