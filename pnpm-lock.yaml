@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@vicons/fluent': ^0.12.0
   '@vicons/ionicons4': ^0.12.0
+  '@vicons/tabler': ^0.12.0
   '@vicons/utils': ^0.1.4
   '@vitejs/plugin-vue': ^2.3.3
   '@vueuse/core': ^8.6.0
@@ -39,6 +40,7 @@ dependencies:
 
 devDependencies:
   '@vicons/fluent': 0.12.0
+  '@vicons/tabler': 0.12.0
   '@vicons/utils': 0.1.4_vue@3.2.36
   '@vitejs/plugin-vue': 2.3.3_vite@2.9.9+vue@3.2.36
   autoprefixer: 10.4.7_postcss@8.4.14
@@ -193,6 +195,10 @@ packages:
   /@vicons/ionicons4/0.12.0:
     resolution: {integrity: sha512-i+7YwlpCrqD6m9esbZLy1bpVQlh4CKugtS3OzgfNw6BLTQQK6HT7drktaJgcESj/BTr4avdNbAtMQXx56wSVMg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npm.taobao.org/@vicons/ionicons4/-/ionicons4-0.12.0.tgz}
     dev: false
+
+  /@vicons/tabler/0.12.0:
+    resolution: {integrity: sha512-3+wUFuxb7e8OzZ8Wryct1pzfA2vyoF4lwW98O9s27ZrfCGaJGNmqG+q8A7vQ92Mf+COCgxpK+rhNPTtTvaU6qw==}
+    dev: true
 
   /@vicons/utils/0.1.4_vue@3.2.36:
     resolution: {integrity: sha512-OHI19qVNN6i+uPQ+Y3f2s0dUxwsYnOCcKBW7XOU4yXXO1aU3ZoKpblCc3+4N0qmgoJs5rWKRAaMisipqEXJwAg==}

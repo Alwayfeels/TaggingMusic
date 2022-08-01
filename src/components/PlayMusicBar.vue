@@ -32,7 +32,7 @@
       </div>
       <!-- 音量 -->
       <div class="volume ml-32 flex w-36 items-center">
-        <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent" @click="state.volume = 0" />
+        <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent" @click="onVolumnMute" />
         <n-slider v-model:value="state.volume" :max="100" :step="1" />
       </div>
       <!-- 播放列表 -->
@@ -43,7 +43,7 @@
         </template>
         <div class="w-full p-1 mb-1">播放列表</div>
         <div class="player-list w-full pt-1">
-          <n-scrollbar style="max-height: 200px">
+          <n-scrollbar style="max-height: 300px">
             <div class="flex w-full items-center cursor-pointer hover:bg-gray-100 box-border p-2 mr-2"
               v-for="(item, index) in state.playerlist" :key="item.id" @click="onPlaylistClick(index)">
               <n-icon v-if="globalPlayer.currPlaySong.id === item.id" color="#18a058" :size="16"
@@ -56,6 +56,8 @@
           </n-scrollbar>
         </div>
       </n-popover>
+      <!-- 播放模式 -->
+      <n-icon class="cursor-pointer ml-4" size="24" :component="state.playModeComponent" @click="onPlayModeChange" />
     </div>
     <!-- 播放器实例 -->
     <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause"
@@ -65,25 +67,31 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
-import { Next24Filled, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled, Play12Filled } from '@vicons/fluent'
+import { ArrowRepeatAll16Regular, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled, Play12Filled } from '@vicons/fluent'
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
-import { LogoGithub } from '@vicons/ionicons4'
+import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
 
 const globalPlayer = useGlobalPlayer()
 const audio = ref(null)
 
+const playMode = {
+  'sequence': ArrowRepeatAll16Regular,
+  'loop': RepeatOnce,
+  'random': ArrowsShuffle
+}
 const state = reactive({
   isLoading: false, // 歌曲是否正在加载
   showPlaylist: false,
   playerlist: computed(() => {
-    let currPlayIndex = globalPlayer.currPlayIndex;
-    if (currPlayIndex < 3) {
-      return globalPlayer.playerList.slice(0, 10);
-    } else {
-      return globalPlayer.playerList.slice(currPlayIndex - 3, currPlayIndex + 7);
-    }
+    return globalPlayer.playerList;
+    // let currPlayIndex = globalPlayer.currPlayIndex;
+    // if (currPlayIndex < 3) {
+    //   return globalPlayer.playerList.slice(0, 10);
+    // } else {
+    //   return globalPlayer.playerList.slice(currPlayIndex - 3, currPlayIndex + 7);
+    // }
   }), // 播放列表
   isProgressDrag: false,
   progressVal: 0,
@@ -100,6 +108,11 @@ const state = reactive({
     }
   }),
   volume: 100, // max 100
+  beforeVolumn: 100,
+  playMode: 'sequence', // 播放模式
+  playModeComponent: computed(() => {
+    return playMode[state.playMode]
+  }),
   volumeComponent: computed(() => {
     if (state.volume === 0) return IosVolumeOff
     if (state.volume < 25) return IosVolumeMute
@@ -132,6 +145,21 @@ watch(() => globalPlayer.currPlaySong, (song) => {
   }
 }, { immediate: true, deep: true })
 
+
+function onPlayModeChange() {
+  let playMode = ['sequence', 'loop', 'random'];
+  let index = playMode.indexOf(state.playMode);
+  index = (index + 1) % playMode.length;
+  state.playMode = playMode[index];
+}
+function onVolumnMute() {
+  if (state.volume === 0) {
+    state.volume = state.beforeVolumn
+  } else {
+    state.beforeVolumn = state.volume
+    state.volume = 0
+  }
+}
 function dragHandler(val) {
   state.progressVal = val
 }
@@ -163,14 +191,36 @@ const getDuration = () => {
 }
 /**
  * 更新当前时间
- * 如果当前音频进度 = 总时长，则自动播放下一首
+ * 如果当前音频进度 = 总时长，则自动播放下一首(根据 playMode)
  */
 const timeupdate = (e) => {
+  console.log('e=====', e)
   globalPlayer.currentTime = e.target.currentTime;
   // if (e.target.currentTime === player.endTime) {
-  //   nextPlay();
+  //   playNext();
   // }
 };
+/** 
+ * @desc 根据播放模式播放下一首
+ * @params {  } 
+ */
+function playNext() {
+  const playMode = state.playMode;
+  // let playMode = ['sequence', 'loop', 'random'];
+  if (playMode === 'sequence') {
+    let index = globalPlayer.currPlayIndex + 1;
+    if (state.playerlist.length > index) {
+      let song = state.playerList[index]
+      globalPlayer.playSong(song) 
+    }
+  } else if (playMode === 'loop') {
+    play();
+  } else if (playMode === 'random') {
+    let index = Math.floor(Math.random() * state.playerlist.length);
+    let song = state.playerList[index]
+    globalPlayer.playSong(song)
+  }
+}
 
 const timeFormatter = (value) => {
   if (value === 0) return '00:00'
@@ -205,7 +255,6 @@ function onPlaylistClick(index) {
 
 .player-list {
   border-top: 1px solid rgba($color: #cccccc, $alpha: 0.5);
-  height: 200px;
   width: 280px;
   overflow: hidden;
 }

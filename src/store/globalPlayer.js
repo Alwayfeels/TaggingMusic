@@ -30,7 +30,10 @@ export const useGlobalPlayer = defineStore("globalPlayer", {
     initPlayerList(songlist) {
       this.playerList = songlist
     },
-    // 歌曲
+    /** 
+     * @desc 播放歌曲
+     * @params song: {id} 
+     */
     async playSong(song) {
       let id = song.id
       let index = this.playerList.findIndex(item => item.id === id)
