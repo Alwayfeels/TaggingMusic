@@ -11,12 +11,12 @@
       <!-- 播放控制 -->
       <div class="ml-4 flex items-center">
         <!-- <n-icon size="24" class="cursor-not-allowed" :component="Previous24Filled" @click="play" /> -->
-        <n-spin :show="state.isLoading">
+        <n-spin :show="globalPlayer.loading">
           <n-icon-wrapper :size="48" :border-radius="48">
             <n-icon class="cursor-pointer" v-if="globalPlayer.isPlay" :size="24" :component="Pause48Filled"
-              @click="pause" />
+              @click="audioPause" />
             <n-icon v-else :class="globalPlayer.currPlaySong ? 'cursor-pointer' : 'cursor-not-allowed'" :size="24"
-              :component="Play48Filled" @click="play" />
+              :component="Play48Filled" @click="audioPlay" />
           </n-icon-wrapper>
         </n-spin>
         <!-- <n-icon size="24" class="cursor-not-allowed" :component="Next24Filled" /> -->
@@ -36,16 +36,18 @@
         <n-slider v-model:value="state.volume" :max="100" :step="1" />
       </div>
       <!-- 播放列表 -->
-      <n-popover trigger="click">
+      <n-popover trigger="click" :to="false" display-directive="show">
         <template #trigger>
-          <n-icon class="cursor-pointer ml-4" size="24" :component="TextBulletListLtr24Filled"
-            @click="togglePlaylist" />
+          <n-icon class="cursor-pointer ml-4" size="24" :component="TextBulletListLtr24Filled" />
         </template>
-        <div class="w-full p-1 mb-1">播放列表</div>
+        <div class="w-full p-1 mb-1 flex justify-between">
+          <div>播放列表</div>
+          <div class="text-green-800 hover:underline cursor-pointer" @click="setPlaylistScrollTop">跳转到播放歌曲</div>
+        </div>
         <div class="player-list w-full pt-1">
-          <n-scrollbar style="max-height: 300px">
+          <n-scrollbar ref="playerlistRef" style="max-height: 300px">
             <div class="flex w-full items-center cursor-pointer hover:bg-gray-100 box-border p-2 mr-2"
-              v-for="(item, index) in state.playerlist" :key="item.id" @click="onPlaylistClick(index)">
+              v-for="(item, index) in globalPlayer.playerList" :key="item.id" @click="onPlaylistClick(index)">
               <n-icon v-if="globalPlayer.currPlaySong.id === item.id" color="#18a058" :size="16"
                 :component="Play12Filled" />
               <div class="pl-1 flex-1 text-gray-500 leading-4">{{ item.name }}</div>
@@ -57,11 +59,18 @@
         </div>
       </n-popover>
       <!-- 播放模式 -->
-      <n-icon class="cursor-pointer ml-4" size="24" :component="state.playModeComponent" @click="onPlayModeChange" />
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <n-icon class="cursor-pointer ml-4" size="24" :component="state.playModeComponent"
+            @click="onPlayModeChange" />
+        </template>
+        {{ state.playMode }}
+      </n-tooltip>
+
     </div>
     <!-- 播放器实例 -->
-    <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="pause"
-      @timeupdate="timeupdate" @play="play" style="display: none"></audio>
+    <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="audioPause"
+      @timeupdate="timeupdate" @play="audioPlay" style="display: none" :loop="state.playMode === '单曲循环'"></audio>
   </div>
 </template>
 
@@ -77,22 +86,14 @@ const globalPlayer = useGlobalPlayer()
 const audio = ref(null)
 
 const playMode = {
-  'sequence': ArrowRepeatAll16Regular,
-  'loop': RepeatOnce,
-  'random': ArrowsShuffle
+  '顺序播放': ArrowRepeatAll16Regular,
+  '单曲循环': RepeatOnce,
+  '随机播放': ArrowsShuffle
 }
 const state = reactive({
-  isLoading: false, // 歌曲是否正在加载
-  showPlaylist: false,
-  playerlist: computed(() => {
-    return globalPlayer.playerList;
-    // let currPlayIndex = globalPlayer.currPlayIndex;
-    // if (currPlayIndex < 3) {
-    //   return globalPlayer.playerList.slice(0, 10);
-    // } else {
-    //   return globalPlayer.playerList.slice(currPlayIndex - 3, currPlayIndex + 7);
-    // }
-  }), // 播放列表
+  // playerlist: computed(() => {
+  //   return globalPlayer.playerList;
+  // }), // 播放列表
   isProgressDrag: false,
   progressVal: 0,
   currentTime: computed({
@@ -109,7 +110,7 @@ const state = reactive({
   }),
   volume: 100, // max 100
   beforeVolumn: 100,
-  playMode: 'sequence', // 播放模式
+  playMode: '顺序播放', // 播放模式
   playModeComponent: computed(() => {
     return playMode[state.playMode]
   }),
@@ -121,37 +122,22 @@ const state = reactive({
   }),
 })
 
-// 播放进度文字格式化
-const processInfo = computed(() => {
-  const curr = timeFormatter(Math.floor(state.currentTime))
-  const dura = timeFormatter(Math.floor(globalPlayer.duration))
-  return `${curr} / ${dura}`
-})
+// watch(() => globalPlayer.currPlaySong, (song) => {
+//   if (!song) {
+//   } else if (song.url) {
+//     nextTick(() => {
+//       audioPlay()
+//     })
+//   }
+// }, { immediate: true, deep: true })
 
-// 控制音量大小
+/** 
+ * @desc 音量控制
+ * @params {  } 
+ */
 watch(() => state.volume, (val) => {
   audio.value.volume = val / 100
 })
-
-watch(() => globalPlayer.currPlaySong, (song) => {
-  if (!song) {
-  } else if (song.url) {
-    state.isLoading = false
-    nextTick(() => {
-      play()
-    })
-  } else {
-    state.isLoading = true
-  }
-}, { immediate: true, deep: true })
-
-
-function onPlayModeChange() {
-  let playMode = ['sequence', 'loop', 'random'];
-  let index = playMode.indexOf(state.playMode);
-  index = (index + 1) % playMode.length;
-  state.playMode = playMode[index];
-}
 function onVolumnMute() {
   if (state.volume === 0) {
     state.volume = state.beforeVolumn
@@ -160,6 +146,26 @@ function onVolumnMute() {
     state.volume = 0
   }
 }
+/** 
+ * @desc 播放进度条下方 时间格式化
+ * @params {  } 
+ */
+const processInfo = computed(() => {
+  const curr = timeFormatter(Math.floor(state.currentTime))
+  const dura = timeFormatter(Math.floor(globalPlayer.duration))
+  return `${curr} / ${dura}`
+})
+// 时间格式化
+const timeFormatter = (value) => {
+  if (value === 0) return '00:00'
+  const minute = Math.floor(value / 60)
+  const second = Math.floor(value % 60)
+  return `${minute}:${second < 10 ? '0' + second : second}`
+}
+/** 
+ * @desc 播放进度条 拖动处理
+ * @params {  } 
+ */
 function dragHandler(val) {
   state.progressVal = val
 }
@@ -171,18 +177,45 @@ function dragHandlerEnd() {
   audio.value.currentTime = state.progressVal
   state.isProgressDrag = false
 }
-function play() {
+/** 
+ * @desc currPlaySong 改变时，更新 audio src
+ * @params {  } 
+ */
+watch(() => globalPlayer.currPlayIndex, (val) => {
+  if (val && !globalPlayer.currPlaySong.unable) {
+    audioPlay()
+  }
+}, { deep: true })
+/** 
+ * @desc Audio播放器 播放/暂停 事件
+ * @params {  } 
+ */
+async function audioPlay() {
   if (globalPlayer.currPlaySong?.url) {
-    globalPlayer.isPlay = true;
     audio.value?.play()
+    globalPlayer.isPlay = true;
+    return true;
+  }
+  if (globalPlayer.currPlaySong?.unable) {
+    window.$notification.error({
+      title: "该歌曲暂时无法播放",
+      duration: 3000
+    })
+    return false;
+  }
+  let canPlay = await globalPlayer.loadCurrPlaySong();
+  if (canPlay) {
+    audio.value?.play()
+    globalPlayer.isPlay = true;
   }
 }
-function pause() {
+
+function audioPause() {
   globalPlayer.isPlay = false;
   audio.value?.pause()
 }
 /**
- * 获取音乐时长
+ * @desc 获取音乐时长
  */
 const getDuration = () => {
   // 此时可以拿到音频时长（audio.value.duration）;
@@ -190,56 +223,53 @@ const getDuration = () => {
   globalPlayer.duration = audio.value.duration;
 }
 /**
- * 更新当前时间
+ * @desc 更新当前时间
  * 如果当前音频进度 = 总时长，则自动播放下一首(根据 playMode)
  */
 const timeupdate = (e) => {
-  console.log('e=====', e)
   globalPlayer.currentTime = e.target.currentTime;
-  // if (e.target.currentTime === player.endTime) {
-  //   playNext();
-  // }
+  if (e.target.currentTime >= globalPlayer.duration) {
+    setNextIndex();
+  }
 };
 /** 
  * @desc 根据播放模式播放下一首
  * @params {  } 
  */
-function playNext() {
+function setNextIndex() {
   const playMode = state.playMode;
-  // let playMode = ['sequence', 'loop', 'random'];
-  if (playMode === 'sequence') {
-    let index = globalPlayer.currPlayIndex + 1;
-    if (state.playerlist.length > index) {
-      let song = state.playerList[index]
-      globalPlayer.playSong(song) 
-    }
-  } else if (playMode === 'loop') {
-    play();
-  } else if (playMode === 'random') {
-    let index = Math.floor(Math.random() * state.playerlist.length);
-    let song = state.playerList[index]
-    globalPlayer.playSong(song)
+  if (playMode === '顺序播放') {
+    let index = (globalPlayer.currPlayIndex + 1) % globalPlayer.playerList.length;
+    globalPlayer.setPlayIndex(index);
+  } else if (playMode === '随机播放') {
+    let index = Math.floor(Math.random() * globalPlayer.playerList.length);
+    globalPlayer.setPlayIndex(index);
   }
 }
 
-const timeFormatter = (value) => {
-  if (value === 0) return '00:00'
-  const minute = Math.floor(value / 60)
-  const second = Math.floor(value % 60)
-  return `${minute}:${second < 10 ? '0' + second : second}`
-}
-// 切换播放列表显隐
-function togglePlaylist() {
-  state.showPlaylist = !state.showPlaylist
-}
-// 删除播放列表歌曲
-// function onRemovePlaylist(item) {
-//   globalPlayer.removePlayerList(item.id)
-// }
-// 点击播放列表
+/** 
+ * @desc 播放列表相关
+ * @params {  } 
+ */
+// 点击播放列表切歌
+const playerlistRef = ref()
 function onPlaylistClick(index) {
-  let song = state.playerlist[index];
-  globalPlayer.playSong(song)
+  globalPlayer.setPlayIndex(index)
+}
+function setPlaylistScrollTop() {
+  let scrollTop = globalPlayer.currPlayIndex * 32;
+  playerlistRef.value.scrollTo({ top: scrollTop })
+}
+
+/** 
+ * @desc 播放模式相关
+ * @params {  } 
+ */
+function onPlayModeChange() {
+  let playMode = ['顺序播放', '单曲循环', '随机播放'];
+  let index = playMode.indexOf(state.playMode);
+  index = (index + 1) % playMode.length;
+  state.playMode = playMode[index];
 }
 </script>
 

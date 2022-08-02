@@ -35,8 +35,8 @@ const tConfig = reactive({
   rowProps: (row) => {
     return {
       onClick: () => {
-        globalPlayer.playSong(row)
-        globalPlayer.isPlayerShow = true;
+        let index = globalPlayer.playerList.findIndex(item => item.id === row.id)
+        globalPlayer.setPlayIndex(index)
       }
     };
   }
