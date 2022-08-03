@@ -141,11 +141,11 @@ const songTableColumns = [
     -webkit-animation: Gradient 15s linear infinite;
     -moz-animation: Gradient 15s linear infinite;
     animation: Gradient 15s linear infinite;
-    // animation-play-state: paused;
+    animation-play-state: paused;
   }
 
   :deep(.song-playing) {
-    // animation-play-state: running;
+    animation-play-state: running;
   }
 
   // 消除默认白底样式
