@@ -4,10 +4,10 @@
     <div class="text-2xl cursor-pointer" @click="toEntry">Tagging Music</div>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <!-- 搜索 -->
-    <!-- <div v-if="state.showControlBtn" class="mx-8 flex-1 flex justify-center">
-      <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索音乐 / 专辑 / 歌手"
+    <div v-if="state.showControlBtn" class="mx-8 flex-1 flex justify-center">
+      <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索表格中的音乐 / 专辑 / 歌手"
         @keypress.enter="searchHandler" />
-    </div> -->
+    </div>
     <div class="ml-auto flex items-center">
       <!--用户 -->
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">

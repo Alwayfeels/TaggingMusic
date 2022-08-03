@@ -173,6 +173,10 @@ const songTableColumns = [
   padding: 18px;
 }
 
+:deep(.n-data-table__pagination) {
+  padding-right: 80px;
+}
+
 @-webkit-keyframes Gradient {
   0% {
     background-position: 0% 50%

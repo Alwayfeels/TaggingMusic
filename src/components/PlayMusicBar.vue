@@ -1,7 +1,7 @@
 <template>
   <div class="play-bar  w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
     <div class="bookmark flex items-center justify-center absolute cursor-pointer" @click="globalPlayer.togglePlayer">
-      <n-icon :component="globalPlayer.isPlayerShow ? CaretDown24Filled : CaretUp24Filled"/>
+      <n-icon :component="globalPlayer.isPlayerShow ? CaretDown24Filled : CaretUp24Filled" />
     </div>
     <div class="w-full h-full px-10 flex items-center justify-center">
       <!-- 歌曲信息 -->
@@ -205,6 +205,7 @@ watch(() => globalPlayer.currPlayIndex, (val) => {
 async function audioPlay() {
   if (globalPlayer.currPlaySong?.url) {
     audio.value?.play()
+    state.isPlaying = true;
     globalPlayer.isPlaying = true;
     return true;
   }
@@ -218,12 +219,14 @@ async function audioPlay() {
   let canPlay = await globalPlayer.loadCurrPlaySong();
   if (canPlay) {
     audio.value?.play()
+    state.isPlaying = true;
     globalPlayer.isPlaying = true;
   }
 }
 
 function audioPause() {
   audio.value?.pause()
+  state.isPlaying = false;
   globalPlayer.isPlaying = false;
 }
 /**
@@ -290,6 +293,7 @@ function onPlayModeChange() {
   transition: bottom 0.5s ease-out;
   box-shadow: 0 0 10px rgba($color: #000000, $alpha: 0.1);
   z-index: 1000;
+  background-color: #ffffff;
 }
 
 .hidden-playbar {
