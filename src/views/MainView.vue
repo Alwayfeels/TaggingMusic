@@ -78,12 +78,6 @@ const menus = reactive({
         }
       }
     }, {
-      label: '显示/隐藏播放器',
-      tip: '',
-      click: () => {
-        globalPlayer.togglePlayer()
-      }
-    }, {
       label: '选择 tag 导入到当前歌单',
       tip: '',
       click: () => {

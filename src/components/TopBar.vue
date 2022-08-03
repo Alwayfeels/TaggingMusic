@@ -18,10 +18,6 @@
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
       <!--控制台 -->
-      <n-button v-if="state.showControlBtn" class="mr-2" secondary size="large" strong type="success"
-        @click="togglePlayerBar">
-        {{ globalPlayer.isPlayerShow ? '隐藏播放器' : '显示播放器' }}
-      </n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="globalData.toggleRemoveTagOnBlur">{{ globalData.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}</n-button>
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
@@ -56,12 +52,6 @@ import { LogoGithub } from '@vicons/ionicons4'
 const globalData = useGlobalData()
 const route = useRoute()
 const router = useRouter()
-
-// 全局player store
-const globalPlayer = useGlobalPlayer()
-const togglePlayerBar = () => {
-  globalPlayer.togglePlayer()
-}
 
 const notification = useNotification()
 const state = reactive({

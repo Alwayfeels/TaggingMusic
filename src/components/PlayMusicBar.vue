@@ -1,7 +1,7 @@
 <template>
   <div class="play-bar  w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
-    <div class="bookmark flex items-center justify-center absolute cursor-pointer">
-      <n-icon :component="globalPlayer.isPlayerShow ? CaretDown24Filled : CaretUp24Filled" @click="globalPlayer.isPlayerShow = !globalPlayer.isPlayerShow" />
+    <div class="bookmark flex items-center justify-center absolute cursor-pointer" @click="globalPlayer.togglePlayer">
+      <n-icon :component="globalPlayer.isPlayerShow ? CaretDown24Filled : CaretUp24Filled"/>
     </div>
     <div class="w-full h-full px-10 flex items-center justify-center">
       <!-- 歌曲信息 -->
