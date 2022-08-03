@@ -6,7 +6,7 @@ import { computed } from 'vue';
 export const useGlobalPlayer = defineStore("globalPlayer", {
   state: () => {
     return {
-      isPlay: false, // 是否正在播放
+      isPlaying: false, // 是否正在播放
       loading: false, // 是否正在加载歌曲
       currentTime: 0, // 当前播放时间
       duration: 0, // 歌曲总时长
@@ -36,9 +36,9 @@ export const useGlobalPlayer = defineStore("globalPlayer", {
         return false
       }
       this.currPlayIndex = index
-      if (this.playerList[index].unable) {
+      if (this.playerList[index].is404) {
         window.$notification.error({
-          title: `「${this.currPlaySong.name}」 暂时无法播放`,
+          title: `「${this.currPlaySong.name}」 暂无音源`,
           duration: 3000
         })
       }
@@ -66,7 +66,7 @@ export const useGlobalPlayer = defineStore("globalPlayer", {
         this.playerList[index].unable = true;
         // 暂无权限
         window.$notification.error({
-          title: `「${this.currPlaySong.name}」 暂时无法播放`,
+          title: `「${this.currPlaySong.name}」 暂无音源`,
           duration: 3000
         })
         return false;
@@ -119,10 +119,10 @@ export const useGlobalPlayer = defineStore("globalPlayer", {
       this.loading = false
     },
     play() {
-      this.isPlay = true
+      this.isPlaying = true
     },
     pause() {
-      this.isPlay = false
+      this.isPlaying = false
     },
     showPlayer() {
       this.isPlayerShow = true;

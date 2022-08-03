@@ -85,7 +85,7 @@ export const useGlobalData = defineStore("globalData", {
         console.warn('playlistId is required')
         return []
       }
-      let songlist = await this.getSonglist({ id: playlistId });
+      let songlist = await this.getSonglist({ playlistId });
       // 筛选需要的key保留到store
       let needProps = ["id", "name", "al", "ar"];
       songlist = this.filterUsefulProps(songlist, needProps);
@@ -95,17 +95,20 @@ export const useGlobalData = defineStore("globalData", {
     // 获取歌单歌曲, 优先从本地获取，使用 force 直接从接口获取
     // config: {id: Number, force: Boolean}
     async getSonglist(config) {
-      let { id, force } = config;
-      if (!id) {
+      let { playlistId, force, setStore = false } = config;
+      if (!playlistId) {
         console.error("getRemoteSonglist error: playlistId is required");
         return [];
       }
       if (force) {
-        return await this.getRemoteSonglist(id);
+        return await this.getRemoteSonglist({ playlistId, setStore });
       }
-      let songlist = await localforage.getItem(`songlist_${id}`);
-      if (songlist) return songlist;
-      return await this.getRemoteSonglist(id);
+      let songlist = await localforage.getItem(`songlist_${playlistId}`);
+      if (songlist) {
+        this.songlist = songlist;
+        return songlist;
+      }
+      return await this.getRemoteSonglist({ playlistId, setStore });
     },
     // 获取远端用户信息, 返回数据并缓存到store, indexedDB
     async getRemoteUserInfo() {
@@ -147,8 +150,9 @@ export const useGlobalData = defineStore("globalData", {
       console.warn('getRemotePlaylist error')
       return []
     },
-    // 获取远端歌单详情, 返回数据并缓存到store, indexedDB
-    async getRemoteSonglist(playlistId = "", setStore = false) {
+    // 根据 playlistId 获取远端歌单详情, 缓存到 indexedDB, 根据 setStore 是否储存到 store
+    async getRemoteSonglist(config) {
+      let { setStore, playlistId } = config;
       if (!playlistId) {
         console.error("getRemoteSonglist error: playlistId is required");
         return [];
@@ -157,12 +161,12 @@ export const useGlobalData = defineStore("globalData", {
         id: playlistId,
       });
       let songlist = res.songs;
+      localforage.setItem(`songlist_${playlistId}`, songlist);
       if (songlist && setStore) {
         // 筛选需要的key保留到store
         let needProps = ["id", "name", "al", "ar"];
         this.songlist = this.filterUsefulProps(songlist, needProps);
       }
-      localforage.setItem(`songlist_${playlistId}`, songlist);
       return songlist;
     },
     // 导出TaggedSong

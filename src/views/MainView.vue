@@ -71,7 +71,7 @@ const menus = reactive({
       click: async () => {
         if (state.currSonglistId) {
           state.songlistLoading = true
-          await globalData.getRemoteSonglist(state.currSonglistId)
+          await globalData.getSonglist({ playlistId: state.currSonglistId, force: true })
           state.songlistLoading = false
         } else {
           console.warning('右键刷新失败，当前歌单id为空，请选择一个menu后再试')

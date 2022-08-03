@@ -13,7 +13,7 @@
         <!-- <n-icon size="24" class="cursor-not-allowed" :component="Previous24Filled" @click="play" /> -->
         <n-spin :show="globalPlayer.loading">
           <n-icon-wrapper :size="48" :border-radius="48">
-            <n-icon class="cursor-pointer" v-if="globalPlayer.isPlay" :size="24" :component="Pause48Filled"
+            <n-icon class="cursor-pointer" v-if="globalPlayer.isPlaying" :size="24" :component="Pause48Filled"
               @click="audioPause" />
             <n-icon v-else :class="globalPlayer.currPlaySong ? 'cursor-pointer' : 'cursor-not-allowed'" :size="24"
               :component="Play48Filled" @click="audioPlay" />
@@ -94,6 +94,7 @@ const state = reactive({
   // playerlist: computed(() => {
   //   return globalPlayer.playerList;
   // }), // 播放列表
+  isPlaying: false, // 是否正在播放
   isProgressDrag: false,
   progressVal: 0,
   currentTime: computed({
@@ -120,6 +121,13 @@ const state = reactive({
     if (state.volume < 65) return IosVolumeLow
     return IosVolumeHigh
   }),
+})
+
+watch(() => globalPlayer.isPlaying, (val) => {
+  if (state.isPlaying !== val) {
+    state.isPlaying = val
+    val ? audioPlay() : audioPause()
+  }
 })
 
 // watch(() => globalPlayer.currPlaySong, (song) => {
@@ -182,7 +190,7 @@ function dragHandlerEnd() {
  * @params {  } 
  */
 watch(() => globalPlayer.currPlayIndex, (val) => {
-  if (val && !globalPlayer.currPlaySong.unable) {
+  if (val && !globalPlayer.currPlaySong.is404) {
     audioPlay()
   }
 }, { deep: true })
@@ -193,12 +201,12 @@ watch(() => globalPlayer.currPlayIndex, (val) => {
 async function audioPlay() {
   if (globalPlayer.currPlaySong?.url) {
     audio.value?.play()
-    globalPlayer.isPlay = true;
+    globalPlayer.isPlaying = true;
     return true;
   }
-  if (globalPlayer.currPlaySong?.unable) {
+  if (globalPlayer.currPlaySong?.is404) {
     window.$notification.error({
-      title: "该歌曲暂时无法播放",
+      title: "该歌曲暂无音源",
       duration: 3000
     })
     return false;
@@ -206,13 +214,13 @@ async function audioPlay() {
   let canPlay = await globalPlayer.loadCurrPlaySong();
   if (canPlay) {
     audio.value?.play()
-    globalPlayer.isPlay = true;
+    globalPlayer.isPlaying = true;
   }
 }
 
 function audioPause() {
-  globalPlayer.isPlay = false;
   audio.value?.pause()
+  globalPlayer.isPlaying = false;
 }
 /**
  * @desc 获取音乐时长

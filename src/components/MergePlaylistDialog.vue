@@ -197,9 +197,9 @@ async function mergePlaylist() {
   progressRef.value?.showProgress()
   // 请求所有歌单的歌曲
   const requests = []
-  playlistIds.forEach(async (id) => {
-    let name = `${state.playlist_Map[id].name}`
-    let req = globalData.getSonglist({ id }).then(res => {
+  playlistIds.forEach(async (playlistId) => {
+    let name = `${state.playlist_Map[playlistId].name}`
+    let req = globalData.getSonglist({ playlistId, setStore: false, force: true }).then(res => {
       console.log('getSonglist', res)
       // 根据 res 状态设置进度
       if (res) {
@@ -232,7 +232,7 @@ async function getAllPlaylist(playlistIds) {
   const songs = [] // merge歌单的歌曲Id集合
   playlistIds.forEach(async (id) => {
     let name = `歌单 ${state.playlist_Map[id].name} 加载完成`
-    const res = await globalData.getRemoteSonglist(id);
+    const res = await globalData.getSonglist({ playlistId, force: true });
     // 根据 res 状态设置进度
     if (res) {
       progressRef.value.setProgressDone(name)
