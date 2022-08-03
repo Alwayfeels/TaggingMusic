@@ -20,7 +20,7 @@ export const useGlobalData = defineStore("globalData", {
     status: {
       updateTagInput: null,
       showMergeDialog: false,
-    },
+    }
   }),
   getters: {},
   actions: {

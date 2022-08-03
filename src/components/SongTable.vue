@@ -1,15 +1,14 @@
 <template>
-  <n-data-table class="songTable" :loading="loading" :columns="songTableColumns" :data="tableData"
+  <n-data-table ref="tableRef" class="songTable" :loading="loading" :columns="songTableColumns" :data="tableData"
     :pagination="pagination" :bordered="false" :flex-height="true" :row-props="tConfig.rowProps"
     :row-class-name="rowClassName" pagination-behavior-on-filter="first" :paginate-single-page="false" />
 </template>
 
 <script setup>
 import { NDataTable, NButton } from "naive-ui";
-import { h, ref, getCurrentInstance, reactive, defineExpose } from "vue";
+import { h, ref, getCurrentInstance, reactive, defineExpose, watch, nextTick } from "vue";
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
-
 import { NAvatar, NTag } from 'naive-ui'
 import TagInput from '@/components/TagInput.vue'
 
@@ -43,6 +42,22 @@ const tConfig = reactive({
   }
 })
 
+const tableRef = ref(null)
+watch(() => globalPlayer.currPlayIndex, (index) => {
+  // 页码根据 index 自动跳转到目标位置, scroll 到目标位置
+  if (index >= 0) {
+    let pageNum = Math.ceil(index / pagination.pageSize)
+    const rowHeight = 68;
+    let scrollPixel = (index % pagination.pageSize) * rowHeight;
+    if (scrollPixel > 3 * rowHeight) {
+      scrollPixel = scrollPixel - 3 * rowHeight;
+    }
+    pagination.page = pageNum
+    nextTick(() => {
+      tableRef.value.scrollTo({ top: scrollPixel })
+    })
+  }
+})
 const pagination = reactive({
   page: 1,
   pageSize: 30,
