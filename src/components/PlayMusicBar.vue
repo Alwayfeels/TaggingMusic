@@ -8,21 +8,21 @@
       <img v-if="globalPlayer.currPlaySong?.al?.picUrl" :src="`${globalPlayer.currPlaySong?.al?.picUrl}?param=64y64`"
         class="w-16 h-16" alt="">
       <div class="ml-4 flex flex-col">
-        <div class="text-lg">{{ globalPlayer.currPlaySong?.name }}</div>
-        <div>{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
+        <div class="text-lg max-w-sm truncate">{{ globalPlayer.currPlaySong?.name }}</div>
+        <div class="max-w-sm truncate">{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
       <!-- 播放控制 -->
       <div class="ml-4 flex items-center">
         <!-- <n-icon size="24" class="cursor-not-allowed" :component="Previous24Filled" @click="play" /> -->
         <n-spin :show="globalPlayer.loading">
-          <n-icon-wrapper :size="48" :border-radius="48">
+          <n-icon-wrapper :size="48" :border-radius="24">
             <n-icon class="cursor-pointer" v-if="globalPlayer.isPlaying" :size="24" :component="Pause48Filled"
               @click="audioPause" />
             <n-icon v-else :class="globalPlayer.currPlaySong ? 'cursor-pointer' : 'cursor-not-allowed'" :size="24"
               :component="Play48Filled" @click="audioPlay" />
           </n-icon-wrapper>
         </n-spin>
-        <!-- <n-icon size="24" class="cursor-not-allowed" :component="Next24Filled" /> -->
+          <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled" @click="setNextIndex" />
       </div>
       <!-- 进度条 -->
       <div class="w-96 ml-6 pt-1 flex flex-col">
@@ -83,7 +83,7 @@ import { ArrowRepeatAll16Regular, Previous24Filled, Play48Filled, Pause48Filled,
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
-import { CaretUp24Filled, CaretDown24Filled } from '@vicons/fluent'
+import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
 
 const globalPlayer = useGlobalPlayer()
@@ -194,7 +194,11 @@ function dragHandlerEnd() {
  * @params {  } 
  */
 watch(() => globalPlayer.currPlayIndex, (val) => {
-  if (val && !globalPlayer.currPlaySong.is404) {
+  if (globalPlayer.currPlaySong.is404) {
+    setTimeout(() => {
+      setNextIndex()
+    }, 3000);
+  } else if (val) {
     audioPlay()
   }
 }, { deep: true })
