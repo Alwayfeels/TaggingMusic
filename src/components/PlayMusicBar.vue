@@ -1,5 +1,8 @@
 <template>
-  <div class="play-bar w-full h-20 fixed z-10 bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
+  <div class="play-bar  w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
+    <div class="bookmark flex items-center justify-center absolute cursor-pointer">
+      <n-icon :component="globalPlayer.isPlayerShow ? CaretDown24Filled : CaretUp24Filled" @click="globalPlayer.isPlayerShow = !globalPlayer.isPlayerShow" />
+    </div>
     <div class="w-full h-full px-10 flex items-center justify-center">
       <!-- 歌曲信息 -->
       <img v-if="globalPlayer.currPlaySong?.al?.picUrl" :src="`${globalPlayer.currPlaySong?.al?.picUrl}?param=64y64`"
@@ -80,6 +83,7 @@ import { ArrowRepeatAll16Regular, Previous24Filled, Play48Filled, Pause48Filled,
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
+import { CaretUp24Filled, CaretDown24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
 
 const globalPlayer = useGlobalPlayer()
@@ -285,6 +289,7 @@ function onPlayModeChange() {
 .play-bar {
   transition: bottom 0.5s ease-out;
   box-shadow: 0 0 10px rgba($color: #000000, $alpha: 0.1);
+  z-index: 1000;
 }
 
 .hidden-playbar {
@@ -295,5 +300,16 @@ function onPlayModeChange() {
   border-top: 1px solid rgba($color: #cccccc, $alpha: 0.5);
   width: 280px;
   overflow: hidden;
+}
+
+.bookmark {
+  background-color: #ffffff;
+  box-shadow: 0 -10px 10px rgba($color: #000000, $alpha: 0.1);
+  border-radius: 4px 4px 0 0;
+  width: 40px;
+  height: 24px;
+  right: 30px;
+  top: -24px;
+  z-index: 999;
 }
 </style>

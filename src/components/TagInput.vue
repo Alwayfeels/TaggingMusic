@@ -84,6 +84,7 @@ function dynamicTagsChange(newVal) {
 }
 // singleTagInput 事件处理
 function enterHandler(tag, submit, deactivate) {
+  tag = tag.trim()
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
     insertTag(tag);
@@ -93,6 +94,7 @@ function enterHandler(tag, submit, deactivate) {
 // tab 键盘事件处理
 function tabHandler(tag, submit, deactivate) {
   // when you press tab, save and open next <tagInput>
+  tag = tag.trim()
   if (!tag) return false;
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
