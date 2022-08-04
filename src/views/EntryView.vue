@@ -14,7 +14,7 @@
     </div>
     <n-divider />
     <div class="detail flex flex-1">
-      <div v-for="item in detailInfo" class="flex-1 pr-8">
+      <div v-for="item in detailInfo" class="flex-1 px-4">
         <div class="title text-xl">{{ item.title }}</div>
         <div class="content mt-4 text-slate-500">
           <p v-for="row in item.content">{{ row }}</p>

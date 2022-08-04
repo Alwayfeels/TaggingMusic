@@ -143,7 +143,6 @@ export const useGlobalData = defineStore("globalData", {
       let playlist = res.playlist;
       if (playlist) {
         // 筛选需要的key保留到store
-        // let needProps = ["id", "name", "al", "ar"];
         let needProps = ["id", "name", "coverImgUrl", "trackCount"];
         this.playlist = this.filterUsefulProps(playlist, needProps);
         localforage.setItem('playlist', playlist);
@@ -229,13 +228,16 @@ export const useGlobalData = defineStore("globalData", {
     // objArray: object[]
     // props: string[]
     filterUsefulProps(objArray, usefulPropsArray) {
-      return objArray.map((item) => {
-        let newItem = {};
-        usefulPropsArray.forEach((key) => {
-          newItem[key] = item[key];
+      if (objArray && objArray.length) {
+        return objArray.map((item) => {
+          let newItem = {};
+          usefulPropsArray.forEach((key) => {
+            newItem[key] = item[key];
+          });
+          return newItem;
         });
-        return newItem;
-      });
+      }
+      return [];
     },
     async searchSong(key = '') {
       if (!key) {
