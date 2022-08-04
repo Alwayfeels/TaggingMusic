@@ -19,13 +19,14 @@
       </div>
       <!--控制台 -->
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}</n-button>
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
+        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}
+      </n-button>
+      <NDropdown v-if="state.showControlBtn" trigger="hover" size="large" :options="jsonOptions"
+        @select="jsonHandleSelect">
+        <n-button size="large" secondary strong type="info">导入/导出 Tag</n-button>
+      </NDropdown>
+      <n-button v-if="state.showControlBtn" secondary class="mx-2" size="large" strong type="info"
         @click="showMergeDialog">合并歌单</n-button>
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="exportTaggedSong">导出Tag</n-button>
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="importTaggedSong">导入Tag</n-button>
       <n-button v-if="state.showControlBtn" class="mr-2" size="large" strong type="info"
         @click="state.showTaggingDialog = true">生成tag歌单</n-button>
       <n-button size="large" strong type="error" @click="state.showLoginDialog = true">
@@ -38,8 +39,8 @@
 </template>
 
 <script setup>
-import { computed, onBeforeMount, onMounted, reactive } from 'vue';
-import { NButton, NIcon, useNotification } from 'naive-ui';
+import { computed, onBeforeMount, onMounted, reactive, h } from 'vue';
+import { NButton, NIcon, useNotification, NDropdown } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import localforage from 'localforage';
@@ -47,6 +48,7 @@ import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
 import { LogoGithub } from '@vicons/ionicons4'
+import { FileUpload, FileDownload } from '@vicons/tabler'
 
 // 全局数据中心
 const globalData = useGlobalData()
@@ -54,9 +56,12 @@ const route = useRoute()
 const router = useRouter()
 
 const notification = useNotification()
+
+// 组件状态
 const state = reactive({
   searchKey: '',
   showControlBtn: computed(() => {
+
     return state.isMainPage && state.isLogged
   }),
   isMainPage: computed(() => {
@@ -79,6 +84,35 @@ async function searchHandler() {
 const refreshLoginStatus = async () => {
   globalData.init()
 }
+/** 
+ * @desc 数据导出和导入
+ * @params {  } 
+ */
+const renderIcon = (icon) => {
+  return () => {
+    return h(NIcon, null, {
+      default: () => h(icon)
+    });
+  };
+};
+const jsonOptions = [
+  {
+    label: '导入 Tag',
+    key: 'import',
+    icon: renderIcon(FileUpload),
+  }, {
+    label: '导出 Tag',
+    key: 'export',
+    icon: renderIcon(FileDownload),
+  }
+]
+const jsonHandleSelect = (key) => {
+  if (key === 'export') {
+    exportTaggedSong()
+  } else if (key === 'import') {
+    importTaggedSong()
+  }
+}
 // export tagged song
 function exportTaggedSong() {
   globalData.exportTaggedSong()
@@ -87,7 +121,10 @@ function exportTaggedSong() {
 function importTaggedSong() {
   globalData.importTaggedSong()
 }
-// 合并歌单
+/** 
+ * @desc 合并歌单
+ * @params {  } 
+ */
 function showMergeDialog() {
   globalData.status.showMergeDialog = true
 }

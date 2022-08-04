@@ -89,18 +89,6 @@ const menus = reactive({
       click: () => {
         state.showTaggingPlaylistDialog = true
       }
-    }, {
-      //   label: "应用配置",
-      //   divided: true,
-      //   children: [
-      //     {
-      //       label: '在 tag 失焦后如何处理标签',
-      //       tip: globalData.removeTagOnBlur ? '删除' : '保留',
-      //       click: () => {
-      //         globalData.toggleRemoveTagOnBlur()
-      //       }
-      //     }
-      //   ]
     }
   ]
 })

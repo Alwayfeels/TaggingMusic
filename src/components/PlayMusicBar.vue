@@ -69,7 +69,6 @@
         </template>
         {{ state.playMode }}
       </n-tooltip>
-
     </div>
     <!-- 播放器实例 -->
     <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="audioPause"
@@ -312,7 +311,7 @@ function onPlayModeChange() {
 
 .bookmark {
   background-color: #ffffff;
-  box-shadow: 0 -10px 10px rgba($color: #000000, $alpha: 0.1);
+  box-shadow: 0 -5px 10px rgba($color: #000000, $alpha: 0.1);
   border-radius: 4px 4px 0 0;
   width: 40px;
   height: 24px;

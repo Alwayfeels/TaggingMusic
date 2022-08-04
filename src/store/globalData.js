@@ -198,9 +198,9 @@ export const useGlobalData = defineStore("globalData", {
         let input = document.createElement("input");
         // 绑定onchange事件
         input.type = "file";
+        input.accept = ".json";
         input.onchange = (e) => {
           let file = e.target.files[0];
-          console.log('file = ', file)
           if (!file) {
             input = null;
             reject('file is null')
