@@ -1,9 +1,11 @@
 <template>
-  <div id="app">
-    <TopBar />
-    <router-view />
-    <PlayMusicBar />
-  </div>
+  <n-notification-provider>
+    <div id="app">
+      <TopBar class="fixed shadow z-10" />
+      <router-view class="mt-20" />
+      <PlayMusicBar />
+    </div>
+  </n-notification-provider>
 </template>
 
 <script setup>
@@ -12,19 +14,22 @@ import PlayMusicBar from '@/components/PlayMusicBar.vue';
 import { useGlobalData } from './store/globalData';
 
 const globalData = useGlobalData()
-globalData.initGlobalData()
+globalData.init()
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-
 </script>
 
 <style>
 #app {
+  overflow: hidden;
   font-family: "Inter", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   /* font-family: Avenir, Helvetica, Arial, sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+}
+html {
+  overflow-y: scroll;
 }
 
 

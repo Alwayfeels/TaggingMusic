@@ -1,8 +1,17 @@
 <template>
   <div class="view-container flex flex-col items-center w-full h-full mt-2 ml-10">
     <h1 class="text-5xl mt-32">Tagging Music</h1>
-    <p class="text-2xl text-slate-400">使用 Tag 标记歌曲，快速生成丰富的分类歌单</p>
-    <NButton class="my-4" type="primary" size="large" @click="toMainView">开始使用</NButton>
+    <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
+    <div class="flex justify-center">
+      <NButton class="my-4" type="primary" secondary size="large" @click="toMainView">
+        <span>使用方法</span>
+        <n-icon class="ml-2" :size="24" :component="ArrowCircleDown24Filled" />
+      </NButton>
+      <NButton class="ml-4 my-4" type="primary" size="large" @click="toMainView">
+        <span>开始使用</span>
+        <n-icon class="ml-2" :size="20" :component="ArrowCircleRight24Filled" />
+      </NButton>
+    </div>
     <n-divider />
     <div class="detail flex flex-1">
       <div v-for="item in detailInfo" class="flex-1 px-4">
@@ -21,9 +30,10 @@
 
 <script setup>
 import playMusicBar from '@/components/PlayMusicBar.vue';
-import { NDataTable, NButton } from "naive-ui";
+import { NDataTable, NButton, NDivider, NIcon } from "naive-ui";
 import { reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
+import { ArrowCircleDown24Filled, ArrowCircleRight24Filled } from '@vicons/fluent'
 
 const router = useRouter()
 

@@ -2,8 +2,8 @@
   <NDynamicTags ref="dynamicTags" v-model:value="state.tagInputVal" @mousedown.self="clickHandler" @click.stop
     :on-update:value="dynamicTagsChange">
     <template #input="{ submit, deactivate }">
-      <single-tag-input @change="changeHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="changeHandler($event, submit, deactivate)"></single-tag-input>
+      <SingleTagInput @pressEnter="enterHandler($event, submit, deactivate)"
+        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler($event, submit, deactivate)"></SingleTagInput>
     </template>
     <template #trigger="{ activate, disabled }">
       <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
@@ -23,9 +23,17 @@ import { useGlobalData } from '@/store/globalData';
 const globalData = useGlobalData()
 
 const props = defineProps({
+  // 是否仅仅作为input使用，不储存至indexDb
+  inputOnly: {
+    type: Boolean,
+    default: false,
+  },
+  // 父组件 v-model 的值
+  value: Array,
   songId: Number,
   songInfo: Object,
 });
+const emits = defineEmits(['update:value'])
 
 const dynamicTags = ref(null)
 const state = reactive({
@@ -33,8 +41,9 @@ const state = reactive({
 })
 
 // 监听 songId 初始化 tagInputVal
-watch(() => props.songId, async (songId) => {
-  let existSong = globalData.taggedSong?.find(e => e.songId === songId)
+watch(() => props.songId, async (propSongId) => {
+  if (!propSongId) return;
+  let existSong = globalData.taggedSong?.find(tagged => tagged.songId === propSongId)
   if (existSong) {
     state.tagInputVal = existSong.tagName.map(e => e)
   } else {
@@ -44,28 +53,54 @@ watch(() => props.songId, async (songId) => {
   immediate: true
 })
 
+// 根据globalData重新初始化tagInputVal
+function refresh() {
+  if (!props.songId) return;
+  let existSong = globalData.taggedSong?.find(e => e.songId === props.songId)
+  if (existSong) {
+    state.tagInputVal = existSong.tagName.map(e => e)
+  } else {
+    state.tagInputVal = []
+  }
+}
+
+watch(() => globalData.status?.updateTagInput, () => {
+  refresh()
+})
+
 // taginput 事件处理
 function dynamicTagsChange(newVal) {
+  state.tagInputVal = newVal
+  if (props.inputOnly) {
+    emits('update:value', newVal);
+    return;
+  }
   // remove tag
   if (newVal.length < state.tagInputVal.length) {
     let needRemoveTag = state.tagInputVal.filter(x => !newVal.includes(x))
     removeTag(needRemoveTag)
     removeTagInTaggedSong(needRemoveTag)
   }
-  state.tagInputVal = newVal
 }
 // singleTagInput 事件处理
-function changeHandler(tag, submit, deactivate) {
+function enterHandler(tag, submit, deactivate) {
+  tag = tag.trim()
   tag ? submit(tag) : deactivate();
-  insertTag(tag);
-  insertTaggedSongs(tag)
+  if (!props.inputOnly) {
+    insertTag(tag);
+    insertTaggedSongs(tag)
+  }
 }
+// tab 键盘事件处理
 function tabHandler(tag, submit, deactivate) {
   // when you press tab, save and open next <tagInput>
+  tag = tag.trim()
   if (!tag) return false;
   tag ? submit(tag) : deactivate();
-  insertTag(tag);
-  insertTaggedSongs(tag)
+  if (!props.inputOnly) {
+    insertTag(tag);
+    insertTaggedSongs(tag)
+  }
   // focus 下一个 tagInput
   setTimeout(() => {
     dynamicTags.value.showInput = true
@@ -79,15 +114,22 @@ function clickHandler() {
     dynamicTags.value.showInput = !dynamicTags.value.showInput
   }, 0);
 }
-function blurHandler(deactivate) {
-  deactivate()
+
+// 根据 globalData.removeTagOnBlur 来决定是否在移除标签
+function blurHandler($event, submit, deactivate) {
+  if(globalData.appConfig.removeTagOnBlur) {
+    deactivate()
+    return;
+  }
+  enterHandler($event, submit, deactivate)
 }
 
 // 数据处理
-// 将tag插入indexedDB.tag
+// 将tag插入indexedDB.tag, 并更新 globalData.tag
 async function insertTag(tagName) {
   if (typeof tagName !== "string") {
-    throw error("insertTag(): tagName must be string")
+    console.error("insertTag(): tagName must be string", tagName)
+    return false;
   };
   let _tags = await localforage.getItem("tag")
   _tags = _tags || []
@@ -101,10 +143,11 @@ async function insertTag(tagName) {
   globalData.tagList = _tags
   localforage.setItem("tag", _tags);
 }
-// 将tag插入indexedDB.taggedSongs
+// 将tag插入indexedDB.taggedSongs 并更新 globalData.taggedSong
 const insertTaggedSongs = async (tagName) => {
   if (typeof tagName !== "string") {
-    throw error("insertTaggedSongs(): tagName must be string")
+    console.error("insertTaggedSongs(): tagName must be string", tagName)
+    return false;
   };
   let taggedSong = await localforage.getItem('taggedSong');
   taggedSong = taggedSong ? taggedSong : [];

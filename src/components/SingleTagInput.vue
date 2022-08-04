@@ -1,11 +1,10 @@
 <template>
   <n-auto-complete size="small" ref="singleTagInput" v-model:value="state.inputValue" v-model:options="state.activeTags"
-    :get-show="() => true" placeholder="请输入" @keypress.enter.prevent="enterHandler" @keydown.tab.prevent="tabHandler"
+    :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keypress.enter.prevent="enterHandler" @keydown.tab.prevent="tabHandler"
     @keydown.esc.prevent="onBlur" :on-blur="blurHandler" />
 </template>
 
 <script setup>
-import localforage from "localforage";
 import { NAutoComplete } from "naive-ui";
 import {
   ref,
@@ -26,11 +25,11 @@ const singleTagInput = ref(null);
 let state = reactive({
   inputValue: null,
   tagList: computed(() => {
-    return globalData.tagList.map(e => ({ label: e.tagName, value: e.tagName }))
+    return globalData.tagList?.map(e => ({ label: e.tagName, value: e.tagName })) || []
   }),
   activeTags: computed(() => {
     if (state.inputValue) {
-      return state.tagList.filter(e => e.label.includes(state.inputValue))
+      return state.tagList?.filter(e => e.label.includes(state.inputValue)) || []
     }
     return state.tagList
   }),
@@ -45,7 +44,7 @@ watch(singleTagInput, (el) => {
 });
 // 键盘输入处理
 function enterHandler(e) {
-  emit("change", state.inputValue);
+  emit("pressEnter", state.inputValue);
 }
 function tabHandler() {
   emit("pressTab", state.inputValue);
