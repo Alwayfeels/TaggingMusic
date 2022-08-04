@@ -115,9 +115,9 @@ function clickHandler() {
   }, 0);
 }
 
-// 根据 globalDat.removeTagOnBlur 来决定是否在移除标签
+// 根据 globalData.removeTagOnBlur 来决定是否在移除标签
 function blurHandler($event, submit, deactivate) {
-  if(globalData.removeTagOnBlur) {
+  if(globalData.appConfig.removeTagOnBlur) {
     deactivate()
     return;
   }

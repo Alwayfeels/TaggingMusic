@@ -11,7 +11,9 @@ import { useGlobalPlayer } from '@/store/globalPlayer';
 // 整个应用的数据中心
 export const useGlobalData = defineStore("globalData", {
   state: () => ({
-    removeTagOnBlur: false,
+    appConfig: {
+      removeTagOnBlur: false,
+    },
     playlist: [], // 歌单列表
     songlist: [], // 歌单歌曲数据
     user: {}, // 用户信息
@@ -326,8 +328,8 @@ export const useGlobalData = defineStore("globalData", {
       return res;
     },
     toggleRemoveTagOnBlur() {
-      this.removeTagOnBlur = !this.removeTagOnBlur;
-      return this.removeTagOnBlur
+      this.appConfig.removeTagOnBlur = !this.appConfig.removeTagOnBlur;
+      return this.appConfig.removeTagOnBlur
     }
   },
 });

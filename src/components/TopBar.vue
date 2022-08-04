@@ -19,17 +19,17 @@
       </div>
       <!--控制台 -->
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}
+        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.appConfig.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}
       </n-button>
       <NDropdown v-if="state.showControlBtn" trigger="hover" size="large" :options="jsonOptions"
         @select="jsonHandleSelect">
         <n-button size="large" secondary strong type="info">导入/导出 Tag</n-button>
       </NDropdown>
-      <n-button v-if="state.showControlBtn" secondary class="mx-2" size="large" strong type="info"
-        @click="showMergeDialog">合并歌单</n-button>
-      <n-button v-if="state.showControlBtn" class="mr-2" size="large" strong type="info"
-        @click="state.showTaggingDialog = true">生成tag歌单</n-button>
-      <n-button size="large" strong type="error" @click="state.showLoginDialog = true">
+      <NDropdown v-if="state.showControlBtn" trigger="hover" size="large" :options="operatorOpitons"
+        @select="onOperatorSelect">
+        <n-button class="ml-2" size="large" strong type="info">歌单操作</n-button>
+      </NDropdown>
+      <n-button class="ml-2" size="large" strong type="error" @click="state.showLoginDialog = true">
         {{ state.isLogged ? '切换用户' : '登录' }}
       </n-button>
     </div>
@@ -43,7 +43,6 @@ import { computed, onBeforeMount, onMounted, reactive, h } from 'vue';
 import { NButton, NIcon, useNotification, NDropdown } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
-import localforage from 'localforage';
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
@@ -85,10 +84,31 @@ const refreshLoginStatus = async () => {
   globalData.init()
 }
 /** 
+ * @desc 歌单操作列表
+ * @params {  } 
+ */
+const operatorOpitons = [
+  {
+    label: '合并歌单',
+    key: 'merge',
+  },
+  {
+    label: '根据 tag 生成歌单',
+    key: 'generate',
+  },
+]
+function onOperatorSelect() {
+  if (key === 'merge') {
+    showMergeDialog()
+  } else if (key === 'generate') {
+    showTaggingDialog()
+  }
+}
+/** 
  * @desc 数据导出和导入
  * @params {  } 
  */
-const renderIcon = (icon) => {
+function renderIcon(icon) {
   return () => {
     return h(NIcon, null, {
       default: () => h(icon)
