@@ -327,6 +327,22 @@ export const useGlobalData = defineStore("globalData", {
       })
       return res;
     },
+    // 删除歌单
+    async deletePlaylist(id) {
+      if (!id) {
+        console.error('deletePlaylist: id is required')
+        return false
+      };
+      const res = await api.getRemote("/playlist/delete", { id });
+      console.log('deletePlaylist res = ', res)
+      if (res.code === 200) {
+        return true;
+      } else {
+        console.error('deletePlaylist request is error : ', res)
+        return false;
+      }
+    },
+    // 切换 tagInput 失焦是否删除 tag
     toggleRemoveTagOnBlur() {
       this.appConfig.removeTagOnBlur = !this.appConfig.removeTagOnBlur;
       return this.appConfig.removeTagOnBlur

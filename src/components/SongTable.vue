@@ -5,11 +5,10 @@
 </template>
 
 <script setup>
-import { NDataTable, NButton } from "naive-ui";
+import { NDataTable, NButton, NAvatar, NTag } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive, defineExpose, watch, nextTick } from "vue";
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
-import { NAvatar, NTag } from 'naive-ui'
 import TagInput from '@/components/TagInput.vue'
 
 const globalPlayer = useGlobalPlayer()

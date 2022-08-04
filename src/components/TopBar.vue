@@ -35,6 +35,7 @@
     </div>
     <QRLoginDialog v-model:showDialog="state.showLoginDialog" @refreshLoginStatus="refreshLoginStatus" />
     <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" />
+    <DeletePlaylistDialog v-model:showDialog="state.showDeleteDialog" />
   </div>
 </template>
 
@@ -43,6 +44,7 @@ import { computed, onBeforeMount, onMounted, reactive, h } from 'vue';
 import { NButton, NIcon, useNotification, NDropdown } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
+import DeletePlaylistDialog from '@/components/DeletePlaylistDialog.vue';
 import { useGlobalPlayer } from '@/store/globalPlayer';
 import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
@@ -60,7 +62,6 @@ const notification = useNotification()
 const state = reactive({
   searchKey: '',
   showControlBtn: computed(() => {
-
     return state.isMainPage && state.isLogged
   }),
   isMainPage: computed(() => {
@@ -68,6 +69,7 @@ const state = reactive({
   }),
   showLoginDialog: false,
   showTaggingDialog: false,
+  showDeleteDialog: false,
   isLogged: computed(() => {
     return Boolean(globalData.user.account)
   }),
@@ -96,12 +98,18 @@ const operatorOpitons = [
     label: '根据 tag 生成歌单',
     key: 'generate',
   },
+  {
+    label: '删除歌单',
+    key: 'delete',
+  }
 ]
-function onOperatorSelect() {
+function onOperatorSelect(key) {
   if (key === 'merge') {
-    showMergeDialog()
+    globalData.status.showMergeDialog = true
   } else if (key === 'generate') {
-    showTaggingDialog()
+    state.showTaggingDialog = true
+  } else if (key === 'delete') {
+    state.showDeleteDialog = true
   }
 }
 /** 

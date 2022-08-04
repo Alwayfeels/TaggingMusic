@@ -119,12 +119,9 @@ function selectChange(val, options) {
 }
 
 function onSubmit() {
-  // TEST_mergePlaylist()
-  // return false;
   formRef.value?.validate(async (errors) => {
     if (!errors) {
       mergePlaylist()
-      // const res = mergePlaylist()
       // if (res) {
       //   notification.success({
       //     message: '合并成功'
@@ -135,50 +132,6 @@ function onSubmit() {
 }
 function onClose() {
   emits('update:showDialog', false)
-}
-
-const mockPromise = (time, res) => {
-  console.log('请求发送，time=', time)
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(res)
-    }, Math.random() * time * 2)
-  })
-}
-async function TEST_mergePlaylist() {
-  const playlistIds = form.playlist.filter(e => e !== 'all')
-  const progressTask = playlistIds.map(id => ({
-    name: `${state.playlist_Map[id].name}`,
-    percentage: Math.round((70 / playlistIds.length * 10).toFixed(1)) / 10
-  }))
-  progressTask.push({ name: '正在新建歌单', percentage: 1 })
-  progressTask.push({ name: '新歌单创建完成', percentage: 29 })
-  progressRef.value?.setProgressTask(progressTask)
-  progressRef.value?.showProgress()
-  console.log('progressTask', progressTask)
-  let requests = []
-  for (let i = 0; i < playlistIds.length; i++) {
-    const id = playlistIds[i]
-    const name = `${state.playlist_Map[id].name}`
-    // const resName = await mockPromise(900, name)
-    // progressRef.value?.setProgressDone(resName)
-    requests.push(mockPromise(900, name).then(resName => {
-      progressRef.value?.setProgressDone(resName)
-      return Promise.resolve(resName)
-    }))
-  }
-  console.log('requests', requests);
-  debugger;
-  Promise.all(requests).then(async res => {
-    console.log('promise.all =>', res);
-    progressRef.value?.setProgressDone('正在新建歌单')
-    await mockPromise(1000)
-    progressRef.value?.setProgressDone('新歌单创建完成')
-    await mockPromise(1000)
-  })
-  // console.log('requests>>>>>', requests)
-  // const res = await Promise.all(requests)
-  // console.log('All请求完成，res=', res)
 }
 
 // 合并歌单
