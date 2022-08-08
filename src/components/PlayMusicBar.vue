@@ -22,7 +22,7 @@
               :component="Play48Filled" @click="audioPlay" />
           </n-icon-wrapper>
         </n-spin>
-          <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled" @click="setNextIndex" />
+        <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled" @click="setNextIndex" />
       </div>
       <!-- 进度条 -->
       <div class="w-96 ml-6 pt-1 flex flex-col">
@@ -34,7 +34,7 @@
         </div>
       </div>
       <!-- 音量 -->
-      <div class="volume ml-32 flex w-36 items-center">
+      <div class="volume ml-16 flex w-36 items-center">
         <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent" @click="onVolumnMute" />
         <n-slider v-model:value="state.volume" :max="100" :step="1" />
       </div>
@@ -69,6 +69,11 @@
         </template>
         {{ state.playMode }}
       </n-tooltip>
+      <!-- 快捷 Taginput -->
+      <div class="input-tag flex-1 ml-16">
+        <TagInput :songId="globalPlayer.currPlaySong?.id"
+          :songInfo="globalPlayer.currPlaySong" @change="updateAllTagInput"></TagInput>
+      </div>
     </div>
     <!-- 播放器实例 -->
     <audio ref="audio" :src="globalPlayer.currPlaySong?.url" @canplay="getDuration" @pause="audioPause"
@@ -80,12 +85,15 @@
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
 import { ArrowRepeatAll16Regular, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled, Play12Filled } from '@vicons/fluent'
 import { useGlobalPlayer } from '@/store/globalPlayer';
+import { useGlobalData } from '@/store/globalData';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
+import TagInput from './TagInput.vue';
 
 const globalPlayer = useGlobalPlayer()
+const globalData = useGlobalData()
 const audio = ref(null)
 
 const playMode = {
@@ -98,8 +106,9 @@ const state = reactive({
   //   return globalPlayer.playerList;
   // }), // 播放列表
   isPlaying: false, // 是否正在播放
-  isProgressDrag: false,
+  isProgressDrag: false, // 是否正在拖动进度条
   progressVal: 0,
+  inputTag: [], // 快捷输入标签
   currentTime: computed({
     get() {
       if (state.isProgressDrag) {
@@ -133,14 +142,11 @@ watch(() => globalPlayer.isPlaying, (val) => {
   }
 })
 
-// watch(() => globalPlayer.currPlaySong, (song) => {
-//   if (!song) {
-//   } else if (song.url) {
-//     nextTick(() => {
-//       audioPlay()
-//     })
-//   }
-// }, { immediate: true, deep: true })
+// 同步 player 中和 table 中 tagInput 组件的值
+function updateAllTagInput(newTag) {
+  console.log('updateAllTagInput', newTag)
+  globalData.status.updateTagInput = new Date().getTime();
+}
 
 /** 
  * @desc 音量控制
@@ -280,7 +286,7 @@ function setPlaylistScrollTop() {
 }
 
 /** 
- * @desc 播放模式相关
+ * @desc 播放模式切换
  * @params {  } 
  */
 function onPlayModeChange() {
@@ -318,5 +324,10 @@ function onPlayModeChange() {
   right: 30px;
   top: -24px;
   z-index: 999;
+}
+
+.input-tag {
+  overflow: hidden;
+  max-width: 25%;
 }
 </style>

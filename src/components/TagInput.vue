@@ -3,7 +3,8 @@
     :on-update:value="dynamicTagsChange">
     <template #input="{ submit, deactivate }">
       <SingleTagInput @pressEnter="enterHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler($event, submit, deactivate)"></SingleTagInput>
+        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler($event, submit, deactivate)">
+      </SingleTagInput>
     </template>
     <template #trigger="{ activate, disabled }">
       <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
@@ -33,7 +34,7 @@ const props = defineProps({
   songId: Number,
   songInfo: Object,
 });
-const emits = defineEmits(['update:value'])
+const emits = defineEmits(['update:value', 'change'])
 
 const dynamicTags = ref(null)
 const state = reactive({
@@ -65,26 +66,38 @@ function refresh() {
 }
 
 watch(() => globalData.status?.updateTagInput, () => {
-  refresh()
+  setTimeout(() => {
+    refresh()
+  }, 0);
 })
 
-// taginput 事件处理
 function dynamicTagsChange(newVal) {
-  state.tagInputVal = newVal
+  // 重复值不生效
+  // if (newVal.length !== Array.from(new Set(newVal)).length) {
+  //   return;
+  // }
   if (props.inputOnly) {
     emits('update:value', newVal);
     return;
   }
   // remove tag
   if (newVal.length < state.tagInputVal.length) {
-    let needRemoveTag = state.tagInputVal.filter(x => !newVal.includes(x))
-    removeTag(needRemoveTag)
-    removeTagInTaggedSong(needRemoveTag)
+    let needRemoveTag = state.tagInputVal.filter(x => {
+      return !newVal.includes(x)
+    })
+    Promise.all([
+      removeTag(needRemoveTag),
+      removeTagInTaggedSong(needRemoveTag)
+    ]).then(() => {
+      console.log(globalData.taggedSong)
+      emits('change', newVal);
+    })
   }
+  state.tagInputVal = newVal
 }
 // singleTagInput 事件处理
 function enterHandler(tag, submit, deactivate) {
-  tag = tag.trim()
+  // tag = tag.trim()
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
     insertTag(tag);
@@ -94,7 +107,7 @@ function enterHandler(tag, submit, deactivate) {
 // tab 键盘事件处理
 function tabHandler(tag, submit, deactivate) {
   // when you press tab, save and open next <tagInput>
-  tag = tag.trim()
+  // tag = tag.trim()
   if (!tag) return false;
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
@@ -117,8 +130,8 @@ function clickHandler() {
 
 // 根据 globalData.removeTagOnBlur 来决定是否在移除标签
 function blurHandler($event, submit, deactivate) {
-  if(globalData.appConfig.removeTagOnBlur) {
-    deactivate()
+  if (globalData.appConfig.removeTagOnBlur) {
+    // deactivate()
     return;
   }
   enterHandler($event, submit, deactivate)
@@ -175,7 +188,7 @@ const removeTagInTaggedSong = async (tags) => {
     taggedSong[songExist].tagName = taggedSong[songExist].tagName.filter(x => !tags.includes(x));
   }
   globalData.taggedSong = taggedSong
-  localforage.setItem("taggedSong", taggedSong);
+  await localforage.setItem("taggedSong", taggedSong);
 }
 
 // 删除一个或多个tag

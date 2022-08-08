@@ -8,6 +8,7 @@
       <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索表格中的音乐 / 专辑 / 歌手"
         @keypress.enter="searchHandler" />
     </div>
+    <n-auto-complete v-model:value="state.inputValue" :options="state.activeTags" />
     <div class="ml-auto flex items-center">
       <!--用户 -->
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">
@@ -19,7 +20,8 @@
       </div>
       <!--控制台 -->
       <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.appConfig.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}
+        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.appConfig.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab"
+        }}
       </n-button>
       <NDropdown v-if="state.showControlBtn" trigger="hover" size="large" :options="jsonOptions"
         @select="jsonHandleSelect">
@@ -50,6 +52,7 @@ import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
 import { LogoGithub } from '@vicons/ionicons4'
 import { FileUpload, FileDownload } from '@vicons/tabler'
+import { NAutoComplete } from "naive-ui";
 
 // 全局数据中心
 const globalData = useGlobalData()
@@ -60,6 +63,8 @@ const notification = useNotification()
 
 // 组件状态
 const state = reactive({
+  inputValue: '',
+  activeTags: [{ label: 'test', value: 'test' }],
   searchKey: '',
   showControlBtn: computed(() => {
     return state.isMainPage && state.isLogged

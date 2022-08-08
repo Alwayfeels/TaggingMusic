@@ -12,7 +12,7 @@ import { useGlobalPlayer } from '@/store/globalPlayer';
 export const useGlobalData = defineStore("globalData", {
   state: () => ({
     appConfig: {
-      removeTagOnBlur: false,
+      removeTagOnBlur: true,
     },
     playlist: [], // 歌单列表
     songlist: [], // 歌单歌曲数据
