@@ -102,7 +102,7 @@ const songTableColumns = [
       ]
       if (needFee) {
         node.push(
-          h(NTag, { type: 'warning', size: 'small', class: 'ml-2 mini-tag' }, 'VIP')
+          h(NTag, { type: 'warning', size: 'small', class: 'ml-2 mini-tag' }, () => 'VIP')
         )
       }
       return h('div', {}, node)
