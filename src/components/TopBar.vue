@@ -5,8 +5,9 @@
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <!-- 搜索 -->
     <div v-if="state.showControlBtn" class="mx-8 flex-1 flex justify-center">
-      <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索表格中的音乐 / 专辑 / 歌手"
-        @keypress.enter="searchHandler" />
+      <NAutoComplete class="search-input" v-model:value="state.searchKey" :options="state.searchOptions" clearable
+        placeholder="搜索当前歌单中的音乐 / 歌手 / Tag" :render-label="state.renderLabel" @keypress.enter="searchHandler"
+        :on-update:value="searchChange" />
     </div>
     <div class="ml-auto flex items-center">
       <!--用户 -->
@@ -19,10 +20,10 @@
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
       <!--控制台 -->
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
+      <!-- <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
         @click="globalData.toggleRemoveTagOnBlur">{{ globalData.appConfig.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab"
         }}
-      </n-button>
+      </n-button> -->
       <NDropdown v-if="state.showControlBtn" trigger="hover" size="large" :options="jsonOptions"
         @select="jsonHandleSelect">
         <n-button size="large" secondary strong type="info">导入/导出 Tag</n-button>
@@ -64,6 +65,12 @@ const notification = useNotification()
 // 组件状态
 const state = reactive({
   searchKey: '',
+  searchOptions: [],
+  renderLabel: (option) => [
+    option.label,
+    '',
+    h('div', {}, () => '歌手')
+  ],
   showControlBtn: computed(() => {
     return state.isMainPage && state.isLogged
   }),
@@ -77,6 +84,10 @@ const state = reactive({
     return Boolean(globalData.user.account)
   }),
 });
+/** 
+ * @desc 搜索模块
+ * @params {  } 
+ */
 async function searchHandler() {
   notification.error({
     title: '在做了在做了 QAQ',
@@ -84,6 +95,42 @@ async function searchHandler() {
   })
   // globalData.searchSong(state.searchKey)
 }
+/** 
+ * @desc 根据 name/singer/tag 计算 searchOptions
+ * @params {  } 
+ */
+function searchChange(key) {
+  state.searchKey = key;
+  if (!key) {
+    state.searchOptions = []
+    return
+  }
+  key = key.trim().toLowerCase()
+  let songlist = globalData.songlist
+  state.searchOptions = songlist.filter(song => {
+    let name = song.name.toLowerCase()
+    let singer = song.ar.map(artist => artist.name).join(' ').toLowerCase()
+    return name.includes(key) || singer.includes(key)
+  }).map(song => {
+    return {
+      label: song.name,
+      value: song,
+    }
+  })
+}
+/** 
+ * @desc 搜索 options 渲染函数
+ * @params {  } 
+ */
+// function renderLabel(option) {
+//   console.log('renderLabel', option)
+//   return [
+//     option.label,
+//     " ",
+//     h('span', {}, () => option.value.ar.map(artist => artist.name).join(' / '))
+//   ]
+// }
+
 // 登录后重新init globalData
 const refreshLoginStatus = async () => {
   globalData.init()
