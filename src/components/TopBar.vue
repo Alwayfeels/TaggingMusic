@@ -5,22 +5,34 @@
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <!-- 搜索 -->
     <div v-if="state.showControlBtn" class="mx-8 flex-1 flex justify-center">
-      <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索表格中的音乐 / 专辑 / 歌手"
-        @keypress.enter="searchHandler" />
+      <NAutoComplete class="search-input" v-model:value="state.searchKey" :options="state.searchOptions" clearable
+        placeholder="搜索当前歌单中的音乐" blur-after-select clear-after-select :on-update:value="searchChange"
+        :on-select="onSearchSelect" :render-label="renderLabel">
+        <template #prefix>
+          <n-popselect v-model:value="state.searchMode" :options="state.searchModeOptions" trigger="hover">
+            <span class="text-gray-400 cursor-pointer">搜索{{ searchModeMap[state.searchMode] || '' }}：</span>
+          </n-popselect>
+        </template>
+        <template #suffix>
+          <n-icon size="16" :component="Search24Filled" />
+        </template>
+      </NAutoComplete>
     </div>
     <div class="ml-auto flex items-center">
       <!--用户 -->
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">
-        <div class="user-name mr-4 flex items-center flex-col">
-          <span>{{ globalData.user.profile.nickname }}</span>
-          <div v-if="!state.isLogged" class="rounded-full text-white bg-gray-400 px-2 py-0.5 text-xs">离线</div>
+        <div class="mr-4">
+          <div class="user-name">{{ globalData.user.profile.nickname }}</div>
+          <NTag v-if="globalData.user?.account?.vipType === 10" type="warning" size="small"
+            class="mini-tag float-right">VIP</NTag>
         </div>
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
       <!--控制台 -->
-      <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
-        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.appConfig.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab" }}
-      </n-button>
+      <!-- <n-button v-if="state.showControlBtn" secondary class="mr-2" size="large" strong type="info"
+        @click="globalData.toggleRemoveTagOnBlur">{{ globalData.appConfig.removeTagOnBlur ? "取消输入时删除tab" : "取消输入时保留tab"
+        }}
+      </n-button> -->
       <NDropdown v-if="state.showControlBtn" trigger="hover" size="large" :options="jsonOptions"
         @select="jsonHandleSelect">
         <n-button size="large" secondary strong type="info">导入/导出 Tag</n-button>
@@ -41,7 +53,7 @@
 
 <script setup>
 import { computed, onBeforeMount, onMounted, reactive, h } from 'vue';
-import { NButton, NIcon, useNotification, NDropdown } from 'naive-ui';
+import { NButton, NIcon, useNotification, NDropdown, NTag, NSelect } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import DeletePlaylistDialog from '@/components/DeletePlaylistDialog.vue';
@@ -50,17 +62,32 @@ import { useGlobalData } from '@/store/globalData';
 import { useRouter, useRoute } from 'vue-router'
 import { LogoGithub } from '@vicons/ionicons4'
 import { FileUpload, FileDownload } from '@vicons/tabler'
+import { Search24Filled } from '@vicons/fluent'
+import { NAutoComplete } from "naive-ui";
 
 // 全局数据中心
 const globalData = useGlobalData()
+const globalPlayer = useGlobalPlayer()
 const route = useRoute()
 const router = useRouter()
 
 const notification = useNotification()
 
+const searchModeMap = {
+  'name': '歌名',
+  'singer': '歌手',
+  'tag': '标签',
+}
 // 组件状态
 const state = reactive({
+  searchMode: 'name',
+  searchModeOptions: [
+    { label: searchModeMap.name, value: 'name' },
+    { label: searchModeMap.singer, value: 'singer' },
+    // { label: searchModeMap.tag, value: 'tag' },
+  ],
   searchKey: '',
+  searchOptions: [],
   showControlBtn: computed(() => {
     return state.isMainPage && state.isLogged
   }),
@@ -74,13 +101,54 @@ const state = reactive({
     return Boolean(globalData.user.account)
   }),
 });
-async function searchHandler() {
-  notification.error({
-    title: '在做了在做了 QAQ',
-    duration: 3000,
+/** 
+ * @desc 根据 searchMode: name/singer/tag 计算 searchOptions
+ * @params {  } 
+ */
+function searchChange(key) {
+  state.searchKey = key;
+  if (!key) {
+    state.searchOptions = []
+    return
+  }
+  key = key.trim().toLowerCase()
+  let songlist = globalData.songlist
+  state.searchOptions = songlist.filter(song => {
+    if (state.searchMode === 'name') {
+      let name = song.name.toLowerCase()
+      return name.includes(key)
+    } else if (state.searchMode === 'singer') {
+      let singer = song.ar.map(artist => artist.name).join(' ').toLowerCase()
+      return singer.includes(key)
+    }
+    return false
+  }).map(song => {
+    return {
+      label: song.name,
+      value: song,
+    }
   })
-  // globalData.searchSong(state.searchKey)
 }
+/** 
+ * @desc 搜索下拉歌曲被选中的回调
+ * @params {  } 
+ */
+function onSearchSelect(song) {
+  let index = globalData.songlist.findIndex(item => item.id === song.id)
+  globalPlayer.setPlayIndex(index)
+
+}
+/** 
+ * @desc 搜索 options 渲染函数
+ * @params {  } 
+ */
+function renderLabel(option) {
+  return [
+    h('span', { class: 'max-w-md truncate' }, option.label),
+    h('span', { class: 'ml-4 truncate text-gray-400' }, option.value.ar.map(artist => artist.name).join(' '))
+  ]
+}
+
 // 登录后重新init globalData
 const refreshLoginStatus = async () => {
   globalData.init()
@@ -176,7 +244,7 @@ function toEntry() {
   }
 
   .search-input {
-    max-width: 400px;
+    max-width: 500px;
   }
 }
 </style>

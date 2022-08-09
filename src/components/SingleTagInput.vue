@@ -1,5 +1,5 @@
 <template>
-  <n-auto-complete size="small" ref="singleTagInput" v-model:value="state.inputValue" v-model:options="state.activeTags"
+  <NAutoComplete size="small" ref="singleTagInput" v-model:value="state.inputValue" v-model:options="state.activeTags"
     :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keypress.enter.prevent="enterHandler" @keydown.tab.prevent="tabHandler"
     @keydown.esc.prevent="onBlur" :on-blur="blurHandler" />
 </template>

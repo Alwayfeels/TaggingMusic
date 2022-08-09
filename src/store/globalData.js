@@ -12,7 +12,7 @@ import { useGlobalPlayer } from '@/store/globalPlayer';
 export const useGlobalData = defineStore("globalData", {
   state: () => ({
     appConfig: {
-      removeTagOnBlur: false,
+      removeTagOnBlur: true,
     },
     playlist: [], // 歌单列表
     songlist: [], // 歌单歌曲数据
@@ -87,15 +87,14 @@ export const useGlobalData = defineStore("globalData", {
         console.warn('playlistId is required')
         return []
       }
-      let songlist = await this.getSonglist({ playlistId });
-      // 筛选需要的key保留到store
-      let needProps = ["id", "name", "al", "ar"];
-      songlist = this.filterUsefulProps(songlist, needProps);
-      this.songlist = songlist;
+      let songlist = await this.getSonglist({
+        playlistId,
+        setStore: true
+      });
       return songlist;
     },
     // 获取歌单歌曲, 优先从本地获取，使用 force 直接从接口获取
-    // config: {id: Number, force: Boolean}
+    // config: { id: Number, force: Boolean, setStore：Boolean }
     async getSonglist(config) {
       let { playlistId, force, setStore = false } = config;
       if (!playlistId) {
@@ -165,7 +164,7 @@ export const useGlobalData = defineStore("globalData", {
       localforage.setItem(`songlist_${playlistId}`, songlist);
       if (songlist && setStore) {
         // 筛选需要的key保留到store
-        let needProps = ["id", "name", "al", "ar"];
+        let needProps = ["id", "name", "al", "ar", "fee"];
         this.songlist = this.filterUsefulProps(songlist, needProps);
       }
       return songlist;
