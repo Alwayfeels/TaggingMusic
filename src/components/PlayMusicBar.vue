@@ -8,7 +8,11 @@
       <img v-if="globalPlayer.currPlaySong?.al?.picUrl" :src="`${globalPlayer.currPlaySong?.al?.picUrl}?param=64y64`"
         class="w-16 h-16" alt="">
       <div class="ml-4 flex flex-col">
-        <div class="text-lg max-w-sm truncate">{{ globalPlayer.currPlaySong?.name }}</div>
+        <div class="text-lg max-w-sm flex items-center">
+          <span class="truncate">{{ globalPlayer.currPlaySong?.name }}</span>
+          <NTag v-if="globalPlayer.currPlaySong?.fee == 8" type="warning" size="small" class="ml-2 mini-tag float-right">VIP
+          </NTag>
+        </div>
         <div class="max-w-sm truncate">{{ globalPlayer.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
       <!-- 播放控制 -->
@@ -71,8 +75,8 @@
       </n-tooltip>
       <!-- 快捷 Taginput -->
       <div class="input-tag flex-1 ml-16">
-        <TagInput :songId="globalPlayer.currPlaySong?.id"
-          :songInfo="globalPlayer.currPlaySong" @change="updateAllTagInput"></TagInput>
+        <TagInput :songId="globalPlayer.currPlaySong?.id" :songInfo="globalPlayer.currPlaySong"
+          @change="updateAllTagInput"></TagInput>
       </div>
     </div>
     <!-- 播放器实例 -->
@@ -89,7 +93,7 @@ import { useGlobalData } from '@/store/globalData';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
-import { NIcon, NSlider, NIconWrapper } from 'naive-ui'
+import { NIcon, NSlider, NIconWrapper, NTag } from 'naive-ui'
 import TagInput from './TagInput.vue';
 
 const globalPlayer = useGlobalPlayer()

@@ -28,10 +28,15 @@ globalData.init()
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+
 html {
   overflow-y: scroll;
 }
 
+.mini-tag {
+  height: 16px;
+  padding: 0 4px;
+}
 
 /* 滚动槽 */
 /* ::-webkit-scrollbar {

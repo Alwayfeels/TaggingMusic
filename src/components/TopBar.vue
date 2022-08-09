@@ -8,13 +8,13 @@
       <n-input class="search-input" v-model:value="state.searchKey" round placeholder="搜索表格中的音乐 / 专辑 / 歌手"
         @keypress.enter="searchHandler" />
     </div>
-    <n-auto-complete v-model:value="state.inputValue" :options="state.activeTags" />
     <div class="ml-auto flex items-center">
       <!--用户 -->
       <div v-if="globalData.user.profile" class="user-info flex items-center mr-4">
-        <div class="user-name mr-4 flex items-center flex-col">
-          <span>{{ globalData.user.profile.nickname }}</span>
-          <div v-if="!state.isLogged" class="rounded-full text-white bg-gray-400 px-2 py-0.5 text-xs">离线</div>
+        <div class="mr-4">
+          <div class="user-name">{{ globalData.user.profile.nickname }}</div>
+          <NTag v-if="globalData.user?.account?.vipType === 10" type="warning" size="small"
+            class="mini-tag float-right">VIP</NTag>
         </div>
         <img class="user-avatar rounded" :src="`${globalData.user.profile.avatarUrl}?param=40y40`" alt="avatar">
       </div>
@@ -43,7 +43,7 @@
 
 <script setup>
 import { computed, onBeforeMount, onMounted, reactive, h } from 'vue';
-import { NButton, NIcon, useNotification, NDropdown } from 'naive-ui';
+import { NButton, NIcon, useNotification, NDropdown, NTag } from 'naive-ui';
 import QRLoginDialog from '@/components/QRLoginDialog.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import DeletePlaylistDialog from '@/components/DeletePlaylistDialog.vue';
@@ -63,8 +63,6 @@ const notification = useNotification()
 
 // 组件状态
 const state = reactive({
-  inputValue: '',
-  activeTags: [{ label: 'test', value: 'test' }],
   searchKey: '',
   showControlBtn: computed(() => {
     return state.isMainPage && state.isLogged

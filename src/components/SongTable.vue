@@ -95,6 +95,18 @@ const songTableColumns = [
     key: "name",
     minWidth: 200,
     width: 300,
+    render(row) {
+      let needFee = row.fee == 1
+      let node = [
+        row.name
+      ]
+      if (needFee) {
+        node.push(
+          h(NTag, { type: 'warning', size: 'small', class: 'ml-2 mini-tag' }, 'VIP')
+        )
+      }
+      return h('div', {}, node)
+    }
   },
   {
     title: "封面",
