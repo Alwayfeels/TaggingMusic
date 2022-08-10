@@ -18,6 +18,7 @@
       <Unlogin />
     </n-layout-content>
   </n-layout>
+  <PlayMusicBar />
   <MergePlaylistDialog v-model:showDialog="globalData.status.showMergeDialog" />
   <TaggingSongDialog v-model:showDialog="state.showTaggingDialog" :playlist="state.currSonglist" />
   <TaggingPlaylistDialog v-model:showDialog="state.showTaggingPlaylistDialog" :playlist="state.currSonglist" />
@@ -34,6 +35,7 @@ import Unlogin from '../components/Unlogin.vue';
 import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
 import MergePlaylistDialog from '@/components/MergePlaylistDialog.vue';
+import PlayMusicBar from '@/components/PlayMusicBar.vue';
 import { useNotification } from 'naive-ui'
 
 

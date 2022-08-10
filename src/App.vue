@@ -3,14 +3,12 @@
     <div id="app">
       <TopBar class="fixed shadow z-10" />
       <router-view class="mt-20" />
-      <PlayMusicBar />
     </div>
   </n-notification-provider>
 </template>
 
 <script setup>
 import TopBar from '@/components/TopBar.vue';
-import PlayMusicBar from '@/components/PlayMusicBar.vue';
 import { useGlobalData } from './store/globalData';
 
 const globalData = useGlobalData()

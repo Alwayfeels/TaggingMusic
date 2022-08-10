@@ -1,5 +1,5 @@
 <template>
-  <div class="play-bar  w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
+  <div class="play-bar w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalPlayer.isPlayerShow }">
     <div class="bookmark flex items-center justify-center absolute cursor-pointer" @click="globalPlayer.togglePlayer">
       <n-icon :component="globalPlayer.isPlayerShow ? CaretDown24Filled : CaretUp24Filled" />
     </div>
