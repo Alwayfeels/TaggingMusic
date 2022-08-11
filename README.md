@@ -1,59 +1,40 @@
 # TaggingMusic
+为你喜欢的音乐标记 tag，快捷根据 tag 生成个性歌单。灵感来自 flomo 
 
-This template should help get you started developing with Vue 3 in Vite.
+本项目纯属个人兴趣，欢迎star, fork, PR，issue
 
-## Recommended IDE Setup
+# 技术栈
+## 前端
+Vue3(setup-script) + Vite + Pinia + NaiveUI + TailwindCSS + Localforage + vicons
+## 后台
+[NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi) + Vercel部署
+# 线上地址
+[Beta版本地址](https://tagging-music.vercel.app/)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+# 启动
+推荐使用 pnpm，减少node_modules体积
+```bash
+pnpm install
+pnpm run dev
 ```
+# 计划
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run build
-npm run test:e2e # or `npm run test:e2e:ci` for headless testing
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+- [x] 入口页使用说明
+- [x] 二维码登录 
+- [x] 歌单列表展示 
+- [x] 歌曲列表展示 
+- [x] 标签设置
+  - [x] tab / enter 键盘快捷录入
+- [x] indexedDB本地存储歌单
+  - [x] 导入 / 导出已标记的歌单
+- [x] 根据 tag 生成歌单
+- [x] 播放音乐
+  - [x] 手动调整播放进度
+  - [x] 音量控制
+  - [x] 播放列表
+  - [x] 循环模式 delay
+- [ ] 搜索歌曲/用户 
+  - [ ] 支持对搜索结果使用 tag
+- [ ] 界面美化
+- [ ] 代码优化
+  - [x] 使用 pinia 管理全局状态
