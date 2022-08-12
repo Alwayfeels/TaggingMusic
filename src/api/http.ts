@@ -119,15 +119,20 @@ service.interceptors.response.use((response: AxiosResponse) => {
 */
 
 interface requestConfig {
-  useCache?: boolean
+  useTimestamp?: boolean
+}
+interface responseData {
+  code: number
+  [propName: string]: any;
 }
 
-export function get(url: string, params: object, config: requestConfig = {}) {
-  const { useCache = false } = config
-  return new Promise((resolve, reject) => {
-    service.get(url, {
+export function get(url: string, params = {}, config: requestConfig = {}) {
+  // default use timestamp params
+  const { useTimestamp = true } = config
+  return new Promise<responseData>((resolve, reject) => {
+    service.get<responseData>(url, {
       params: {
-        timestamp: useCache ? null : new Date().getTime(),
+        timestamp: useTimestamp ? new Date().getTime() : null,
         ...params
       }
     })
@@ -147,10 +152,11 @@ export function get(url: string, params: object, config: requestConfig = {}) {
 * @returns {Promise}
 */
 export function post(url: string, params = {}, config: requestConfig = {}) {
-  const { useCache = false } = config
-  return new Promise((resolve, reject) => {
-    service.post(url, {
-      timestamp: useCache ? null : new Date().getTime(),
+  // default use timestamp params
+  const { useTimestamp = true } = config
+  return new Promise<responseData>((resolve, reject) => {
+    service.post<responseData>(url, {
+      timestamp: useTimestamp ? new Date().getTime() : null,
       ...params
     })
       .then(res => {

@@ -1,21 +1,67 @@
 import { defineStore } from "pinia";
+import api from '@/api/http'
 import localforage from "localforage";
 
 /** 
  * @desc 全局数据存储
  * @tips 该文件是唯一和 indexedDB 交互的入口
  */
+ interface UserInfo {
+  profile: any,
+  account: any,
+  id: number | null,
+}
+interface GlobalState {
+  user: UserInfo,
+}
+
 export const useGlobalData = defineStore({
   id: 'globalData',
-  state: () => ({
-    counter: 0
+  state: (): GlobalState => ({
+    user: {
+      profile: null,
+      account: null,
+      id: null,
+    },
   }),
-  getters: {
-    doubleCount: (state) => state.counter * 2
+  getters: { 
   },
   actions: {
-    increment() {
-      this.counter++
+    /** 
+     * @desc 初始化 globalData
+     */
+    async initGlobalData() {
+      this.getUserInfo()
+    },
+    
+    /** 
+     * @desc 获取用户信息
+     */
+    async getUserInfo(force = false) {
+      let profile, account = null
+      if (!force) {
+        [profile, account] = await Promise.all([localforage.getItem("profile"), localforage.getItem("account")]);
+      }
+      // 本地无数据, 或者强制刷新时，调用接口
+      if (profile && account) {
+        const userInfo: UserInfo = { profile, account, id: account?.id };
+        this.user = userInfo;
+        return userInfo;
+      } else {
+        const res = await api.get("login/status");
+        if (res.data?.profile) {
+          profile = res.data.profile;
+          account = res.data.account;
+          const userInfo: UserInfo = { profile, account, id: account?.id };
+          this.user = userInfo
+          localforage.setItem("profile", profile);
+          localforage.setItem("account", account);
+          return userInfo;
+        } else {
+          console.warn('getRemoteUserInfo error: 可能用户未登录')
+          return false
+        }
+      }
     }
   }
 })
