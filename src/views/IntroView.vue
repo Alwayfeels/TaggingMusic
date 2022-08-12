@@ -56,7 +56,7 @@ const detailInfo = ref([
 ])
 
 function toMainView() {
-  router.push('/main')
+  router.push('/home')
 }
 </script>
 
