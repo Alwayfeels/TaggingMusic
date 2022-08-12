@@ -11,7 +11,7 @@
     <!-- User -->
     <div class="user-info flex items-center mr-4">
       <div class="mr-4">
-        <div class="user-name">{{ globalData.user.profile?.nickname }}</div>
+        <div class="font-medium">{{ globalData.user.profile?.nickname }}</div>
         <NTag v-if="globalData.user?.account?.vipType === 10" type="warning" size="small" class="mini-tag float-right">
           VIP</NTag>
       </div>
