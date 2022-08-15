@@ -3,21 +3,12 @@ import api from '@/api/http'
 import localforage from "localforage";
 import { computed } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
+import type { GlobalData, UserInfo } from "@/store/types";
 
 /** 
  * @desc 全局数据存储
  * @tips 该文件是唯一和 indexedDB 交互的入口
  */
-interface UserInfo {
-  profile: any,
-  account: any,
-  id?: number | null,
-}
-interface GlobalData {
-  user: UserInfo,
-  playlist: any,
-  songlist: any
-}
 
 export const useGlobalData = defineStore({
   id: 'globalData',

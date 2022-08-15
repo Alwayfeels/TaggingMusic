@@ -46,6 +46,21 @@ export const useGlobalState = defineStore({
     async init() {
       this.playlist.active = this.playlist.data[0];
       this.songlist.data = await this.globalData.getSonglist(this.playlist.active?.id || null)
+    },
+    /** 
+     * @desc 设置正在播放的歌曲
+     */
+    setSonglistActive(config: { index?: number, id?: number }) {
+      if (!this.songlist.data.length) {
+        console.error('setSonglistActive error: songlist is empty')
+        return;
+      }
+      if (config.id && config.id >= 0) {
+        this.songlist.active = this.songlist.data.find(item => item.id === config.id)
+      }
+      if (config.index && config.index >= 0) {
+        this.songlist.active = this.songlist.data[config.index || 0];
+      }
     }
   }
 })
