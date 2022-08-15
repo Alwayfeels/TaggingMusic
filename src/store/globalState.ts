@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed } from 'vue'
 import { useGlobalData } from './globalData'
+import type { GlobalState } from './types'
 
 /** 
  * @desc 全局状态
@@ -8,11 +9,11 @@ import { useGlobalData } from './globalData'
  */
 export const useGlobalState = defineStore({
   id: 'globalState',
-  state: () => ({
+  state: (): GlobalState => ({
     globalData: useGlobalData(),
     user: {
-      isLogin: computed(() => Boolean(useGlobalData().user.account)),
-      isVip: computed(() => useGlobalData().user.account?.vipType === 10)
+      isLogin: computed<boolean>(() => Boolean(useGlobalData().user.account)),
+      isVip: computed<boolean>(() => useGlobalData().user.account?.vipType === 10)
     },
     topBar: {
       isShow: false,
@@ -21,7 +22,7 @@ export const useGlobalState = defineStore({
     playlist: {
       isShow: false,
       isLoading: false,
-      data: computed(() => useGlobalData().playlist),
+      data: computed<any>(() => useGlobalData().playlist),
       active: null
     },
     songlist: {
