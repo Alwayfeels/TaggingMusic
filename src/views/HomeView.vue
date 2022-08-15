@@ -3,7 +3,7 @@
     <n-layout-sider v-if="user.isLogin" collapse-mode="width" :collapsed-width="120" :width="320"
       show-trigger="arrow-circle" content-style="padding: 24px;" bordered v-menus:right="rightMenus"
       :native-scrollbar="false">
-      <n-spin :show="playlist.loading">
+      <n-spin :show="playlist.isLoading">
         <n-menu v-model:value="playlist.active" :root-indent="36" :indent="12" key-field="id"
           :options="playlist.data" :render-icon="renderMenuIcon" :render-label="renderMenuLabel"
           :on-update:value="activeMenuChange" />
@@ -12,27 +12,28 @@
     <n-layout-content v-if="globalState.user.isLogin" content-style="padding: 24px; height: 100%;"
       :native-scrollbar="false" v-menus:right="rightMenus">
       <SongTable ref="songTableRef" class="h-full" v-model:tableData="songlist.data"
-        v-model:loading="songlist.loading" />
+        v-model:loading="songlist.isLoading" />
     </n-layout-content>
     <n-layout-content v-else content-style="padding: 24px;">
       <Unlogin />
     </n-layout-content>
   </n-layout>
+  <PlayerBar />
 </template>
 
 <script setup lang="ts">
-// import SongTable from '@/components/SongTable.vue';
+import SongTable from '@/components/SongTable.vue';
 import { h, onMounted, reactive, ref, shallowRef, computed } from 'vue';
 import { directive } from 'vue3-menus';
 import { NMenu, NLayout, NLayoutContent, NSpin, NLayoutSider, NScrollbar } from 'naive-ui';
-// import { useGlobalPlayer } from '@/store/globalPlayer';
-import { useGlobalData } from '@/stores/globalData';
-import { useGlobalState } from '@/stores/globalState';
+// import { useglobalState.player } from '@/store/globalState.player';
+import { useGlobalData } from '@/store/globalData';
+import { useGlobalState } from '@/store/globalState';
 import Unlogin from '@/components/UnLogin.vue';
 // import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
 // import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
 // import MergePlaylistDialog from '@/components/MergePlaylistDialog.vue';
-// import PlayMusicBar from '@/components/PlayMusicBar.vue';
+import PlayerBar from '@/components/PlayerBar.vue';
 import { useNotification } from 'naive-ui'
 
 // 全局数据中心
@@ -114,5 +115,22 @@ const renderMenuLabel = (option: any) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.main-container {
+  // margin-top: 5rem;
+  overflow: hidden;
+  transition: height 0.5s ease-out;
+
+  :v-deep(.n-scrollbar-content) {
+    height: 100%;
+  }
+}
+
+.full-height {
+  height: calc(100vh - 5rem);
+}
+
+.min-height {
+  height: calc(100vh - 10rem);
+}
 </style>

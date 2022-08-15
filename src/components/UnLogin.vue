@@ -18,7 +18,7 @@ const menus = shallowRef({
       label: "刷新登陆状态",
       tip: '',
       click: () => {
-        globalData.refreshLoginStatus()
+        globalData.getUserInfo(true)
       }
     }
   ]

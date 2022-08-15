@@ -10,10 +10,17 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import TopBar from './components/TopBar.vue';
-import { useGlobalData } from '@/stores/globalData'
+import { useGlobalData } from '@/store/globalData'
+import { useGlobalState } from '@/store/globalState';
 
 const globalData = useGlobalData()
-globalData.initGlobalData()
+const globalState = useGlobalState()
+
+async function initApp() {
+  await globalData.init()
+  globalState.init()
+}
+initApp()
 
 </script>
 

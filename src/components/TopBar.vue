@@ -12,14 +12,14 @@
     <div class="user-info flex items-center mr-4">
       <div class="mr-4">
         <div class="font-medium">{{ globalData.user.profile?.nickname }}</div>
-        <NTag v-if="globalData.user?.account?.vipType === 10" type="warning" size="small" class="mini-tag float-right">
+        <NTag v-if="globalState.user.isVip" type="warning" size="small" class="mini-tag float-right">
           VIP</NTag>
       </div>
       <img class="user-avatar rounded" :src="`${globalData.user.profile?.avatarUrl}?param=40y40`" alt="avatar">
     </div>
     <!-- Login -->
     <NButton class="ml-2" size="large" strong type="error" @click="onLogin">
-      {{ globalData.user.id ? '切换用户' : '登录' }}
+      {{ globalState.user.isLogin ? '切换用户' : '登录' }}
     </NButton>
     <LoginDialog ref="LoginDialogRef" />
   </div>
@@ -30,13 +30,15 @@ import { computed, reactive, ref } from 'vue'
 import { NButton, NIcon, useNotification, NDropdown, NTag, NAutoComplete } from 'naive-ui';
 import { LogoGithub } from '@vicons/ionicons4'
 import { useRouter, useRoute } from 'vue-router'
-import { useGlobalData } from '@/stores/globalData'
+import { useGlobalData } from '@/store/globalData'
+import { useGlobalState } from '@/store/globalState'
 import SearchBar from '@/components/SearchBar.vue'
 import LoginDialog from '@/components/LoginDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
 const globalData = useGlobalData()
+const globalState = useGlobalState()
 
 const LoginDialogRef = ref()
 function onLogin() {

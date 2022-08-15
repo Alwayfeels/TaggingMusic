@@ -1,39 +1,45 @@
 import { defineStore } from "pinia";
 import api from '@/api/http'
 import localforage from "localforage";
+import { computed } from "vue";
+import { FlashSettings20Filled } from "@vicons/fluent";
 
 /** 
  * @desc 全局数据存储
  * @tips 该文件是唯一和 indexedDB 交互的入口
  */
- interface UserInfo {
+interface UserInfo {
   profile: any,
   account: any,
-  id: number | null,
+  id?: number | null,
 }
-interface GlobalState {
+interface GlobalData {
   user: UserInfo,
+  playlist: any,
+  songlist: any
 }
 
 export const useGlobalData = defineStore({
   id: 'globalData',
-  state: (): GlobalState => ({
+  state: (): GlobalData => ({
     user: {
       profile: null,
-      account: null,
-      id: null,
+      account: null
     },
+    playlist: [],
+    songlist: []
   }),
-  getters: { 
+  getters: {
   },
   actions: {
     /** 
      * @desc 初始化 globalData
      */
-    async initGlobalData() {
+    async init() {
       this.getUserInfo()
+      const playlist = await this.getPlaylist()
+      // this.getSonglist(playlist[0].id)
     },
-    
     /** 
      * @desc 获取用户信息
      */
@@ -41,27 +47,80 @@ export const useGlobalData = defineStore({
       let profile, account = null
       if (!force) {
         [profile, account] = await Promise.all([localforage.getItem("profile"), localforage.getItem("account")]);
-      }
-      // 本地无数据, 或者强制刷新时，调用接口
-      if (profile && account) {
-        const userInfo: UserInfo = { profile, account, id: account?.id };
-        this.user = userInfo;
-        return userInfo;
-      } else {
-        const res = await api.get("login/status");
-        if (res.data?.profile) {
-          profile = res.data.profile;
-          account = res.data.account;
-          const userInfo: UserInfo = { profile, account, id: account?.id };
-          this.user = userInfo
-          localforage.setItem("profile", profile);
-          localforage.setItem("account", account);
+        if (profile && account) {
+          // const userInfo: UserInfo = { profile, account, id: account?.id };
+          const userInfo: UserInfo = { profile, account };
+          this.user = userInfo;
           return userInfo;
-        } else {
-          console.warn('getRemoteUserInfo error: 可能用户未登录')
-          return false
         }
       }
+      // API Call
+      const res = await api.get("login/status");
+      if (res.data?.profile) {
+        profile = res.data.profile;
+        account = res.data.account;
+        // const userInfo: UserInfo = { profile, account, id: account?.id };
+        const userInfo: UserInfo = { profile, account };
+        this.user = userInfo
+        localforage.setItem("profile", profile);
+        localforage.setItem("account", account);
+        return userInfo;
+      } else {
+        console.warn('getRemoteUserInfo error: 可能用户未登录')
+        return false
+      }
+    },
+    /** 
+     * @desc 获取歌单列表
+     */
+    async getPlaylist(force = false) {
+      let playlist = null
+      if (!force) {
+        playlist = await localforage.getItem("playlist");
+        if (playlist) {
+          this.playlist = playlist
+          return playlist
+        }
+      }
+      if (!this.user.account.id) {
+        console.warn('getPlaylist error: 用户id不存在')
+        return false
+      }
+      // API Call
+      const res = await api.get("/user/playlist", {
+        uid: this.user.account.id,
+      });
+      playlist = res.playlist
+      this.playlist = playlist;
+      localforage.setItem('playlist', playlist);
+      return playlist
+    },
+    /** 
+     * @desc 获取歌单歌曲列表
+     */
+    async getSonglist(id: number, force = false, setStore = true) {
+      if (!id) {
+        console.warn('getSonglist error: id不存在')
+        return false
+      }
+      let songlist = null
+      if (!force) {
+        songlist = await localforage.getItem(`songlist_${id}`);
+        if (songlist) {
+          this.songlist = songlist
+          return songlist
+        }
+      }
+      // API Call
+      const res = await api.get("/playlist/track/all", {
+        id,
+      });
+      songlist = res.songs
+      localforage.setItem(`songlist_${id}`, songlist);
+      if (songlist && setStore) {
+        this.songlist = songlist;
+      }
+      return songlist
     }
   }
 })
