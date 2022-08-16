@@ -3,7 +3,8 @@ import api from '@/api/http'
 import localforage from "localforage";
 import { computed } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
-import type { GlobalData, UserInfo } from "@/store/types";
+import type { GlobalData, UserInfo, Song } from "@/store/types";
+import { useGlobalState } from "@/store/globalState";
 
 /** 
  * @desc 全局数据存储
@@ -62,7 +63,7 @@ export const useGlobalData = defineStore({
       }
     },
     /** 
-     * @desc 获取歌单列表
+     * @desc 获取用户所有歌单
      */
     async getPlaylist(force = false) {
       let playlist = null
@@ -87,18 +88,17 @@ export const useGlobalData = defineStore({
       return playlist
     },
     /** 
-     * @desc 获取歌单歌曲列表
+     * @desc 获取目标歌单所有歌曲
      */
-    async getSonglist(id: number, force = false, setStore = true) {
-      if (!id) {
-        console.warn('getSonglist error: id不存在')
-        return false
-      }
+    async getSonglist(id: number | null, force = false, setStore = true) {
+      if (!id) return false
+      useGlobalState().songlist.isLoading = true
       let songlist = null
       if (!force) {
         songlist = await localforage.getItem(`songlist_${id}`);
         if (songlist) {
           this.songlist = songlist
+          useGlobalState().songlist.isLoading = false
           return songlist
         }
       }
@@ -111,7 +111,18 @@ export const useGlobalData = defineStore({
       if (songlist && setStore) {
         this.songlist = songlist;
       }
+      useGlobalState().songlist.isLoading = false
       return songlist
+    },
+    /** 
+     * @desc 获取歌曲详情和url
+     */
+    async getSongUrl(song: Song, force = false) {
+      if (!song.id) return;
+      if (force || song.url) return;
+      const detail = await api.get('/song/url', { id: song.id, br: 320000 });
+      const url = detail.data[0].url;
+      return url
     }
   }
 })

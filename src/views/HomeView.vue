@@ -4,7 +4,7 @@
       show-trigger="arrow-circle" content-style="padding: 24px;" bordered v-menus:right="rightMenus"
       :native-scrollbar="false">
       <n-spin :show="playlist.isLoading">
-        <n-menu v-model:value="playlist.active" :root-indent="36" :indent="12" key-field="id"
+        <n-menu v-model:value="playlist.active.id" :root-indent="36" :indent="12" key-field="id"
           :options="playlist.data" :render-icon="renderMenuIcon" :render-label="renderMenuLabel"
           :on-update:value="activeMenuChange" />
       </n-spin>
@@ -92,11 +92,14 @@ const rightMenus = reactive({
     }
   ]
 })
-const activeMenuChange = async (key, item) => {
-  // state.currSonglist = item
-  // state.currSonglistId = key
-  // await globalData.initSonglist(key)
-  // songTableRef.value.resetPager()
+/** 
+ * @desc 左侧歌单点击事件
+ */
+const songTableRef = ref()
+const activeMenuChange = async (key: number, item: object) => {
+  globalState.playlist.active = item
+  globalState.setSonglist(key)
+  songTableRef.value.resetPager()
 }
 /** 
  * @desc 菜单渲染函数

@@ -7,11 +7,11 @@
 <script setup lang="ts">
 import { NDataTable, NButton, NAvatar, NTag } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive, defineExpose, watch, nextTick } from "vue";
-// import { useglobalState.player } from '@/store/globalState.player';
+import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
 // import TagInput from '@/components/TagInput.vue'
 
-// const globalState.player = useglobalState.player()
+const globalState = useGlobalState()
 const globalData = useGlobalData()
 defineExpose({ resetPager })
 
@@ -30,12 +30,12 @@ const props = defineProps({
 
 const tConfig = reactive({
   // 点击行后播放音乐
-  rowProps: (row) => {
+  rowProps: (row: any) => {
     return {
       onClick: () => {
-        // let index = globalState.player.playerList.findIndex(item => item.id === row.id)
-        // globalState.player.setPlayIndex(index)
-        // globalState.player.play()
+        const index = globalState.songlist.data.findIndex(item => item.id === row.id)
+        globalState.setActiveSong({ index })
+        globalState.player.isPlaying = true
       }
     };
   }
@@ -77,15 +77,14 @@ function resetPager() {
 
 const tableInstance = getCurrentInstance();
 
-function rowClassName(row) {
-  let className = '';
-  // if (row?.id === globalState.player.currPlaySong?.id) {
-  //   // className += 'bg-gradient-to-r from-green-200 to-blue-300 playing-song';
-  //   className += 'playing-song'
-  //   if (globalState.player.isPlaying) {
-  //     className += ' song-playing';
-  //   }
-  // }
+function rowClassName(row: any) {
+  let className = ''
+  if (row?.id === globalState.songlist.active?.id) {
+    className += 'playing-song'
+    if (globalState.player.isPlaying) {
+      className += ' song-playing';
+    }
+  }
   return className;
 }
 
@@ -96,8 +95,8 @@ const songTableColumns = [
     minWidth: 200,
     width: 300,
     render(row) {
-      let needFee = row.fee == 1
-      let node = [
+      const needFee = row.fee == 1
+      const node = [
         row.name
       ]
       if (needFee) {
@@ -113,7 +112,7 @@ const songTableColumns = [
     key: "al.picUrl",
     width: '80px',
     render(row) {
-      let songImgUrl = `${row.al.picUrl}?param=40y40`
+      const songImgUrl = `${row.al.picUrl}?param=40y40`
       return h(
         NAvatar,
         {

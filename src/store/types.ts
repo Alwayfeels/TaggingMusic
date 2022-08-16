@@ -1,9 +1,15 @@
-import { ComputedRef } from "vue"
+import type { ComputedRef } from "vue"
 
 export interface UserInfo {
   profile: any,
   account: any,
   id?: number | null,
+}
+
+export enum PlayMode {
+  LOOP = '顺序播放',
+  RANDOM = '随机播放',
+  SINGLE = '单曲循环',
 }
 
 export interface GlobalData {
@@ -13,8 +19,22 @@ export interface GlobalData {
   [key: string]: unknown;
 }
 
+export interface Playlist {
+  id?: number;
+  name?: string;
+  [key: string]: any;
+}
+
+export interface Song {
+  id?: number;
+  ar?: any;
+  fee?: number;
+  name?: string;
+  url?: string;
+  [key: string]: any;
+}
+
 export interface GlobalState {
-  globalData: GlobalData;
   user: {
     isLogin: ComputedRef<boolean>;
     isVip: ComputedRef<boolean>;
@@ -26,18 +46,21 @@ export interface GlobalState {
   playlist: {
     isShow: boolean;
     isLoading: boolean;
-    data: ComputedRef<any[]>;
-    active: any;
+    data: ComputedRef<Playlist[]>;
+    active: Playlist;
   };
   songlist: {
     isShow: boolean;
     isLoading: boolean;
-    data: any[];
-    active: any;
+    data: Song[];
+    active: Song;
   };
   player: {
     isShow: boolean;
     isLoading: boolean;
     isPlaying: boolean;
+    currentTime: number;
+    duration: number;
+    playMode: PlayMode;
   };
 }

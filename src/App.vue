@@ -18,7 +18,7 @@ const globalState = useGlobalState()
 
 async function initApp() {
   await globalData.init()
-  globalState.init()
+  await globalState.init()
 }
 initApp()
 

@@ -1,32 +1,32 @@
 <template>
   <div class="play-bar w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalState.player.isShow }">
-    <div class="bookmark flex items-center justify-center absolute cursor-pointer" @click="globalState.player.togglePlayer">
+    <div class="bookmark flex items-center justify-center absolute cursor-pointer"
+      @click="globalState.player.togglePlayer">
       <n-icon :component="globalState.player.isShow ? CaretDown24Filled : CaretUp24Filled" />
     </div>
     <div class="w-full h-full px-10 flex items-center justify-center">
       <!-- 歌曲信息 -->
-      <img v-if="globalState.player.currPlaySong?.al?.picUrl" :src="`${globalState.player.currPlaySong?.al?.picUrl}?param=64y64`"
-        class="w-16 h-16" alt="">
+      <img v-if="globalState.songlist.active?.al?.picUrl"
+        :src="`${globalState.songlist.active?.al?.picUrl}?param=64y64`" class="w-16 h-16" alt="">
       <div class="ml-4 flex flex-col">
         <div class="text-lg max-w-sm flex items-center">
-          <span class="truncate">{{ globalState.player.currPlaySong?.name }}</span>
-          <NTag v-if="globalState.player.currPlaySong?.fee == 8" type="warning" size="small" class="ml-2 mini-tag float-right">VIP
+          <span class="truncate">{{ globalState.songlist.active?.name }}</span>
+          <NTag v-if="globalState.songlist.active?.fee == 8" type="warning" size="small"
+            class="ml-2 mini-tag float-right">VIP
           </NTag>
         </div>
-        <div class="max-w-sm truncate">{{ globalState.player.currPlaySong?.ar?.map(e => e.name)?.join(' / ') }}</div>
+        <div class="max-w-sm truncate">{{ globalState.songlist.active?.ar?.map(e => e.name)?.join(' / ') }}</div>
       </div>
       <!-- 播放控制 -->
       <div class="ml-4 flex items-center">
-        <!-- <n-icon size="24" class="cursor-not-allowed" :component="Previous24Filled" @click="play" /> -->
         <n-spin :show="globalState.player.isLoading">
-          <n-icon-wrapper :size="48" :border-radius="24">
-            <n-icon class="cursor-pointer" v-if="globalState.player.isPlaying" :size="24" :component="Pause48Filled"
-              @click="audioPause" />
-            <n-icon v-else :class="globalState.player.currPlaySong ? 'cursor-pointer' : 'cursor-not-allowed'" :size="24"
-              :component="Play48Filled" @click="audioPlay" />
+          <n-icon-wrapper :class="globalState.songlist.active ? 'cursor-pointer' : 'cursor-not-allowed'" :size="48"
+            :border-radius="24" @click="() => { globalState.player.isPlaying ? audioPause() : audioPlay() }">
+            <n-icon v-if="globalState.player.isPlaying" :size="24" :component="Pause48Filled" />
+            <n-icon v-else :size="24" :component="Play48Filled" />
           </n-icon-wrapper>
         </n-spin>
-        <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled" @click="setNextIndex" />
+        <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled" @click="globalState.setNextSong" />
       </div>
       <!-- 进度条 -->
       <div class="w-96 ml-6 pt-1 flex flex-col">
@@ -80,7 +80,7 @@
       </div>
     </div>
     <!-- 播放器实例 -->
-    <audio ref="audio" :src="globalState.player.currPlaySong?.url" @canplay="getDuration" @pause="audioPause"
+    <audio ref="audio" :src="globalState.songlist.active?.url" @canplay="getDuration" @pause="audioPause"
       @timeupdate="timeupdate" @play="audioPlay" style="display: none" :loop="state.playMode === '单曲循环'"></audio>
   </div>
 </template>
@@ -139,6 +139,9 @@ const state = reactive({
   }),
 })
 
+/** 
+ * @desc 根据 globalState 修改播放状态
+ */
 watch(() => globalState.player.isPlaying, (val) => {
   if (state.isPlaying !== val) {
     state.isPlaying = val
@@ -173,7 +176,7 @@ function onVolumnMute() {
 const processInfo = computed(() => {
   const curr = timeFormatter(Math.floor(state.currentTime))
   const dura = timeFormatter(Math.floor(globalState.player.duration))
-  return `${curr} / ${dura}`
+  return `${curr || '--'} / ${dura || '--'}`
 })
 // 时间格式化
 const timeFormatter = (value) => {
@@ -204,7 +207,7 @@ function dragHandlerEnd() {
 watch(() => globalState.player.currPlayIndex, (val) => {
   if (globalState.player.currPlaySong.is404) {
     setTimeout(() => {
-      setNextIndex()
+      globalState.setNextSong()
     }, 3000);
   } else if (val) {
     audioPlay()
@@ -214,20 +217,20 @@ watch(() => globalState.player.currPlayIndex, (val) => {
  * @desc Audio播放器 播放/暂停 事件
  */
 async function audioPlay() {
-  if (globalState.player.currPlaySong?.url) {
+  if (globalState.songlist.active?.url) {
     audio.value?.play()
     state.isPlaying = true;
     globalState.player.isPlaying = true;
     return true;
   }
-  if (globalState.player.currPlaySong?.is404) {
+  if (globalState.songlist.active?.is404) {
     window.$notification.error({
       title: "该歌曲暂无音源",
       duration: 3000
     })
     return false;
   }
-  let canPlay = await globalState.player.loadCurrPlaySong();
+  const canPlay = await globalState.getActiveSongUrl();
   if (canPlay) {
     audio.value?.play()
     state.isPlaying = true;
@@ -255,23 +258,23 @@ const getDuration = () => {
 const timeupdate = (e) => {
   globalState.player.currentTime = e.target.currentTime;
   if (e.target.currentTime >= globalState.player.duration) {
-    setNextIndex();
+    globalState.setNextSong();
   }
 };
 /** 
  * @desc 根据播放模式播放下一首
  * @params {  } 
  */
-function setNextIndex() {
-  const playMode = state.playMode;
-  if (playMode === '顺序播放') {
-    let index = (globalState.player.currPlayIndex + 1) % globalState.player.playerList.length;
-    globalState.player.setPlayIndex(index);
-  } else if (playMode === '随机播放') {
-    let index = Math.floor(Math.random() * globalState.player.playerList.length);
-    globalState.player.setPlayIndex(index);
-  }
-}
+// function setNextIndex() {
+//   const playMode = state.playMode;
+//   if (playMode === '顺序播放') {
+//     const index = (globalState.player.currPlayIndex + 1) % globalState.player.playerList.length;
+//     globalState.player.setPlayIndex(index);
+//   } else if (playMode === '随机播放') {
+//     const index = Math.floor(Math.random() * globalState.player.playerList.length);
+//     globalState.player.setPlayIndex(index);
+//   }
+// }
 
 /** 
  * @desc 播放列表相关
@@ -283,7 +286,7 @@ function onPlaylistClick(index) {
   globalState.player.setPlayIndex(index)
 }
 function setPlaylistScrollTop() {
-  let scrollTop = globalState.player.currPlayIndex * 32;
+  const scrollTop = globalState.player.currPlayIndex * 32;
   playerlistRef.value.scrollTo({ top: scrollTop })
 }
 
@@ -292,7 +295,7 @@ function setPlaylistScrollTop() {
  * @params {  } 
  */
 function onPlayModeChange() {
-  let playMode = ['顺序播放', '单曲循环', '随机播放'];
+  const playMode = ['顺序播放', '单曲循环', '随机播放'];
   let index = playMode.indexOf(state.playMode);
   index = (index + 1) % playMode.length;
   state.playMode = playMode[index];
