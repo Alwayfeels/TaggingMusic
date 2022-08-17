@@ -31,8 +31,9 @@
       </div>
       <!-- 进度条 -->
       <div class="w-96 ml-6 pt-1 flex flex-col">
-        <n-slider v-model:value="state.currentTime" :max="globalState.player.duration" :format-tooltip="timeFormatter"
-          :step="1" :onUpdate:value="dragHandler" @mousedown="dragHandlerStart" @mouseup="dragHandlerEnd" />
+        <n-slider v-model:value="progress.currentTime" :max="globalState.player.duration"
+          :format-tooltip="timeFormatter" :step="1" :onUpdate:value="dragHandler" @mousedown="dragHandlerStart"
+          @mouseup="dragHandlerEnd" />
         <div class="mt-2 flex justify-between">
           <span>320kbps</span>
           <span>{{ processInfo }}</span>
@@ -40,8 +41,8 @@
       </div>
       <!-- 音量 -->
       <div class="volume ml-16 flex w-36 items-center">
-        <n-icon class="cursor-pointer mr-2" size="24" :component="state.volumeComponent" @click="onVolumnMute" />
-        <n-slider v-model:value="state.volume" :max="100" :step="1" />
+        <n-icon class="cursor-pointer mr-2" size="24" :component="volume.volumeComponent" @click="onVolumnMute" />
+        <n-slider v-model:value="volume.val" :max="100" :step="1" />
       </div>
       <!-- 播放列表 -->
       <n-popover trigger="click" :to="false" display-directive="show">
@@ -69,8 +70,7 @@
       <!-- 播放模式 -->
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-icon class="cursor-pointer ml-4" size="24" :component="state.playModeComponent"
-            @click="onPlayModeChange" />
+          <n-icon class="cursor-pointer ml-4" size="24" :component="PlayModeComponent" @click="onPlayModeChange" />
         </template>
         {{ globalState.player.playMode }}
       </n-tooltip>
@@ -81,8 +81,9 @@
       </div>
     </div>
     <!-- 播放器实例 -->
-    <audio ref="audio" :src="globalState.songlist.active?.url" @canplay="getDuration" @pause="audioPause"
-      @timeupdate="timeupdate" @play="audioPlay" style="display: none" :loop="state.playMode === '单曲循环'"></audio>
+    <audio ref="audio" :src="globalState.songlist.active?.url" @canplay="audioGetDuration" @pause="audioPause"
+      @timeupdate="audioTimeUpdate" @play="audioPlay" style="display: none"
+      :loop="globalState.player.playMode === PlayMode.LOOP"></audio>
   </div>
 </template>
 
@@ -94,138 +95,117 @@ import { useGlobalData } from '@/store/globalData';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
-import { NIcon, NSlider, NIconWrapper, NTag } from 'naive-ui'
+import { NIcon, NSlider, NIconWrapper, NTag, useNotification } from 'naive-ui'
 import { PlayMode } from '@/store/types'
+
+const notification = useNotification()
 // import TagInput from './TagInput.vue';
 
 const globalState = useGlobalState()
 const globalData = useGlobalData()
-const audio = ref(null)
 
-const playModeIcon = {
-  [PlayMode.LOOP]: ArrowRepeatAll16Regular,
-  [PlayMode.SINGLE]: RepeatOnce,
-  [PlayMode.RANDOM]: ArrowsShuffle
-}
+
 const state = reactive({
   // playerlist: computed(() => {
   //   return globalState.player.playerList;
   // }), // 播放列表
-  // isPlaying: false, // 是否正在播放
-  isProgressDrag: false, // 是否正在拖动进度条
-  progressVal: 0,
   inputTag: [], // 快捷输入标签
-  currentTime: computed({
-    get() {
-      if (state.isProgressDrag) {
-        return state.progressVal
-      } else {
-        return globalState.player.currentTime
-      }
-    },
-    set(val) {
-      state.progressVal = val
-    }
-  }),
-  volume: 100, // max 100
-  beforeVolumn: 100,
-  // playMode: '顺序播放', // 播放模式
-  playModeComponent: computed(() => {
-    return playModeIcon[globalState.player.playMode]
-  }),
-  volumeComponent: computed(() => {
-    if (state.volume === 0) return IosVolumeOff
-    if (state.volume < 25) return IosVolumeMute
-    if (state.volume < 65) return IosVolumeLow
-    return IosVolumeHigh
-  }),
 })
 
 /** 
  * @desc 根据 globalState 修改播放状态
  */
-watch(() => globalState.player.isPlaying, (val) => {
-  if (state.isPlaying !== val) {
-    state.isPlaying = val
-    val ? audioPlay() : audioPause()
-  }
-})
+// watch(() => globalState.player.isPlaying, (val: boolean) => {
+//   val ? audioPlay() : audioPause()
+// })
 
 // 同步 player 中和 table 中 tagInput 组件的值
-function updateAllTagInput(newTag) {
-  console.log('updateAllTagInput', newTag)
-  globalData.status.updateTagInput = new Date().getTime();
-}
+// function updateAllTagInput(newTag) {
+//   console.log('updateAllTagInput', newTag)
+//   globalData.status.updateTagInput = new Date().getTime();
+// }
+
+
+
 
 /** 
- * @desc 音量控制
+ * @desc 进度条
+ * =============================================================== 
  */
-watch(() => state.volume, (val) => {
-  audio.value.volume = val / 100
-})
-function onVolumnMute() {
-  if (state.volume === 0) {
-    state.volume = state.beforeVolumn
-  } else {
-    state.beforeVolumn = state.volume
-    state.volume = 0
-  }
+interface Progress {
+  val: number;
+  isDrag: boolean;
+  currentTime: number;
 }
-/** 
- * @desc 播放进度条下方 时间格式化
- * @params {  } 
- */
+const progress: Progress = reactive({
+  val: 0,
+  isDrag: false,
+  currentTime: computed({
+    get() {
+      return progress.isDrag ? progress.val : globalState.player.currentTime
+    },
+    set(val) {
+      progress.val = val
+    }
+  }),
+})
+
+function dragHandler(val: number) {
+  progress.val = val
+}
+
+function dragHandlerStart() {
+  progress.isDrag = true
+}
+
+function dragHandlerEnd() {
+  globalState.player.currentTime = progress.val
+  audio.value.currentTime = progress.val
+  progress.isDrag = false
+}
+
+// 播放进度条下方 时间格式化
 const processInfo = computed(() => {
-  const curr = timeFormatter(Math.floor(state.currentTime))
+  const curr = timeFormatter(Math.floor(progress.currentTime))
   const dura = timeFormatter(Math.floor(globalState.player.duration))
   return `${curr || '--'} / ${dura || '--'}`
 })
+
 // 时间格式化
-const timeFormatter = (value) => {
+const timeFormatter = (value: number) => {
   if (value === 0) return '00:00'
   const minute = Math.floor(value / 60)
   const second = Math.floor(value % 60)
   return `${minute}:${second < 10 ? '0' + second : second}`
 }
 /** 
- * @desc 播放进度条 拖动处理
- * @params {  } 
+ * @desc 播放器控制
+ * =============================================================== 
  */
-function dragHandler(val) {
-  state.progressVal = val
+const audio = ref()
+
+// 获取音乐时长
+function audioGetDuration() {
+  globalState.player.duration = audio.value.duration;
 }
-function dragHandlerStart() {
-  state.isProgressDrag = true
+
+// 暂停
+function audioPause() {
+  audio.value?.pause()
+  globalState.player.isPlaying = false;
 }
-function dragHandlerEnd() {
-  globalState.player.currentTime = state.progressVal
-  audio.value.currentTime = state.progressVal
-  state.isProgressDrag = false
-}
-/** 
- * @desc currPlaySong 改变时，更新 audio src
- * @params {  } 
- */
-watch(() => globalState.player.currPlayIndex, (val) => {
-  if (globalState.player.currPlaySong.is404) {
-    setTimeout(() => {
-      globalState.setNextSong()
-    }, 3000);
-  } else if (val) {
-    audioPlay()
-  }
-}, { deep: true })
-/** 
- * @desc Audio播放器 播放/暂停 事件
- */
+
+// 播放
 async function audioPlay() {
-  if (globalState.songlist.active?.url) {
-    audio.value?.play()
-    globalState.player.isPlaying = true;
+  if (globalState.songlist.active.url) {
+    nextTick(() => {
+      audio.value.play()
+      globalState.player.isPlaying = true;
+    })
     return true;
   }
   if (globalState.songlist.active?.is404) {
-    window.$Notification.error({
+    notification.error({
       title: "该歌曲暂无音源",
       duration: 3000
     })
@@ -234,54 +214,59 @@ async function audioPlay() {
   const canPlay = await globalState.getActiveSongUrl();
   if (canPlay) {
     audio.value?.play()
-    state.isPlaying = true;
     globalState.player.isPlaying = true;
   }
 }
 
-function audioPause() {
-  audio.value?.pause()
-  state.isPlaying = false;
-  globalState.player.isPlaying = false;
-}
-/**
- * @desc 获取音乐时长
- */
-const getDuration = () => {
-  // 此时可以拿到音频时长（audio.value.duration）;
-  console.log('此时可以拿到音频时长（' + audio.value.duration + '）')
-  globalState.player.duration = audio.value.duration;
-}
-/**
- * @desc 更新当前时间
- * 如果当前音频进度 = 总时长，则自动播放下一首(根据 playMode)
- */
-const timeupdate = (e: any) => {
+// 更新当前时间: 如果当前音频进度 = 总时长，则自动播放下一首(根据 playMode)
+const audioTimeUpdate = (e: any) => {
   globalState.player.currentTime = e.target.currentTime;
   if (e.target.currentTime >= globalState.player.duration) {
     globalState.setNextSong();
   }
 };
-/** 
- * @desc 根据播放模式播放下一首
- * @params {  } 
- */
-// function setNextIndex() {
-//   const playMode = state.playMode;
-//   if (playMode === '顺序播放') {
-//     const index = (globalState.player.currPlayIndex + 1) % globalState.player.playerList.length;
-//     globalState.player.setPlayIndex(index);
-//   } else if (playMode === '随机播放') {
-//     const index = Math.floor(Math.random() * globalState.player.playerList.length);
-//     globalState.player.setPlayIndex(index);
-//   }
-// }
+
+// 播放歌曲变动时，播放新的歌曲
+watch(() => globalState.activeSongIdx, (val) => {
+  if (globalState.songlist.active.is404) {
+    setTimeout(() => {
+      globalState.setNextSong()
+    }, 3000);
+  } else if (val) {
+    audioPlay()
+  }
+}, { deep: true })
 
 /** 
- * @desc 播放列表相关
- * @params {  } 
+ * @desc 音量控制
+ * =============================================================== 
  */
-// 点击播放列表切歌
+const volume = reactive({
+  val: 100, // max 100
+  beforeVal: 100,
+  volumeComponent: computed(() => {
+    if (volume.val === 0) return IosVolumeOff
+    if (volume.val < 25) return IosVolumeMute
+    if (volume.val < 65) return IosVolumeLow
+    return IosVolumeHigh
+  }),
+})
+watch(() => volume.val, (val) => {
+  audio.value.volume = val / 100
+})
+function onVolumnMute() {
+  if (volume.val === 0) {
+    volume.val = volume.beforeVal
+  } else {
+    volume.beforeVal = volume.val
+    volume.val = 0
+  }
+}
+
+/** 
+ * @desc 播放列表
+ * =============================================================== 
+ */
 const playerlistRef = ref()
 function onPlaylistClick(index: number) {
   globalState.setActiveSong({ index })
@@ -291,10 +276,18 @@ function setPlaylistScrollTop() {
   playerlistRef.value.scrollTo({ top: scrollTop })
 }
 
-/** 
- * @desc 播放模式切换
- * @params {  } 
+/**
+ * @desc 播放模式
+ * =============================================================== 
  */
+const playModeIcon = {
+  [PlayMode.LOOP]: ArrowRepeatAll16Regular,
+  [PlayMode.SINGLE]: RepeatOnce,
+  [PlayMode.RANDOM]: ArrowsShuffle
+}
+const PlayModeComponent = computed(() => {
+  return playModeIcon[globalState.player.playMode]
+})
 function onPlayModeChange() {
   const mode = [PlayMode.LOOP, PlayMode.SINGLE, PlayMode.RANDOM]
   const index = mode.indexOf(globalState.player.playMode);

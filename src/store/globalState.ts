@@ -65,6 +65,7 @@ export const useGlobalState = defineStore({
     },
     /** 
      * @desc 设置正在播放的歌曲
+     * 支持通过 index 或 id 查找，优先 id
      */
     async setActiveSong(config: { index?: number, id?: number }) {
       if (!this.songlist.data.length) {
