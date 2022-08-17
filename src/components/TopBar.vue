@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { NButton, NIcon, useNotification, NDropdown, NTag, NAutoComplete } from 'naive-ui';
+import { NButton, NIcon, NTag } from 'naive-ui';
 import { LogoGithub } from '@vicons/ionicons4'
 import { useRouter, useRoute } from 'vue-router'
 import { useGlobalData } from '@/store/globalData'
