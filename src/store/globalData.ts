@@ -121,8 +121,11 @@ export const useGlobalData = defineStore({
       if (!song.id) return;
       if (force || song.url) return;
       const detail = await api.get('/song/url', { id: song.id, br: 320000 });
-      const url = detail.data[0].url;
-      return url
+      if (detail?.data[0]?.url) {
+        const url = detail.data[0].url;
+        return url
+      }
+      return false
     }
   }
 })

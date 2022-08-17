@@ -9,6 +9,7 @@ import { NDataTable, NButton, NAvatar, NTag } from "naive-ui";
 import { h, ref, getCurrentInstance, reactive, defineExpose, watch, nextTick } from "vue";
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
+import type { Song } from '@/store/types';
 // import TagInput from '@/components/TagInput.vue'
 
 const globalState = useGlobalState()
@@ -41,22 +42,22 @@ const tConfig = reactive({
   }
 })
 
-const tableRef = ref(null)
-// watch(() => globalState.player.currPlayIndex, (index) => {
-//   // 页码根据 index 自动跳转到目标位置, scroll 到目标位置
-//   if (index >= 0) {
-//     let pageNum = Math.ceil(index / pagination.pageSize)
-//     const rowHeight = 68;
-//     let scrollPixel = (index % pagination.pageSize) * rowHeight;
-//     if (scrollPixel > 3 * rowHeight) {
-//       scrollPixel = scrollPixel - 3 * rowHeight;
-//     }
-//     pagination.page = pageNum
-//     nextTick(() => {
-//       tableRef.value.scrollTo({ top: scrollPixel })
-//     })
-//   }
-// })
+// 页码根据 index 自动跳转到目标位置, scroll 到目标位置
+const tableRef = ref()
+watch(() => globalState.activeSongIdx, (index) => {
+  if (index >= 0) {
+    const pageNum: number = Math.ceil(index / pagination.pageSize)
+    const rowHeight = 68;
+    let scrollY: number = (index % pagination.pageSize) * rowHeight;
+    if (scrollY > 3 * rowHeight) {
+      scrollY = scrollY - 3 * rowHeight;
+    }
+    pagination.page = pageNum
+    nextTick(() => {
+      tableRef?.value.scrollTo({ top: scrollY })
+    })
+  }
+})
 const pagination = reactive({
   page: 1,
   pageSize: 30,
@@ -94,9 +95,9 @@ const songTableColumns = [
     key: "name",
     minWidth: 200,
     width: 300,
-    render(row) {
+    render(row: Song) {
       const needFee = row.fee == 1
-      const node = [
+      const node: any[] = [
         row.name
       ]
       if (needFee) {
@@ -111,7 +112,7 @@ const songTableColumns = [
     title: "封面",
     key: "al.picUrl",
     width: '80px',
-    render(row) {
+    render(row: Song) {
       const songImgUrl = `${row.al.picUrl}?param=40y40`
       return h(
         NAvatar,
@@ -125,14 +126,14 @@ const songTableColumns = [
   {
     title: "歌手",
     minWidth: 100,
-    render(row) {
-      return row.ar.map(artist => artist.name).join(' / ')
+    render(row: Song) {
+      return row.ar.map((artist: any) => artist.name).join(' / ')
     }
   },
   {
     title: "专辑",
     minWidth: 100,
-    render(row) {
+    render(row: Song) {
       return h('div', {}, row.al.name)
     }
   },
@@ -140,7 +141,7 @@ const songTableColumns = [
     title: 'Tag',
     minWidth: 500,
     width: 700,
-    render(row, index) {
+    render(row: Song, index: number) {
       return 'haha'
       // return h(TagInput, {
       //   songId: row.id,

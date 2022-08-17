@@ -40,7 +40,12 @@ export const useGlobalState = defineStore({
     }
   }),
   getters: {
-    
+    activePlaylistIdx: (state) => {
+      return state.playlist.data.findIndex(item => item.id === state.playlist.active.id)
+    },
+    activeSongIdx: (state) => {
+      return state.songlist.data.findIndex(item => item.id === state.songlist.active.id)
+    }
   },
   actions: {
     /** 
@@ -88,7 +93,7 @@ export const useGlobalState = defineStore({
       if (!song.id) return false;
       if (!force && song.url) return false;
       this.player.isLoading = true;
-      song.url = await useGlobalData().getSongUrl(song)
+      song.url = await useGlobalData().getSongUrl(song) || null
       this.player.isLoading = false;
       return song
     },

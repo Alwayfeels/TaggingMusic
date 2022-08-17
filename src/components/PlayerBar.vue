@@ -1,7 +1,7 @@
 <template>
   <div class="play-bar w-full h-20 fixed bottom-0" :class="{ 'hidden-playbar': !globalState.player.isShow }">
     <div class="bookmark flex items-center justify-center absolute cursor-pointer"
-      @click="globalState.player.togglePlayer">
+      @click="globalState.player.isShow = !globalState.player.isShow">
       <n-icon :component="globalState.player.isShow ? CaretDown24Filled : CaretUp24Filled" />
     </div>
     <div class="w-full h-full px-10 flex items-center justify-center">
@@ -15,7 +15,7 @@
             class="ml-2 mini-tag float-right">VIP
           </NTag>
         </div>
-        <div class="max-w-sm truncate">{{ globalState.songlist.active?.ar?.map(e => e.name)?.join(' / ') }}</div>
+        <div class="max-w-sm truncate">{{ globalState.songlist.active?.ar?.map((e: any) => e.name)?.join(' / ') }}</div>
       </div>
       <!-- 播放控制 -->
       <div class="ml-4 flex items-center">
@@ -26,7 +26,8 @@
             <n-icon v-else :size="24" :component="Play48Filled" />
           </n-icon-wrapper>
         </n-spin>
-        <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled" @click="globalState.setNextSong" />
+        <n-icon size="24" color="#18a058" class="p-2 cursor-pointer" :component="Next24Filled"
+          @click="globalState.setNextSong" />
       </div>
       <!-- 进度条 -->
       <div class="w-96 ml-6 pt-1 flex flex-col">
@@ -54,8 +55,8 @@
         <div class="player-list w-full pt-1">
           <n-scrollbar ref="playerlistRef" style="max-height: 300px">
             <div class="flex w-full items-center cursor-pointer hover:bg-gray-100 box-border p-2 mr-2"
-              v-for="(item, index) in globalState.player.playerList" :key="item.id" @click="onPlaylistClick(index)">
-              <n-icon v-if="globalState.player.currPlaySong.id === item.id" color="#18a058" :size="16"
+              v-for="(item, index) in globalState.songlist.data" :key="item.id" @click="onPlaylistClick(index)">
+              <n-icon v-if="globalState.songlist.active.id === item.id" color="#18a058" :size="16"
                 :component="Play12Filled" />
               <div class="pl-1 flex-1 text-gray-500 leading-4">{{ item.name }}</div>
               <!-- <div class="pr-2 text-red-400 justify-items-end leading-4 hover:underline"
@@ -71,7 +72,7 @@
           <n-icon class="cursor-pointer ml-4" size="24" :component="state.playModeComponent"
             @click="onPlayModeChange" />
         </template>
-        {{ state.playMode }}
+        {{ globalState.player.playMode }}
       </n-tooltip>
       <!-- 快捷 Taginput -->
       <div class="input-tag flex-1 ml-16">
@@ -85,7 +86,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
 import { ArrowRepeatAll16Regular, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled, Play12Filled } from '@vicons/fluent'
 import { useGlobalState } from '@/store/globalState';
@@ -94,22 +95,23 @@ import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicon
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper, NTag } from 'naive-ui'
+import { PlayMode } from '@/store/types'
 // import TagInput from './TagInput.vue';
 
 const globalState = useGlobalState()
 const globalData = useGlobalData()
 const audio = ref(null)
 
-const playMode = {
-  '顺序播放': ArrowRepeatAll16Regular,
-  '单曲循环': RepeatOnce,
-  '随机播放': ArrowsShuffle
+const playModeIcon = {
+  [PlayMode.LOOP]: ArrowRepeatAll16Regular,
+  [PlayMode.SINGLE]: RepeatOnce,
+  [PlayMode.RANDOM]: ArrowsShuffle
 }
 const state = reactive({
   // playerlist: computed(() => {
   //   return globalState.player.playerList;
   // }), // 播放列表
-  isPlaying: false, // 是否正在播放
+  // isPlaying: false, // 是否正在播放
   isProgressDrag: false, // 是否正在拖动进度条
   progressVal: 0,
   inputTag: [], // 快捷输入标签
@@ -127,9 +129,9 @@ const state = reactive({
   }),
   volume: 100, // max 100
   beforeVolumn: 100,
-  playMode: '顺序播放', // 播放模式
+  // playMode: '顺序播放', // 播放模式
   playModeComponent: computed(() => {
-    return playMode[state.playMode]
+    return playModeIcon[globalState.player.playMode]
   }),
   volumeComponent: computed(() => {
     if (state.volume === 0) return IosVolumeOff
@@ -219,12 +221,11 @@ watch(() => globalState.player.currPlayIndex, (val) => {
 async function audioPlay() {
   if (globalState.songlist.active?.url) {
     audio.value?.play()
-    state.isPlaying = true;
     globalState.player.isPlaying = true;
     return true;
   }
   if (globalState.songlist.active?.is404) {
-    window.$notification.error({
+    window.$Notification.error({
       title: "该歌曲暂无音源",
       duration: 3000
     })
@@ -255,7 +256,7 @@ const getDuration = () => {
  * @desc 更新当前时间
  * 如果当前音频进度 = 总时长，则自动播放下一首(根据 playMode)
  */
-const timeupdate = (e) => {
+const timeupdate = (e: any) => {
   globalState.player.currentTime = e.target.currentTime;
   if (e.target.currentTime >= globalState.player.duration) {
     globalState.setNextSong();
@@ -282,11 +283,11 @@ const timeupdate = (e) => {
  */
 // 点击播放列表切歌
 const playerlistRef = ref()
-function onPlaylistClick(index) {
-  globalState.player.setPlayIndex(index)
+function onPlaylistClick(index: number) {
+  globalState.setActiveSong({ index })
 }
 function setPlaylistScrollTop() {
-  const scrollTop = globalState.player.currPlayIndex * 32;
+  const scrollTop = globalState.activeSongIdx * 32;
   playerlistRef.value.scrollTo({ top: scrollTop })
 }
 
@@ -295,10 +296,10 @@ function setPlaylistScrollTop() {
  * @params {  } 
  */
 function onPlayModeChange() {
-  const playMode = ['顺序播放', '单曲循环', '随机播放'];
-  let index = playMode.indexOf(state.playMode);
-  index = (index + 1) % playMode.length;
-  state.playMode = playMode[index];
+  const mode = [PlayMode.LOOP, PlayMode.SINGLE, PlayMode.RANDOM]
+  const index = mode.indexOf(globalState.player.playMode);
+  const nextIndex = (index + 1) % mode.length;
+  globalState.player.playMode = mode[nextIndex];
 }
 </script>
 
