@@ -15,11 +15,13 @@ export const useGlobalData = defineStore({
   id: 'globalData',
   state: (): GlobalData => ({
     user: {
-      profile: null,
-      account: null
+      profile: {},
+      account: {}
     },
     playlist: [],
-    songlist: []
+    songlist: [],
+    tagList: [],
+    taggedSong: []
   }),
   getters: {
   },

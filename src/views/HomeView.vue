@@ -1,5 +1,5 @@
 <template>
-  <n-layout class="main-container" :class="user.isLogin ? 'min-height' : 'full-height'" has-sider>
+  <n-layout class="main-container" :class="player.isShow ? 'min-height' : 'full-height'" has-sider>
     <n-layout-sider v-if="user.isLogin" collapse-mode="width" :collapsed-width="120" :width="320"
       show-trigger="arrow-circle" content-style="padding: 24px;" bordered v-menus:right="rightMenus"
       :native-scrollbar="false">
@@ -40,7 +40,7 @@ import { useNotification } from 'naive-ui'
 const globalData = useGlobalData()
 // 全局应用状态
 const globalState = useGlobalState()
-const { playlist, songlist, user } = globalState
+const { playlist, songlist, user, player } = globalState
 
 // const playlist = reactive({
 //   data: [],

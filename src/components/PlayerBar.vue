@@ -76,6 +76,7 @@
       </n-tooltip>
       <!-- 快捷 Taginput -->
       <div class="input-tag flex-1 ml-16">
+        <TagInput></TagInput>
         <!-- <TagInput :songId="globalState.player.currPlaySong?.id" :songInfo="globalState.player.currPlaySong"
           @change="updateAllTagInput"></TagInput> -->
       </div>
@@ -96,6 +97,7 @@ import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicon
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper, NTag, useNotification } from 'naive-ui'
+import TagInput from './TagInput.vue';
 import { PlayMode } from '@/store/types'
 
 const notification = useNotification()

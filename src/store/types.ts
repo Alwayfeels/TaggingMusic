@@ -15,7 +15,9 @@ export enum PlayMode {
 export interface GlobalData {
   user: UserInfo;
   playlist: any;
-  songlist: any;
+  songlist: Song[];
+  tagList: any;
+  taggedSong: any[];
   [key: string]: unknown;
 }
 
@@ -63,4 +65,20 @@ export interface GlobalState {
     duration: number;
     playMode: PlayMode;
   };
+}
+
+export interface Tag {
+  name: string;
+  [key: string]: any;
+}
+
+export interface LabelValue {
+  label: string;
+  value: any;
+  disabled?: boolean;
+}
+export interface TagInputState {
+  val: string;
+  tagList: LabelValue[];
+  activeTags: LabelValue[];
 }
