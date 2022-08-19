@@ -6,14 +6,16 @@
 
 <script setup lang="ts">
 import { NDataTable, NButton, NAvatar, NTag } from "naive-ui";
-import { h, ref, getCurrentInstance, reactive, defineExpose, watch, nextTick } from "vue";
+import { h, ref, reactive, defineExpose, watch, nextTick } from "vue";
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
 import type { Song } from '@/store/types';
-// import TagInput from '@/components/TagInput.vue'
+import type { DataTableColumns, RawData } from 'naive-ui'
+import TagInputGroup from '@/components/TagInputGroup.vue'
 
 const globalState = useGlobalState()
 const globalData = useGlobalData()
+
 defineExpose({ resetPager })
 
 const props = defineProps({
@@ -56,6 +58,10 @@ watch(() => globalState.activeSongIdx, (index) => {
     })
   }
 })
+
+/** 
+ * @desc 分页器
+ */
 const pagination = reactive({
   page: 1,
   pageSize: 30,
@@ -70,13 +76,11 @@ const pagination = reactive({
   }
 });
 
-function resetPager() {
+function resetPager(): void {
   pagination.page = 1;
 }
 
-const tableInstance = getCurrentInstance();
-
-function rowClassName(row: any) {
+function rowClassName(row: any): string {
   let className = ''
   if (row?.id === globalState.songlist.active?.id) {
     className += 'playing-song'
@@ -87,7 +91,7 @@ function rowClassName(row: any) {
   return className;
 }
 
-const songTableColumns = [
+const songTableColumns: DataTableColumns = [
   {
     title: "歌曲名称",
     key: "name",
@@ -123,6 +127,7 @@ const songTableColumns = [
   },
   {
     title: "歌手",
+    key: "id",
     minWidth: 100,
     render(row: Song) {
       return row.ar.map((artist: any) => artist.name).join(' / ')
@@ -130,6 +135,7 @@ const songTableColumns = [
   },
   {
     title: "专辑",
+    key: "al.id",
     minWidth: 100,
     render(row: Song) {
       return h('div', {}, row.al.name)
@@ -137,18 +143,14 @@ const songTableColumns = [
   },
   {
     title: 'Tag',
+    key: 'id',
     minWidth: 500,
     width: 700,
-    render(row: Song, index: number) {
-      return 'haha'
-      // return h(TagInput, {
-      //   songId: row.id,
-      //   songInfo: {
-      //     name: row.name,
-      //     artist: row.ar.map(artist => artist.name).join(' / '),
-      //     album: row.al.name
-      //   }
-      // })
+    render(row: Song) {
+      return h(TagInputGroup, {
+        songId: row.id,
+        song: row
+      })
     }
   }
 ]
