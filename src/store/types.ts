@@ -16,8 +16,7 @@ export interface GlobalData {
   user: UserInfo;
   playlist: any;
   songlist: Song[];
-  tagList: any;
-  taggedSong: any[];
+  taggedSongs: TaggedSong[];
   [key: string]: unknown;
 }
 
@@ -34,6 +33,10 @@ export interface Song {
   name?: string;
   url?: string;
   [key: string]: any;
+}
+
+export interface TaggedSong extends Song {
+  tags: string[]
 }
 
 export interface GlobalState {
@@ -67,8 +70,9 @@ export interface GlobalState {
   };
 }
 
-export interface Tag {
+export interface TagRef {
   name: string;
+  ref?: number;
   [key: string]: any;
 }
 

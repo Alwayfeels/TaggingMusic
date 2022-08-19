@@ -1,9 +1,9 @@
 <template>
-  <NDynamicTags ref="dynamicTags" v-model:value="state.tagInputVal" @mousedown.self="clickHandler" @click.stop=""
-    :on-update:value="dynamicTagsChange">
+  <NDynamicTags ref="dynamicTags" v-model:value="state.tagInputVal" @mousedown.self="onClickHandler" @click.stop=""
+    :on-update:value="onTagsChange">
     <template #input="{ submit, deactivate }">
-      <TagInput @pressEnter="enterHandler($event, submit, deactivate)"
-        @pressTab="tabHandler($event, submit, deactivate)" @blur="blurHandler($event, submit, deactivate)">
+      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)"
+        @pressTab="onTabHandler($event, submit, deactivate)" @blur="onBlurHandler($event, submit, deactivate)">
       </TagInput>
     </template>
     <template #trigger="{ activate, disabled }">
@@ -16,10 +16,10 @@
 
 <script setup lang="ts">
 import { NDynamicTags, NSelect, NButton } from "naive-ui";
-import { ref, h, computed, nextTick, watch, reactive } from "vue";
+import { ref, h, computed, nextTick, watch, reactive, toRaw } from "vue";
 import TagInput from "@/components/TagInput.vue";
-import localforage from "localforage";
 import { useGlobalData } from '@/store/globalData';
+import type { Song, TaggedSong } from "@/store/types";
 // 全局数据中心
 const globalData = useGlobalData()
 
@@ -29,15 +29,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // 父组件 v-model 的值
-  value: Array,
-  songId: Number,
-  songInfo: Object,
+  value: Array, // 父组件 v-model 的值
+  songId: Number, // 根据歌曲 id 初始化标签
+  song: Object // 歌曲信息
 });
+
 const emits = defineEmits(['update:value', 'change'])
 
-const dynamicTags = ref(null)
-
+const dynamicTags = ref()
 interface TagInputGroupState {
   tagInputVal: any[],
 }
@@ -48,9 +47,9 @@ const state: TagInputGroupState = reactive({
 // 监听 songId 初始化 tagInputVal
 watch(() => props.songId, async (propSongId) => {
   if (!propSongId) return;
-  const existSong = globalData.taggedSong?.find(song => song.id === propSongId)
-  if (existSong) {
-    state.tagInputVal = [...existSong.tagName]
+  const taggedSong = globalData.taggedSongs?.find(song => song.id === propSongId)
+  if (taggedSong) {
+    state.tagInputVal = [...taggedSong.tags]
   } else {
     state.tagInputVal = []
   }
@@ -58,24 +57,10 @@ watch(() => props.songId, async (propSongId) => {
   immediate: true
 })
 
-// 根据globalData重新初始化tagInputVal
-// function refresh() {
-//   if (!props.songId) return;
-//   const existSong = globalData.taggedSong?.find(e => e.songId === props.songId)
-//   if (existSong) {
-//     state.tagInputVal = existSong.tagName.map(e => e)
-//   } else {
-//     state.tagInputVal = []
-//   }
-// }
-// 
-// watch(() => globalData.status?.updateTagInput, () => {
-//   setTimeout(() => {
-//     refresh()
-//   }, 0);
-// })
-
-function dynamicTagsChange(newVal) {
+/** 
+ * @desc 标签 change 事件处理
+ */
+function onTagsChange(newVal: string[]) {
   // 重复值不生效
   // if (newVal.length !== Array.from(new Set(newVal)).length) {
   //   return;
@@ -84,39 +69,38 @@ function dynamicTagsChange(newVal) {
     emits('update:value', newVal);
     return;
   }
-  // remove tag
   if (newVal.length < state.tagInputVal.length) {
-    const needRemoveTag = state.tagInputVal.filter(x => {
+    // need remove tag
+    const needRemoveTags = state.tagInputVal.filter(x => {
       return !newVal.includes(x)
     })
-    Promise.all([
-      removeTag(needRemoveTag),
-      removeTagInTaggedSong(needRemoveTag)
-    ]).then(() => {
-      console.log(globalData.taggedSong)
-      emits('change', newVal);
-    })
+    removeTag(needRemoveTags)
   }
   state.tagInputVal = newVal
+  emits('change', newVal);
 }
-// singleTagInput 事件处理
-function enterHandler(tag, submit, deactivate) {
+
+/** 
+ * @desc enter 按键事件处理
+ */
+function onEnterHandler(tag: string, submit: any, deactivate: any) {
   // tag = tag.trim()
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
     insertTag(tag);
-    insertTaggedSongs(tag)
   }
 }
-// tab 键盘事件处理
-function tabHandler(tag, submit, deactivate) {
+
+/** 
+ * @desc tab 按键事件处理
+ */
+function onTabHandler(tag: string, submit: any, deactivate: any) {
   // when you press tab, save and open next <tagInput>
   // tag = tag.trim()
   if (!tag) return false;
   tag ? submit(tag) : deactivate();
   if (!props.inputOnly) {
     insertTag(tag);
-    insertTaggedSongs(tag)
   }
   // focus 下一个 tagInput
   setTimeout(() => {
@@ -124,99 +108,64 @@ function tabHandler(tag, submit, deactivate) {
   }, 0);
 }
 
-// 点击外部 关闭/开启 tagInput
-function clickHandler() {
+/** 
+ * @desc 组件点击事件处理
+ */
+function onClickHandler() {
   if (dynamicTags.value.showInput) return false
   setTimeout(() => {
     dynamicTags.value.showInput = !dynamicTags.value.showInput
   }, 0);
 }
 
-// 根据 globalData.removeTagOnBlur 来决定是否在移除标签
-function blurHandler($event, submit, deactivate) {
-  if (globalData.appConfig.removeTagOnBlur) {
-    // deactivate()
-    return;
-  }
-  enterHandler($event, submit, deactivate)
+/** 
+ * @desc blur 失焦事件处理
+ */
+function onBlurHandler($event: string, submit: any, deactivate: any) {
+  // if (globalData.appConfig.removeTagOnBlur) {
+  deactivate()
+  //   return;
+  // }
+  // onEnterHandler($event, submit, deactivate)
 }
 
-// 数据处理
-// 将tag插入indexedDB.tag, 并更新 globalData.tag
-async function insertTag(tagName) {
+/** 
+ * @desc 插入标签到 globalData.taggedSongs[?].tags , 同步至 indexedDb
+ */
+async function insertTag(tagName: string) {
   if (typeof tagName !== "string") {
     console.error("insertTag(): tagName must be string", tagName)
     return false;
   }
-  let _tags = await localforage.getItem("tag")
-  _tags = _tags || []
-
-  const tagExist = _tags.findIndex((e) => e.tagName === tagName);
-  if (tagExist >= 0) {
-    _tags[tagExist].ref++;
-  } else {
-    _tags.push({ tagName, ref: 1 });
-  }
-  globalData.tagList = _tags
-  localforage.setItem("tag", _tags);
-}
-// 将tag插入indexedDB.taggedSongs 并更新 globalData.taggedSong
-const insertTaggedSongs = async (tagName) => {
-  if (typeof tagName !== "string") {
-    console.error("insertTaggedSongs(): tagName must be string", tagName)
-    return false;
-  }
-  let taggedSong = await localforage.getItem('taggedSong');
-  taggedSong = taggedSong ? taggedSong : [];
+  const taggedSongs = globalData.taggedSongs || [];
+  // tag 插入的目标歌曲 id
   const songId = props.songId;
-  // 判断该songId是否已经存在
-  const songExist = taggedSong.findIndex((e) => e.songId === songId);
-  // 若已存在，则将tagName添加到taggedSong中，否则添加新的taggedSong
-  if (songExist >= 0) {
-    taggedSong[songExist].tagName.push(tagName);
+  const songIndex: number = taggedSongs.findIndex((e) => e.id === songId);
+
+  // 目标 TaggedSong 已经存在，则更新 tags， 否则初始化
+  if (songIndex >= 0) {
+    taggedSongs[songIndex].tags.push(tagName);
   } else {
-    taggedSong.push({ songId, tagName: [tagName], ...props.songInfo });
-  }
-  globalData.taggedSong = taggedSong
-  // 存入indexedDB
-  localforage.setItem('taggedSong', taggedSong);
-}
-
-// 删除taggedSong中的tag
-const removeTagInTaggedSong = async (tags) => {
-  let taggedSong = await localforage.getItem('taggedSong');
-  taggedSong = taggedSong || [];
-  const songId = props.songId;
-  const songExist = taggedSong.findIndex((e) => e.songId === songId);
-  if (songExist >= 0) {
-    taggedSong[songExist].tagName = taggedSong[songExist].tagName.filter(x => !tags.includes(x));
-  }
-  globalData.taggedSong = taggedSong
-  await localforage.setItem("taggedSong", taggedSong);
-}
-
-// 删除一个或多个tag
-// tag: string|string[]
-const removeTag = async (tags) => {
-  if (typeof tags === 'string') {
-    tags = [tags]
-  }
-  let local_tags = await localforage.getItem("tag")
-  local_tags = local_tags || [];
-  tags.forEach(tag => {
-    const tagIndex = local_tags.findIndex((e) => e.tagName === tag);
-    if (tagIndex >= 0) {
-      const tagRef = local_tags[tagIndex].ref;
-      if (tagRef > 1) {
-        local_tags[tagIndex].ref--;
-      } else {
-        local_tags[tagIndex].ref = 0;
-      }
+    // 使用 toRaw 函数将 reactive 对象转换为原始对象, 防止内部引用对象被转换为 proxy 对象
+    const newTaggedSong = {
+      ...toRaw(props.song),
+      tags: [tagName]
     }
-  })
-  // 清除ref=0的tag
-  local_tags = local_tags.filter((e) => e.ref > 0);
-  globalData.tagList = local_tags
-  localforage.setItem("tag", local_tags);
+    taggedSongs.push(newTaggedSong)
+  }
+  nextTick(() => globalData.saveTaggedSongs())
+}
+
+/** 
+ * @desc 删除标签到 globalData.taggedSongs[?].tags , 同步至 indexedDb
+ */
+function removeTag(tags: string[]) {
+  const taggedSongs = globalData.taggedSongs || [];
+  const songId = props.songId;
+  const updateSong = taggedSongs.find((e) => e.id === songId);
+  if (updateSong) {
+    updateSong.tags = updateSong.tags.filter(tag => !tags.includes(tag));
+    nextTick(() => globalData.saveTaggedSongs())
+  }
 }
 </script>

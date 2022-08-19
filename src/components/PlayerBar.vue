@@ -76,7 +76,7 @@
       </n-tooltip>
       <!-- 快捷 Taginput -->
       <div class="input-tag flex-1 ml-16">
-        <TagInput></TagInput>
+        <TagInputGroup v-model:value="tagInputVal" :songId="globalState.songlist.active.id" :song="globalState.songlist.active"></TagInputGroup>
         <!-- <TagInput :songId="globalState.player.currPlaySong?.id" :songInfo="globalState.player.currPlaySong"
           @change="updateAllTagInput"></TagInput> -->
       </div>
@@ -97,16 +97,15 @@ import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicon
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper, NTag, useNotification } from 'naive-ui'
-import TagInput from './TagInput.vue';
+import TagInputGroup from './TagInputGroup.vue';
 import { PlayMode } from '@/store/types'
 
 const notification = useNotification()
-// import TagInput from './TagInput.vue';
 
 const globalState = useGlobalState()
 const globalData = useGlobalData()
 
-
+const tagInputVal = ref([])
 const state = reactive({
   // playerlist: computed(() => {
   //   return globalState.player.playerList;

@@ -60,7 +60,7 @@ export const useGlobalState = defineStore({
      */
     async setSonglist(id: number | null) {
       if (!id) return;
-      this.songlist.data = await useGlobalData().getSonglist(id)
+      this.songlist.data = await useGlobalData().getSonglist(id) || []
       this.songlist.active = this.songlist.data[0] || {}
     },
     /** 

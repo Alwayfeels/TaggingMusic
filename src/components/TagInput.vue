@@ -1,5 +1,5 @@
 <template>
-  <NAutoComplete size="small" ref="singleTagInput" v-model:value="state.val" v-model:options="state.activeTags"
+  <NAutoComplete size="small" ref="tagInput" v-model:value="state.val" v-model:options="state.activeTags"
     :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keypress.enter.prevent="onEnterHandler"
     @keydown.tab.prevent="onTabHandler" @keydown.esc.prevent="onEscHandler" :on-blur="onBlurHandler" />
 </template>
@@ -8,7 +8,7 @@
 import { NAutoComplete } from "naive-ui";
 import { ref, computed, watch, nextTick, reactive } from "vue";
 import { useGlobalData } from '@/store/globalData';
-import type { TagInputState, LabelValue, Tag } from '@/store/types';
+import type { TagInputState, LabelValue, TagRef } from '@/store/types';
 
 const globalData = useGlobalData()
 const emit = defineEmits(["change", "blur", "pressTab", "pressEnter"]);
@@ -18,7 +18,7 @@ const emit = defineEmits(["change", "blur", "pressTab", "pressEnter"]);
 const state: TagInputState = reactive({
   val: '',
   tagList: computed(() => {
-    return globalData.tagList?.map((e: Tag) => ({ label: e.name, value: e.name })) || []
+    return globalData.tagList?.map((e: TagRef) => ({ label: e.name, value: e.name })) || []
   }),
   activeTags: computed(() => {
     if (state.val) {
@@ -29,10 +29,10 @@ const state: TagInputState = reactive({
 })
 
 // 根据 globalData.tagList 中的数据联想
-const singleTagInput = ref();
+const tagInput = ref();
 
 // 组件加载完成时自动 focus
-watch(singleTagInput, (el) => {
+watch(tagInput, (el) => {
   if (el)
     nextTick(() => {
       el.focus();
@@ -41,15 +41,19 @@ watch(singleTagInput, (el) => {
 
 // 键盘输入处理
 function onEnterHandler() {
-  emit("pressEnter", state.val);
+  if (state.val) {
+    emit("pressEnter", state.val);
+  }
 }
 function onTabHandler() {
-  emit("pressTab", state.val);
+  if (state.val) {
+    emit("pressTab", state.val);
+  }
 }
 function onBlurHandler() {
   emit("blur", state.val);
 }
 function onEscHandler() {
-  singleTagInput.value.blur()
+  tagInput.value.blur()
 }
 </script>
