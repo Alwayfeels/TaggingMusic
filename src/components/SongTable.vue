@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { NDataTable, NButton, NAvatar, NTag } from "naive-ui";
-import { h, ref, reactive, defineExpose, watch, nextTick } from "vue";
+import { h, ref, reactive, watch, nextTick } from "vue";
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
 import type { Song } from '@/store/types';
