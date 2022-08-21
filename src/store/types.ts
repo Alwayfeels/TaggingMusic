@@ -21,7 +21,7 @@ export interface GlobalData {
 }
 
 export interface Playlist {
-  id?: number;
+  id?: number | null;
   name?: string;
   [key: string]: any;
 }
