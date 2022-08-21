@@ -22,7 +22,9 @@ export const useGlobalState = defineStore({
       isShow: false,
       isLoading: false,
       data: computed<any>(() => useGlobalData().playlist),
-      active: {}
+      active: {
+        id: null
+      }
     },
     songlist: {
       isShow: true,
