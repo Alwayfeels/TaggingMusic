@@ -76,7 +76,8 @@
       </n-tooltip>
       <!-- 快捷 Taginput -->
       <div class="input-tag flex-1 ml-16">
-        <TagInputGroup v-model:value="tagInputVal" :songId="globalState.songlist.active.id" :song="globalState.songlist.active"></TagInputGroup>
+        <TagInputGroup v-model:value="tagInputVal" :songId="globalState.songlist.active.id"
+          :song="globalState.songlist.active"></TagInputGroup>
         <!-- <TagInput :songId="globalState.player.currPlaySong?.id" :songInfo="globalState.player.currPlaySong"
           @change="updateAllTagInput"></TagInput> -->
       </div>
@@ -96,11 +97,11 @@ import { useGlobalData } from '@/store/globalData';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
-import { NIcon, NSlider, NIconWrapper, NTag, useNotification } from 'naive-ui'
+import { NIcon, NSlider, NIconWrapper, NTag, createDiscreteApi } from 'naive-ui'
 import TagInputGroup from './TagInputGroup.vue';
 import { PlayMode } from '@/store/types'
 
-const notification = useNotification()
+const { notification } = createDiscreteApi(['notification'])
 
 const globalState = useGlobalState()
 const globalData = useGlobalData()
@@ -206,7 +207,8 @@ async function audioPlay() {
     return true;
   }
   if (globalState.songlist.active?.is404) {
-    notification.error({
+    notification.create({
+      type: 'error',
       title: "该歌曲暂无音源",
       duration: 3000
     })

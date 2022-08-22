@@ -10,7 +10,7 @@ import { h, ref, reactive, watch, nextTick } from "vue";
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
 import type { Song } from '@/store/types';
-import type { DataTableColumns, RawData } from 'naive-ui'
+import type { DataTableColumns } from 'naive-ui'
 import TagInputGroup from '@/components/TagInputGroup.vue'
 
 const globalState = useGlobalState()

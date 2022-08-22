@@ -34,7 +34,6 @@ import Unlogin from '@/components/UnLogin.vue';
 // import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
 // import MergePlaylistDialog from '@/components/MergePlaylistDialog.vue';
 import PlayerBar from '@/components/PlayerBar.vue';
-import { useNotification } from 'naive-ui'
 
 // 全局数据中心
 const globalData = useGlobalData()

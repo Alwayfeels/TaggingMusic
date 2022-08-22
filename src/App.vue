@@ -1,10 +1,8 @@
 <template>
-  <n-notification-provider>
-    <header>
-      <TopBar />
-    </header>
-    <RouterView />
-  </n-notification-provider>
+  <header>
+    <TopBar />
+  </header>
+  <RouterView />
 </template>
 
 <script setup lang="ts">

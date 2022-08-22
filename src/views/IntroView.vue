@@ -21,7 +21,7 @@
         </div>
       </div>
     </div>
-    <div class="footer">
+    <div class="footer mt-40">
       MIT Licensed | Copyright © 2022-present
       <a href="https://github.com/yyx990803" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
     </div>
@@ -66,8 +66,6 @@ function toMainView() {
   padding: 0 20%;
 
   .footer {
-    position: fixed;
-    bottom: 10px;
   }
 }
 </style>

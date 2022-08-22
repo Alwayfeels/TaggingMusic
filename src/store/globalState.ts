@@ -11,7 +11,7 @@ export const useGlobalState = defineStore({
   id: 'globalState',
   state: (): GlobalState => ({
     user: {
-      isLogin: computed<boolean>(() => Boolean(useGlobalData().user.account)),
+      isLogin: computed<boolean>(() => Boolean(useGlobalData().user.account?.id)),
       isVip: computed<boolean>(() => useGlobalData().user.account?.vipType === 10)
     },
     topBar: {

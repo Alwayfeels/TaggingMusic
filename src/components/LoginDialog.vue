@@ -19,11 +19,13 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { NModal, NSpin, useNotification } from 'naive-ui'
+import { NModal, NSpin } from 'naive-ui'
+import { createDiscreteApi } from 'naive-ui'
 import api from '@/api/http'
 
+const { notification } = createDiscreteApi(['notification'])
+
 const emits = defineEmits(['loginSuccess'])
-const notification = useNotification()
 
 /** 
  * @desc 显隐控制
@@ -96,7 +98,8 @@ async function getLoginStatus(timer = 500) {
       break;
     case 803:
       QR_State.QRLoginState = QRStateEnum.Success;
-      notification.success({
+      notification.create({
+        type: 'success',
         title: "登录成功",
         duration: 3000
       })
