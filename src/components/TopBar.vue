@@ -22,7 +22,6 @@
       {{ globalState.user.isLogin ? '切换用户' : '登录' }}
     </NButton>
     <LoginDialog ref="LoginDialogRef" />
-    <NButton @click="openN">打开notification</NButton>
   </div>
 </template>
 
@@ -35,16 +34,16 @@ import { useGlobalData } from '@/store/globalData'
 import { useGlobalState } from '@/store/globalState'
 import SearchBar from '@/components/SearchBar.vue'
 import LoginDialog from '@/components/LoginDialog.vue'
-import { createDiscreteApi } from 'naive-ui'
+// import { createDiscreteApi } from 'naive-ui'
 
-const { notification } = createDiscreteApi(['notification'])
-function openN() {
-  notification.create({
-      type: 'error',
-      title: "该歌曲暂无音源",
-      duration: 3000
-    })
-}
+// const { notification } = createDiscreteApi(['notification'])
+// function openN() {
+//   notification.create({
+//       type: 'error',
+//       title: "该歌曲暂无音源",
+//       duration: 3000
+//     })
+// }
 
 const route = useRoute()
 const router = useRouter()
