@@ -1,11 +1,11 @@
 <template>
-  <n-data-table ref="tableRef" class="songTable" :loading="loading" :columns="songTableColumns" :data="tableData"
+  <n-data-table ref="tableRef" class="songTable" :loading="loading" :columns="songTableColumns" :data="(tableData as any[])"
     :pagination="pagination" :bordered="false" :flex-height="true" :row-props="tConfig.rowProps"
     :row-class-name="rowClassName" pagination-behavior-on-filter="first" :paginate-single-page="false" />
 </template>
 
 <script setup lang="ts">
-import { NDataTable, NButton, NAvatar, NTag } from "naive-ui";
+import { NDataTable, NAvatar, NTag } from "naive-ui";
 import { h, ref, reactive, watch, nextTick } from "vue";
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';

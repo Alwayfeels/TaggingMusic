@@ -25,6 +25,7 @@ export const useGlobalData = defineStore({
   getters: {
     tagList: (state) => {
       const tagArray = state.taggedSongs.map(item => item.tags).flat()
+      console.log('tagArray', tagArray);
       const tagList: TagRef[] = []
       tagArray.forEach((tag: string) => {
         const index = tagList.findIndex(item => item.name === tag)
@@ -37,6 +38,7 @@ export const useGlobalData = defineStore({
           })
         }
       })
+      console.log('tagList', tagList);
       localforage.setItem('tagList', tagList)
       return tagList
     },
@@ -44,16 +46,19 @@ export const useGlobalData = defineStore({
   actions: {
     /** 
      * @desc 初始化 globalData
+     * @includes user, playlist, taggedSongs 属性
      */
     async init() {
-      this.getUserInfo()
       this.initTaggedSongs()
-      await this.setPlaylist()
+      await this.initUserInfo()
+      if (this.user.account?.id) {
+        await this.initPlaylist()
+      }
     },
     /** 
-     * @desc 获取用户信息
+     * @desc 初始化用户信息
      */
-    async getUserInfo(force = false) {
+    async initUserInfo(force = false) {
       let profile, account = null
       if (!force) {
         [profile, account] = await Promise.all([localforage.getItem("profile"), localforage.getItem("account")]);
@@ -83,16 +88,42 @@ export const useGlobalData = defineStore({
     /** 
      * @desc 初始化已标记歌曲信息
      */
-    async initTaggedSongs() {
+    async initTaggedSongs(): Promise<TaggedSong[]> {
       const taggedSongs: TaggedSong[] = await localforage.getItem("taggedSongs") || [];
       if (taggedSongs) {
         this.taggedSongs = taggedSongs;
       }
+      return taggedSongs
     },
     /** 
-     * @desc 获取用户所有歌单
+     * @desc 保存 taggedSongs 到 indexedDB
      */
-    async setPlaylist(force = false) {
+    setTaggedSongs(taggedSongs?: TaggedSong[]) {
+      localforage.setItem("taggedSongs", toRaw(taggedSongs || this.taggedSongs));
+    },
+    /** 
+     * @desc 保存 传入的 tags，到指定的 taggedSongs[id].tags 中
+     * @cond 若无匹配的 id 或没有传入 id, 则创建新的 taggedSong 并初始化
+     */
+    setTagsInTaggedSongs(id: number, tags: string[], song?: Song): void {
+      const existSong = this.taggedSongs.find(e => e.id === id)
+      if (existSong) {
+        existSong.tags = tags
+        this.setTaggedSongs()
+        return;
+      }
+      if (song) {
+        // 新建 taggedSong 并初始化 tags
+        this.taggedSongs.push({ tags, ...toRaw(song) })
+        this.setTaggedSongs()
+        return;
+      }
+      console.error('setTagsInTaggedSongs error: params is unvalid')
+    },
+    /** 
+     * @desc 初始化用户所有歌单
+     */
+    async initPlaylist(force = false) {
       let playlist = null
       if (!force) {
         playlist = await localforage.getItem("playlist");
@@ -102,7 +133,7 @@ export const useGlobalData = defineStore({
         }
       }
       if (!this.user.account.id) {
-        console.warn('setPlaylist error: 用户id不存在')
+        console.warn('initPlaylist error: 用户id不存在')
         return false
       }
       // API Call
@@ -162,12 +193,6 @@ export const useGlobalData = defineStore({
         return url
       }
       return false
-    },
-    /** 
-     * @desc 保存 taggedSongs 到 indexedDB
-     */
-    saveTaggedSongs(taggedSongs?: TaggedSong[]) {
-      localforage.setItem("taggedSongs", toRaw(taggedSongs || this.taggedSongs));
     }
   }
 })

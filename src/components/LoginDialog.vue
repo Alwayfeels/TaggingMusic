@@ -22,10 +22,12 @@ import { computed, reactive, ref, watch } from 'vue'
 import { NModal, NSpin } from 'naive-ui'
 import { createDiscreteApi } from 'naive-ui'
 import api from '@/api/http'
+import { useGlobalState } from '@/store/globalState';
+import { useGlobalData } from '@/store/globalData';
 
 const { notification } = createDiscreteApi(['notification'])
-
 const emits = defineEmits(['loginSuccess'])
+const globalState = useGlobalState()
 
 /** 
  * @desc 显隐控制
@@ -105,6 +107,7 @@ async function getLoginStatus(timer = 500) {
       })
       emits('loginSuccess')
       showDialog.value = false
+      globalState.init();
       break;
   }
   // 递归

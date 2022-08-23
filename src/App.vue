@@ -8,14 +8,11 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import TopBar from './components/TopBar.vue';
-import { useGlobalData } from '@/store/globalData'
 import { useGlobalState } from '@/store/globalState';
 
-const globalData = useGlobalData()
 const globalState = useGlobalState()
 
 async function initApp() {
-  await globalData.init()
   await globalState.init()
 }
 initApp()

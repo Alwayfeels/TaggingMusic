@@ -76,10 +76,8 @@
       </n-tooltip>
       <!-- 快捷 Taginput -->
       <div class="input-tag flex-1 ml-16">
-        <TagInputGroup v-model:value="tagInputVal" :songId="globalState.songlist.active.id"
+        <TagInputGroup :songId="globalState.songlist.active.id"
           :song="globalState.songlist.active"></TagInputGroup>
-        <!-- <TagInput :songId="globalState.player.currPlaySong?.id" :songInfo="globalState.player.currPlaySong"
-          @change="updateAllTagInput"></TagInput> -->
       </div>
     </div>
     <!-- 播放器实例 -->
@@ -106,7 +104,6 @@ const { notification } = createDiscreteApi(['notification'])
 const globalState = useGlobalState()
 const globalData = useGlobalData()
 
-const tagInputVal = ref([])
 const state = reactive({
   // playerlist: computed(() => {
   //   return globalState.player.playerList;
