@@ -33,7 +33,7 @@ export const useGlobalState = defineStore({
       active: {}
     },
     player: {
-      isShow: true,
+      isShow: false,
       isLoading: false,
       isPlaying: false,
       currentTime: 0,

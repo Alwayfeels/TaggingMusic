@@ -37,6 +37,7 @@ const tConfig = reactive({
     return {
       onClick: () => {
         globalState.setActiveSong({ id: row.id })
+        globalState.player.isShow = true
       }
     };
   }

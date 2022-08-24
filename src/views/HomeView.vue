@@ -41,11 +41,6 @@ const globalData = useGlobalData()
 const globalState = useGlobalState()
 const { playlist, songlist, user, player } = globalState
 
-// const playlist = reactive({
-//   data: [],
-//   loading: false,
-// })
-
 /** 
  * @desc 右键菜单配置
  */
