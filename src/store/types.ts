@@ -1,4 +1,4 @@
-import type { ComputedRef } from "vue"
+import type { ComputedRef, PropType } from "vue"
 
 export interface UserInfo {
   profile: any,
@@ -76,11 +76,12 @@ export interface TagRef {
   [key: string]: any;
 }
 
-export interface LabelValue {
-  label: string;
-  value: any;
-  disabled?: boolean;
+export type LabelValue = import('naive-ui').AutoCompleteOption & {
+    label: string;
+    value: any;
+    disabled?: boolean;
 }
+
 export interface TagInputState {
   val: string;
   tagList: LabelValue[];
