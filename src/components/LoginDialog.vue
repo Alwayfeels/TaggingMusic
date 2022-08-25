@@ -20,10 +20,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { NModal, NSpin } from 'naive-ui'
-import { createDiscreteApi } from 'naive-ui'
 import api from '@/api/http'
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
+import { createDiscreteApi } from 'naive-ui'
 
 const { notification } = createDiscreteApi(['notification'])
 const emits = defineEmits(['loginSuccess'])

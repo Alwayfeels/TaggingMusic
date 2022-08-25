@@ -17,11 +17,16 @@
       </div>
       <img class="user-avatar rounded" :src="`${globalData.user.profile?.avatarUrl}?param=40y40`" alt="avatar">
     </div>
+    <!-- Tag Handler -->
+    <NButton class="ml-2" size="large" strong type="success" @click="onGenerate">
+      生成tag歌单
+    </NButton>
     <!-- Login -->
     <NButton class="ml-2" size="large" strong type="error" @click="onLogin">
       {{ globalState.user.isLogin ? '切换用户' : '登录' }}
     </NButton>
     <LoginDialog ref="LoginDialogRef" />
+    <MergeTaggedSongDialog ref="mergeTaggedSongRef" />
   </div>
 </template>
 
@@ -34,6 +39,7 @@ import { useGlobalData } from '@/store/globalData'
 import { useGlobalState } from '@/store/globalState'
 import SearchBar from '@/components/SearchBar.vue'
 import LoginDialog from '@/components/LoginDialog.vue'
+import MergeTaggedSongDialog from '@/components/MergeTaggedSongDialog.vue'
 // import { createDiscreteApi } from 'naive-ui'
 
 // const { notification } = createDiscreteApi(['notification'])
@@ -50,11 +56,23 @@ const router = useRouter()
 const globalData = useGlobalData()
 const globalState = useGlobalState()
 
+
+/** 
+ * @desc button handler
+ */
 const LoginDialogRef = ref()
 function onLogin() {
   LoginDialogRef.value.showDialog = true
 }
 
+const mergeTaggedSongRef = ref()
+function onGenerate() {
+  mergeTaggedSongRef.value.showDialog = true
+}
+
+/** 
+ * @desc router handler
+ */
 function toGithub() {
   window.open('https://github.com/Alwayfeels/TaggingMusic', '_blank')
 }
