@@ -18,23 +18,20 @@
             <n-input-group class="mb-4">
                 <n-select type="primary" v-model:value="state.generateMode" :style="{ width: '130px' }"
                     :options="([{ label: '新建歌单', value: GenerateMode.Create }, { label: '合入歌单', value: GenerateMode.Merge }] as any[])" />
-                <n-input v-if="state.generateMode === GenerateMode.Create" placeholder="请输入新建的歌单名" v-model:value="state.songlistName" />
+                <n-input v-if="state.generateMode === GenerateMode.Create" placeholder="请输入新建的歌单名"
+                    v-model:value="state.songlistName" />
                 <n-select v-else placeholder="请选择合入的歌单" v-model:value="state.mergePlaylistId" type="primary"
                     :options="state.playlistOptions" />
             </n-input-group>
-            <!-- <div class="mb-4 flex items-center">
-                <span class="w-40"> {{ state.title }}</span>
-                <n-input v-if="state.isCreatePlaylist" v-model:value="state.songlistName" type="text"
-                    placeholder="歌单名称" />
-                <n-input v-else :value="props.playlist?.name" disabled type="text" />
-            </div> -->
             <div class="flex justify-center items-center">
                 <n-icon size="24" class="success-icon" :component="CheckboxChecked24Filled" />
-                <n-select class="ml-2 tag-select" filterable clearable :placeholder="'需要包含的tag'" v-model:value="state.includedTag" multiple
-                    :options="state.tagOptions" max-tag-count="responsive" :on-update:show="(show) => show || generatePreview()" />
+                <n-select class="ml-2 tag-select" filterable clearable :placeholder="'需要包含的tag'"
+                    v-model:value="state.includedTag" multiple :options="state.tagOptions" max-tag-count="responsive"
+                    :on-update:show="(show) => show || generatePreview()" />
                 <n-icon size="24" class="ml-4 error-icon" :component="DismissSquare24Filled" />
-                <n-select class="ml-2 tag-select" filterable clearable :placeholder="'需要剔除的tag'" v-model:value="state.disabledTag"
-                    multiple :options="state.tagOptions" max-tag-count="responsive" :on-update:show="(show) => show || generatePreview()" />
+                <n-select class="ml-2 tag-select" filterable clearable :placeholder="'需要剔除的tag'"
+                    v-model:value="state.disabledTag" multiple :options="state.tagOptions" max-tag-count="responsive"
+                    :on-update:show="(show) => show || generatePreview()" />
             </div>
             <div class="mt-4 preview-table" v-if="state.previewSonglist.length > 0">
                 <n-data-table class="h-full" :columns="tableColumn" :flex-height="true" :data="state.previewSonglist"
@@ -42,9 +39,9 @@
             </div>
             <n-divider />
             <div class="mt-4 flex items-center justify-end">
-                <n-popover placement="top" trigger="manual" :show="state.showTips">
+                <n-popover placement="top" trigger="hover">
                     <template #trigger>
-                        <n-button class="ml-2" :disabled="state.includedTag.length === 0" strong type="success" @click="submit">生成</n-button>
+                        <n-button class="ml-2" strong type="success" @click="submit">生成</n-button>
                     </template>
                     <span>{{ state.tips }}</span>
                 </n-popover>
@@ -85,19 +82,18 @@ enum GenerateMode {
  * @desc 初始化 tagOptions
  */
 const showDialog = ref(false)
+// onMounted(() => {
+//     initTagsOptions()
+// })
 
-onMounted(() => {
-    initTagsOptions()
-})
-
-function initTagsOptions() {
-    state.tagOptions = globalData.tagList.map(item => {
-        return {
-            label: item.name,
-            value: item.name
-        }
-    })
-}
+// function initTagsOptions() {
+//     state.tagOptions = globalData.tagList.map(item => {
+//         return {
+//             label: item.name,
+//             value: item.name
+//         }
+//     })
+// }
 
 interface State {
     tagOptions?: any[],
@@ -105,20 +101,24 @@ interface State {
 }
 const state: State = reactive({
     generateMode: GenerateMode.Create,
-    playlistOptions: computed(() => {
-        return globalData.playlist.map((e: any) => ({
-            label: e.name,
-            value: e.id
-        }))
-    }),
+    playlistOptions: globalData.playlist.map((e: any) => ({
+        label: e.name,
+        value: e.id
+    })),
     isCreatePlaylist: computed(() => {
         return !!props.playlist?.name
     }),
     title: computed((): string => {
         return state.isCreatePlaylist ? '选择 tag 生成歌单：' : '选择 tag 导入歌单'
     }),
-    songlistName: '',
-    tips: '',
+    songlistName: '', // 新建歌单名称
+    mergePlaylistId: null, // 导入歌单ID
+    tips: computed(() => {
+        if (state.previewSonglist.length === 0) return '已选择的歌曲为空，请先选择歌曲tag'
+        if (state.generateMode === GenerateMode.Create && !state.songlistName) return '请先输入新建歌单名称';
+        if (state.generateMode === GenerateMode.Merge && !state.mergePlaylistId) return '请选择歌曲导入的歌单';
+        return ''
+    }),
     loading: false,
     showTips: false,
     includedTag: [],
@@ -126,10 +126,6 @@ const state: State = reactive({
     tagOptions: [],
     previewSonglist: [], // 预览生成的歌单
 })
-
-// watch([() => state.includedTag, () => state.disabledTag], () => {
-//     generatePreview()
-// })
 
 /** 
  * @desc 分页
