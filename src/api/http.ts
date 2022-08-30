@@ -45,8 +45,11 @@ const showStatus = (status: number) => {
 
 const service = axios.create({
   // 联调
-  // baseURL: process.env.NODE_ENV === 'production' ? `/` : '/api',
-  baseURL: "https://tagging-music-api.vercel.app/",
+  // baseURL: "https://tagging-music-api.vercel.app/",
+  // 旧版本临时
+  // baseURL: "https://tagging-music-9apvcrf74-alwayfeels.vercel.app/",
+  // 国内友情服务器
+  baseURL: "http://47.105.100.125:8082/",
   // headers: {
   //   get: {
   //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
