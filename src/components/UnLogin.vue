@@ -8,8 +8,9 @@
 import { defineComponent, shallowRef } from "vue";
 import { directive } from 'vue3-menus';
 import { useGlobalData } from '@/store/globalData';
+import type { GlobalData } from "@/store/types";
 
-const globalData = useGlobalData()
+const globalData: GlobalData = useGlobalData()
 
 const menus = shallowRef({
   menus: [
@@ -17,7 +18,7 @@ const menus = shallowRef({
     {
       label: "刷新登陆状态",
       tip: '',
-      click: () => {
+      click: (): void => {
         globalData.getUserInfo(true)
       }
     }

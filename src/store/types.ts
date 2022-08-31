@@ -17,7 +17,7 @@ export interface GlobalData {
   playlist: any;
   songlist: Song[];
   taggedSongs: TaggedSong[];
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface Playlist {
