@@ -50,7 +50,7 @@ export const useGlobalData = defineStore({
      */
     async init() {
       this.initTaggedSongs()
-      await this.initUserInfo()
+      await this.initUserInfo(true)
       if (this.user.account?.id) {
         await this.initPlaylist()
       }
@@ -63,14 +63,21 @@ export const useGlobalData = defineStore({
       if (!force) {
         [profile, account] = await Promise.all([localforage.getItem("profile"), localforage.getItem("account")]);
         if (profile && account) {
-          // const userInfo: UserInfo = { profile, account, id: account?.id };
           const userInfo: UserInfo = { profile, account };
           this.user = userInfo;
           return userInfo;
         }
       }
+      const loginInfo = await api.get("login/status");
+      account = loginInfo?.data?.account;
+      if (!account.id) {
+        console.warn('uid is null');
+        return false;
+      }
+      this.user.account = account
+      // debugger;
       // API Call
-      const res = await api.get("login/status");
+      const res = await api.get("user/detail", { uid: account.uid }, { useTimestamp: false });
       if (res.data?.profile) {
         profile = res.data.profile;
         account = res.data.account;
@@ -84,6 +91,12 @@ export const useGlobalData = defineStore({
         console.warn('getRemoteUserInfo error: 可能用户未登录')
         return false
       }
+    },
+    /**
+     * @desc 注销登录
+     */
+    async logout() {
+      await api.get("logout")
     },
     /** 
      * @desc 初始化已标记歌曲信息

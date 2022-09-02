@@ -4,8 +4,8 @@
     <div class="flex justify-center items-center flex-col">
       <p>请使用手机端网易云音乐扫码登录</p>
       <NSpin :show="QR_State.QRloading">
-        <img v-if="QR_State.QRImg" :src="QR_State.QRImg" alt="登录二维码" @click="refreshQR">
-        <div v-else class="bg-stripes flex items-center justify-center" @click="refreshQR">
+        <img v-if="QR_State.QRImg" :src="QR_State.QRImg" alt="登录二维码" @click="loadQrImg(true)">
+        <div v-else class="bg-stripes flex items-center justify-center" @click="loadQrImg(true)">
           <p v-if="QR_State.QRLoginState === QRStateEnum.Failed">二维码加载失败</p>
         </div>
       </NSpin>
@@ -25,10 +25,36 @@ import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
 import { createDiscreteApi } from 'naive-ui'
 
+
+enum QRStateEnum {
+  Loading,
+  Loaded,
+  Scaning,
+  Success,
+  Failed,
+  Overtime
+}
+interface QRLoginState {
+  unikey: string | null,
+  QRImg: string | null,
+  QRLoginState: QRStateEnum,
+  QRloading: boolean,
+  QRCodeTips: string,
+}
+const QRLoginTipsMap = new Map([
+  [QRStateEnum.Loading, '二维码正在加载中，请先喝个茶...'],
+  [QRStateEnum.Loaded, '请打开网易云音乐app，扫描二维码'],
+  [QRStateEnum.Scaning, '扫描成功，请在手机上确认...'],
+  [QRStateEnum.Success, '登录成功'],
+  [QRStateEnum.Failed, '二维码加载失败，请点击二维码刷新'],
+  [QRStateEnum.Overtime, '二维码已过期，请点击二维码刷新']
+])
+
 const { notification } = createDiscreteApi(['notification'])
 const emits = defineEmits(['loginSuccess'])
 const globalState = useGlobalState()
 
+const isCheckingStatus = ref(false)
 /** 
  * @desc 显隐控制
  */
@@ -39,16 +65,31 @@ watch(() => showDialog.value, (isShow) => {
       QR_State.QRLoginState = QRStateEnum.Loaded
       getLoginStatus()
     } else {
-      refreshQR()
+      init()
     }
+  } else {
+    isCheckingStatus.value = false
   }
 })
 
+// state: 二维码登录状态
+const QR_State: QRLoginState = reactive({
+  unikey: null,
+  QRImg: null,
+  QRLoginState: QRStateEnum.Loading,
+  QRloading: computed(() => [QRStateEnum.Loading, QRStateEnum.Scaning].includes(QR_State.QRLoginState)),
+  QRCodeTips: computed((): string => {
+    return QRLoginTipsMap.get(QR_State.QRLoginState) || ''
+  })
+})
+
 /** 
- * @desc 刷新二维码
+ * @desc 初始化 = 加载二维码 - 启动轮询
  */
-function refreshQR() {
+function init() {
   loadQrImg(true)
+  // 启动轮询
+  getLoginStatus()
 }
 
 /** 
@@ -71,8 +112,6 @@ async function loadQrImg(force = false) {
   // 二维码加载成功
   QR_State.QRImg = qrData.qrimg;
   QR_State.QRLoginState = QRStateEnum.Loaded;
-  // 启动轮询
-  getLoginStatus()
 }
 
 /** 
@@ -118,44 +157,6 @@ async function getLoginStatus(timer = 500) {
   }
 }
 
-/** 
- * @desc 二维码登录状态
- */
-enum QRStateEnum {
-  Loading,
-  Loaded,
-  Scaning,
-  Success,
-  Failed,
-  Overtime
-}
-const QRLoginTipsMap = new Map([
-  [QRStateEnum.Loading, '二维码正在加载中，请先喝个茶...'],
-  [QRStateEnum.Loaded, '请打开网易云音乐app，扫描二维码'],
-  [QRStateEnum.Scaning, '扫描成功，请在手机上确认...'],
-  [QRStateEnum.Success, '登录成功'],
-  [QRStateEnum.Failed, '二维码加载失败，请点击二维码刷新'],
-  [QRStateEnum.Overtime, '二维码已过期，请点击二维码刷新']
-])
-
-interface QRLoginState {
-  unikey: string | null,
-  QRImg: string | null,
-  QRLoginState: QRStateEnum,
-  QRloading: boolean,
-  QRCodeTips: string,
-}
-
-// state: 二维码登录状态
-const QR_State: QRLoginState = reactive({
-  unikey: null,
-  QRImg: null,
-  QRLoginState: QRStateEnum.Loading,
-  QRloading: computed(() => [QRStateEnum.Loading, QRStateEnum.Scaning].includes(QR_State.QRLoginState)),
-  QRCodeTips: computed((): string => {
-    return QRLoginTipsMap.get(QR_State.QRLoginState) || ''
-  })
-})
 
 const dialogBodyStyle = {
   width: '600px'
