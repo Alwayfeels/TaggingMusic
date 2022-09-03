@@ -90,9 +90,9 @@ const rightMenus = reactive({
  * @desc 左侧歌单点击事件
  */
 const songTableRef = ref()
-const activeMenuChange = async (key: number, item: object) => {
+const activeMenuChange = async (id: number, item: any) => {
   globalState.playlist.active = item
-  globalState.setSonglist(key)
+  globalData.getSonglist(id, item.trackCount)
   songTableRef.value.resetPager()
 }
 /** 

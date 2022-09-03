@@ -56,16 +56,10 @@ export const useGlobalState = defineStore({
     async init() {
       await useGlobalData().init() // 初始化 user, playlist, taggedSongs
       this.playlist.active = this.playlist.data[0];
-      this.setSonglist(this.playlist.active?.id || null)
-    },
-    /** 
-     * @desc 根据 playlistId 设置歌曲列表（右侧table）
-     * @params id = playlistId
-     */
-    async setSonglist(id: number | null) {
-      if (!id) return;
-      this.songlist.data = await useGlobalData().getSonglist(id) || []
-      this.songlist.active = this.songlist.data[0] || {}
+      if (this.playlist.active?.id) {
+        this.songlist.data = await useGlobalData().getSonglist(this.playlist.active?.id) || []
+        this.songlist.active = this.songlist.data[0] || {}
+      }
     },
     /** 
      * @desc 设置正在播放的歌曲

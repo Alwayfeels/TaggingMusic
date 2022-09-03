@@ -5,7 +5,9 @@ import { computed, toRaw } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
 import type { GlobalData, UserInfo, Song, TagRef, TaggedSong } from "@/store/types";
 import { useGlobalState } from "@/store/globalState";
+import { createDiscreteApi } from 'naive-ui'
 
+const { notification } = createDiscreteApi(['notification'])
 /** 
  * @desc 全局数据存储
  * @tips 该文件是唯一和 indexedDB 交互的入口
@@ -69,7 +71,7 @@ export const useGlobalData = defineStore({
         }
       }
       const res = await api.get("login/status");
-    // API Call
+      // API Call
       if (res.data?.profile) {
         profile = res.data.profile;
         account = res.data.account;
@@ -152,26 +154,36 @@ export const useGlobalData = defineStore({
     },
     /** 
      * @desc 获取目标歌单所有歌曲
+     * @tips 获取歌单接口单次最高获取 1000 首，否则会报错
+     * @params id: 歌单id
+     * @params force: 是否不使用本地存储直接调用接口
+     * @params setStore: 是否将歌曲列表存入globalData
+     * @params songNumber: 获取的歌曲数量, 大于1000将拆分请求
      */
-    async getSonglist(id: number | null, force = false, setStore = true) {
+    async getSonglist(id: number | null, songNum = 1000, force = false, setStore = true) {
       if (!id) return false
       useGlobalState().songlist.isLoading = true
-      let songlist: Song[] | null
+      let songlist: Song[]
       if (!force) {
-        songlist = await localforage.getItem(`songlist_${id}`);
-        if (songlist) {
+        songlist = await localforage.getItem(`songlist_${id}`) || [];
+        if (songlist.length) {
           this.songlist = songlist
           useGlobalState().songlist.isLoading = false
           return songlist
         }
       }
       // API Call
-      const res = await api.get("/playlist/track/all", {
-        id,
-      });
-      songlist = res.songs;
-      songlist = songlist || []
-      // 过滤不需要的属性
+      const requests = []
+      for (let offset = 0; offset < songNum; offset += 1000) {
+        requests.push(api.get("/playlist/track/all", { id, limit: 1000, offset }))
+      }
+      const responses = await Promise.all(requests)
+      songlist = []
+      responses.forEach(res => {
+        const songs = res?.songs || []
+        songlist.push(...songs) 
+      })
+      // // 过滤不需要的属性
       songlist = songlist.map(item => ({
         id: item.id,
         name: item.name,
@@ -180,8 +192,9 @@ export const useGlobalData = defineStore({
         fee: item.fee,
       }))
       localforage.setItem(`songlist_${id}`, songlist);
-      if (songlist && setStore) {
+      if (setStore) {
         this.songlist = songlist;
+        useGlobalState().songlist.data = songlist
       }
       useGlobalState().songlist.isLoading = false
       return songlist

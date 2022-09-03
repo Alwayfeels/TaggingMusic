@@ -104,6 +104,12 @@ service.interceptors.response.use((response: AxiosResponse) => {
     } else {
       response.data.msg = msg
     }
+    notification.create({
+      type: 'error',
+      title: '请求错误',
+      content: msg,
+      duration: 3000
+    })
   }
   return response
 }, (error) => {
