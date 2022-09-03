@@ -54,7 +54,6 @@ const { notification } = createDiscreteApi(['notification'])
 const emits = defineEmits(['loginSuccess'])
 const globalState = useGlobalState()
 
-const isCheckingStatus = ref(false)
 /** 
  * @desc 显隐控制
  */
@@ -68,7 +67,7 @@ watch(() => showDialog.value, (isShow) => {
       init()
     }
   } else {
-    isCheckingStatus.value = false
+    clearLoginTimer()
   }
 })
 
@@ -86,8 +85,8 @@ const QR_State: QRLoginState = reactive({
 /** 
  * @desc 初始化 = 加载二维码 - 启动轮询
  */
-function init() {
-  loadQrImg(true)
+async function init() {
+  await loadQrImg(true)
   // 启动轮询
   getLoginStatus()
 }
@@ -114,49 +113,52 @@ async function loadQrImg(force = false) {
   QR_State.QRLoginState = QRStateEnum.Loaded;
 }
 
+// 轮询请求 timer
+const loginStatusTimer = ref()
 /** 
  * @desc 轮询扫码登录状态
  */
-async function getLoginStatus(timer = 500) {
+function getLoginStatus(timer = 500) {
   if (!showDialog.value) false
   if (!QR_State.unikey) return false;
-  console.log('///state', QR_State.QRLoginState)
   if ([QRStateEnum.Overtime, QRStateEnum.Success].includes(QR_State.QRLoginState)) return false;
+  
+  clearLoginTimer()
+  loginStatusTimer.value = setInterval(async function () {
+    // 根据 unikey 查询扫码登录状态
+    const { code } = await api.get('login/qr/check', { key: QR_State.unikey })
 
-  // 根据 unikey 查询扫码登录状态
-  const { code } = await api.get('login/qr/check', { key: QR_State.unikey })
-
-  // 800 为二维码过期,801 为等待扫码,802 为待确认,803 为授权登录成功(803 状态码下会返回 cookies)
-  switch (code) {
-    case 800:
-      QR_State.QRLoginState = QRStateEnum.Overtime;
-      break;
-    case 801:
-      QR_State.QRLoginState = QRStateEnum.Loaded;
-      break;
-    case 802:
-      QR_State.QRLoginState = QRStateEnum.Scaning;
-      break;
-    case 803:
-      QR_State.QRLoginState = QRStateEnum.Success;
-      notification.create({
-        type: 'success',
-        title: "登录成功",
-        duration: 3000
-      })
-      emits('loginSuccess')
-      showDialog.value = false
-      globalState.init();
-      break;
-  }
-  // 递归
-  if (showDialog.value) {
-    setTimeout(() => {
-      getLoginStatus()
-    }, timer);
+    // 800 为二维码过期,801 为等待扫码,802 为待确认,803 为授权登录成功(803 状态码下会返回 cookies)
+    switch (code) {
+      case 800:
+        QR_State.QRLoginState = QRStateEnum.Overtime;
+        break;
+      case 801:
+        QR_State.QRLoginState = QRStateEnum.Loaded;
+        break;
+      case 802:
+        QR_State.QRLoginState = QRStateEnum.Scaning;
+        break;
+      case 803:
+        QR_State.QRLoginState = QRStateEnum.Success;
+        notification.create({
+          type: 'success',
+          title: "登录成功",
+          duration: 3000
+        })
+        emits('loginSuccess')
+        showDialog.value = false
+        globalState.init();
+        break;
+    }
+  }, timer)
+}
+function clearLoginTimer() {
+  if (loginStatusTimer.value) {
+    clearInterval(loginStatusTimer.value)
+    loginStatusTimer.value = null
   }
 }
-
 
 const dialogBodyStyle = {
   width: '600px'
