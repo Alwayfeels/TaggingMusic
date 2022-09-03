@@ -62,7 +62,6 @@ const globalState = useGlobalState()
  */
 const LoginDialogRef = ref()
 async function onLogin() {
-  await globalData.logout()
   LoginDialogRef.value.showDialog = true
 }
 
