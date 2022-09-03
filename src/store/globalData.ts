@@ -68,16 +68,8 @@ export const useGlobalData = defineStore({
           return userInfo;
         }
       }
-      const loginInfo = await api.get("login/status");
-      account = loginInfo?.data?.account;
-      if (!account.id) {
-        console.warn('uid is null');
-        return false;
-      }
-      this.user.account = account
-      // debugger;
-      // API Call
-      const res = await api.get("user/detail", { uid: account.uid }, { useTimestamp: false });
+      const res = await api.get("login/status");
+    // API Call
       if (res.data?.profile) {
         profile = res.data.profile;
         account = res.data.account;

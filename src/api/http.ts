@@ -1,6 +1,8 @@
 // http.ts
 import axios from 'axios'
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { createDiscreteApi } from 'naive-ui'
+const { notification } = createDiscreteApi(['notification'])
 
 const showStatus = (status: number) => {
   let message = ''
@@ -46,9 +48,9 @@ const showStatus = (status: number) => {
 
 const service = axios.create({
   // 联调
-  // baseURL: "https://tagging-music-api.vercel.app/",
+  // baseURL: "https://tagging-music-9apvcrf74-alwayfeels.vercel.app/",
   // 自有服务器
-  baseURL: "http://43.143.12.132:8888/",
+  baseURL: "/music",
   // 友情服务器（弃用）
   // baseURL: "http://47.105.100.125:8082/",
   // headers: {
@@ -87,6 +89,7 @@ service.interceptors.request.use((config: AxiosRequestConfig) => {
   error.data = {}
   error.data.msg = '服务器异常，请联系管理员！'
   return Promise.resolve(error)
+
 })
 
 // 响应拦截器
@@ -105,11 +108,19 @@ service.interceptors.response.use((response: AxiosResponse) => {
   return response
 }, (error) => {
   if (axios.isCancel(error)) {
+    notification.create({
+      type: 'error',
+      title: `repeated request: ${error.message}`,
+      duration: 3000
+    })
     console.log('repeated request: ' + error.message)
   } else {
-    // handle error code
     // 错误抛到业务代码
-    console.log('请求超时或服务器异常，请检查网络或联系管理员！')
+    notification.create({
+      type: 'error',
+      title: `repeated request: ${error.message}`,
+      duration: 3000
+    })
   }
   return Promise.reject(error)
 })
