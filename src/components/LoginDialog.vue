@@ -18,13 +18,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, getCurrentInstance, reactive, ref, watch } from 'vue'
 import { NModal, NSpin } from 'naive-ui'
 import api from '@/api/http'
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
-import { createDiscreteApi } from 'naive-ui'
-
+const app = getCurrentInstance()
 
 enum QRStateEnum {
   Loading,
@@ -50,7 +49,6 @@ const QRLoginTipsMap = new Map([
   [QRStateEnum.Overtime, '二维码已过期，请点击二维码刷新']
 ])
 
-const { notification } = createDiscreteApi(['notification'])
 const emits = defineEmits(['loginSuccess'])
 const globalState = useGlobalState()
 
@@ -141,7 +139,7 @@ function getLoginStatus(timer = 500) {
         break;
       case 803:
         QR_State.QRLoginState = QRStateEnum.Success;
-        notification.create({
+        (app as any).proxy.$notification.create({
           type: 'success',
           title: "登录成功",
           duration: 3000

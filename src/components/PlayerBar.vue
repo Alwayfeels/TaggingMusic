@@ -81,14 +81,14 @@
       </div>
     </div>
     <!-- 播放器实例 -->
-    <audio ref="audio" :src="globalState.songlist.active?.url" @canplay="audioGetDuration" @pause="audioPause"
-      @timeupdate="audioTimeUpdate" @play="audioPlay" style="display: none"
-      :loop="globalState.player.playMode === PlayMode.LOOP"></audio>
+    <audio ref="audio" :src="globalState.songlist.active?.url" @ended="globalState.setNextSong()" @canplay="audioGetDuration"
+      @timeupdate="audioTimeUpdate"  style="display: none"
+      :loop="globalState.player.playMode === PlayMode.SINGLE"></audio>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch, nextTick } from 'vue'
+import { computed, onMounted, reactive, ref, watch, nextTick, getCurrentInstance } from 'vue'
 import { ArrowRepeatAll16Regular, Previous24Filled, Play48Filled, Pause48Filled, AnimalCat24Regular, TextBulletListLtr24Filled, Play12Filled } from '@vicons/fluent'
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
@@ -99,7 +99,7 @@ import { NIcon, NSlider, NIconWrapper, NTag, createDiscreteApi } from 'naive-ui'
 import TagInputGroup from './TagInputGroup.vue';
 import { PlayMode } from '@/store/types'
 
-const { notification } = createDiscreteApi(['notification'])
+const app = getCurrentInstance()
 
 const globalState = useGlobalState()
 const globalData = useGlobalData()
@@ -198,32 +198,31 @@ function audioPause() {
 async function audioPlay() {
   if (globalState.songlist.active.url) {
     nextTick(() => {
-      audio.value.play()
-      globalState.player.isPlaying = true;
+      if (audio.value) {
+        audio.value.play()
+        globalState.player.isPlaying = true;
+      }
     })
     return true;
   }
   if (globalState.songlist.active?.is404) {
-    notification.create({
+    (app as any).proxy.$notification.create({
       type: 'error',
       title: "该歌曲暂无音源",
       duration: 3000
     })
     return false;
   }
-  const canPlay = await globalState.getActiveSongUrl();
+  const canPlay = await globalState.setActiveSong({ index: globalState.activeSongIdx });
   if (canPlay) {
     audio.value?.play()
     globalState.player.isPlaying = true;
   }
 }
 
-// 更新当前时间: 如果当前音频进度 = 总时长，则自动播放下一首(根据 playMode)
+// 更新当前时间
 const audioTimeUpdate = (e: any) => {
   globalState.player.currentTime = e.target.currentTime;
-  if (e.target.currentTime >= globalState.player.duration) {
-    globalState.setNextSong();
-  }
 };
 
 // 播放歌曲变动时，播放新的歌曲

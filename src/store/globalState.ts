@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed } from 'vue'
 import { useGlobalData } from './globalData'
 import { PlayMode, type GlobalState } from './types'
+// import { thottle } from 'lodash'
 
 /** 
  * @desc 全局状态
@@ -93,6 +94,7 @@ export const useGlobalState = defineStore({
      * @desc 获取歌曲详情（url）
      */
     async getActiveSongUrl(force = false) {
+      // thottle(async () => {
       const song = this.songlist.active
       if (!song.id) return false;
       if (!force && song.url) return false;
@@ -100,6 +102,7 @@ export const useGlobalState = defineStore({
       song.url = await useGlobalData().getSongUrl(song) || null
       this.player.isLoading = false;
       return song
+      // }, 100)
     },
     /** 
      * @desc 播放下一首

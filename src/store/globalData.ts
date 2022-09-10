@@ -5,9 +5,6 @@ import { computed, toRaw } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
 import type { GlobalData, UserInfo, Song, TagRef, TaggedSong } from "@/store/types";
 import { useGlobalState } from "@/store/globalState";
-import { createDiscreteApi } from 'naive-ui'
-
-const { notification } = createDiscreteApi(['notification'])
 /** 
  * @desc 全局数据存储
  * @tips 该文件是唯一和 indexedDB 交互的入口
@@ -204,7 +201,7 @@ export const useGlobalData = defineStore({
      */
     async getSongUrl(song: Song, force = false) {
       if (!song.id) return;
-      if (force || song.url) return;
+      if (song.url && !force) return;
       const detail = await api.get('/song/url', { id: song.id, br: 320000 });
       if (detail?.data[0]?.url) {
         const url = detail.data[0].url;

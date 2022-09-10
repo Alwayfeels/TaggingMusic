@@ -29,13 +29,13 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NDivider, NIcon, createDiscreteApi } from "naive-ui";
-import { ref } from 'vue';
+import { NButton, NDivider, NIcon } from "naive-ui";
+import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router'
 import { ArrowCircleDown24Filled, ArrowCircleRight24Filled } from '@vicons/fluent'
 
+const app = getCurrentInstance()
 const router = useRouter()
-const { notification } = createDiscreteApi(['notification'])
 
 const detailInfo = ref([
   {
@@ -59,9 +59,9 @@ const detailInfo = ref([
 function toMainView() {
   router.push('/home')
 }
+
 function toIntro() {
-  console.log('test');
-  notification.create({
+  (app as any).proxy.$notification.create({
     type: 'error',
     title: "在做了在做了!",
     duration: 3000
