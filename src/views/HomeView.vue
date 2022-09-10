@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import SongTable from '@/components/SongTable.vue';
-import { h, onMounted, reactive, ref, shallowRef, computed } from 'vue';
+import { h, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import { directive } from 'vue3-menus';
 import { NMenu, NLayout, NLayoutContent, NSpin, NLayoutSider, NScrollbar } from 'naive-ui';
 // import { useglobalState.player } from '@/store/globalState.player';
@@ -40,6 +40,15 @@ const globalData = useGlobalData()
 // 全局应用状态
 const globalState = useGlobalState()
 const { playlist, songlist, user, player } = globalState
+
+/**
+ * @params 播放音乐时，弹出播放器 playerBar
+ */
+watch(() => globalState.player.isPlaying, (isPlaying: boolean) => {
+  if (isPlaying) {
+    globalState.player.isShow = true
+  }
+})
 
 /** 
  * @desc 右键菜单配置
@@ -92,7 +101,8 @@ const rightMenus = reactive({
 const songTableRef = ref()
 const activeMenuChange = async (id: number, item: any) => {
   globalState.playlist.active = item
-  globalData.getSonglist(id, item.trackCount)
+  globalState.songlist.data = await globalData.getSonglist(id, item.trackCount) || []
+  globalState.setActiveSong({ index: 0 })
   songTableRef.value.resetPager()
 }
 /** 

@@ -71,13 +71,14 @@ export const useGlobalState = defineStore({
         return;
       }
       let active = null
-      if (config.id && config.id >= 0) {
+      if (typeof config.id === 'number' && config.id >= 0) {
         active = this.songlist.data.find(item => item.id === config.id) || this.songlist.data[0]
       }
-      else if (config.index && config.index >= 0) {
+      else if (typeof config.index === 'number' && config.index >= 0) {
         active = this.songlist.data[config.index || 0];
       }
       else {
+        console.error('setActiveSong: params is wrong')
         return false;
       }
       this.songlist.active = active
