@@ -114,9 +114,9 @@ const state = reactive({
 /** 
  * @desc 根据 globalState 修改播放状态
  */
-// watch(() => globalState.player.isPlaying, (val: boolean) => {
-//   val ? audioPlay() : audioPause()
-// })
+watch(() => globalState.player.isPlaying, (val: boolean) => {
+  val ? audioPlay() : audioPause()
+})
 
 // 同步 player 中和 table 中 tagInput 组件的值
 // function updateAllTagInput(newTag) {

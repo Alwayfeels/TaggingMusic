@@ -65,7 +65,8 @@ export const useGlobalState = defineStore({
      * @desc 设置正在播放的歌曲
      * 支持通过 index 或 id 查找，优先 id
      */
-    async setActiveSong(config: { index?: number, id?: number }) {
+    async setActiveSong(config: { index?: number, id?: number, autoPlay?: boolean }) {
+      config = { autoPlay: true, ...config }
       if (!this.songlist.data.length) {
         console.error('setActiveSong error: songlist is empty')
         return;
@@ -83,7 +84,10 @@ export const useGlobalState = defineStore({
       }
       this.songlist.active = active
       await this.getActiveSongUrl()
-      this.player.isPlaying = true
+      if (config.autoPlay) {
+        this.player.isPlaying = true
+      }
+      return true
     },
     /** 
      * @desc 获取歌曲详情（url）
