@@ -18,7 +18,7 @@
       <img class="user-avatar rounded" :src="`${globalData.user.profile?.avatarUrl}?param=40y40`" alt="avatar">
     </div>
     <!-- Tag Handler -->
-    <NButton class="ml-2" size="large" strong type="success" @click="onGenerate">
+    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="success" @click="onGenerate">
       生成tag歌单
     </NButton>
     <!-- Login -->
