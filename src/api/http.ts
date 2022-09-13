@@ -1,8 +1,7 @@
 // http.ts
 import axios from 'axios'
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { createDiscreteApi } from 'naive-ui'
-const { notification } = createDiscreteApi(['notification'])
+import app from '@/main'
 
 const showStatus = (status: number) => {
   let message = ''
@@ -96,6 +95,7 @@ service.interceptors.request.use((config: AxiosRequestConfig) => {
 service.interceptors.response.use((response: AxiosResponse) => {
   const status = response.status
   let msg = ''
+
   if (status < 200 || status >= 300) {
     // 处理http错误，抛到业务代码
     msg = showStatus(status)
@@ -104,7 +104,7 @@ service.interceptors.response.use((response: AxiosResponse) => {
     } else {
       response.data.msg = msg
     }
-    notification.create({
+    app?.config?.globalProperties?.$notification?.create({
       type: 'error',
       title: '请求错误',
       content: msg,
@@ -114,7 +114,7 @@ service.interceptors.response.use((response: AxiosResponse) => {
   return response
 }, (error) => {
   if (axios.isCancel(error)) {
-    notification.create({
+    app?.config?.globalProperties?.$notification?.create({
       type: 'error',
       title: `repeated request: ${error.message}`,
       duration: 3000
@@ -122,7 +122,7 @@ service.interceptors.response.use((response: AxiosResponse) => {
     console.log('repeated request: ' + error.message)
   } else {
     // 错误抛到业务代码
-    notification.create({
+    app?.config?.globalProperties?.$notification?.create({
       type: 'error',
       title: `repeated request: ${error.message}`,
       duration: 3000

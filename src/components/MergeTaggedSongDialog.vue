@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, watch, h, ref } from 'vue'
+import { computed, onMounted, reactive, watch, h, ref, getCurrentInstance } from 'vue'
 import { NDataTable, NTag, NModal, NInput, NSelect, NButton, NPopover } from 'naive-ui';
 import type { DataTableColumns } from 'naive-ui';
 import { CheckboxChecked24Filled, DismissSquare24Filled, BookQuestionMark20Filled } from '@vicons/fluent'
@@ -62,7 +62,7 @@ import { useGlobalData } from '@/store/globalData';
 import { MdAnalytics } from '@vicons/ionicons4';
 import { createDiscreteApi } from 'naive-ui'
 
-const { notification } = createDiscreteApi(['notification'])
+const app = getCurrentInstance()
 // 全局数据中心
 const globalData = useGlobalData()
 

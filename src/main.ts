@@ -6,6 +6,7 @@ import naive from 'naive-ui'
 import localforage from 'localforage'
 import router from './router'
 import './index.css'
+import { createDiscreteApi } from 'naive-ui'
 
 localforage.config({
   driver: localforage.INDEXEDDB,
@@ -14,9 +15,14 @@ localforage.config({
 
 const app = createApp(App)
 
+const { notification } = createDiscreteApi(['notification'])
+app.config.globalProperties.$notification = notification
+
 app.use(createPinia())
 app.use(router)
 app.use(naive)
 app.use(Menus)
 
 app.mount('#app')
+
+export default app
