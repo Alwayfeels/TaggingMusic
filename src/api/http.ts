@@ -189,4 +189,79 @@ export function post(url: string, params = {}, config: requestConfig = {}) {
   })
 }
 
-export default { get, post }
+/**
+ * =======================================
+ * @desc: 数据存储服务
+ */
+
+ const store = axios.create({
+  // 自有服务器
+  baseURL: "/store",
+  // headers: {
+  //   get: {
+  //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+  //   },
+  //   post: {
+  //     'Content-Type': 'application/json;charset=utf-8'
+  //   }
+  // },
+  // 是否跨站点访问控制请求
+  withCredentials: true,
+  timeout: 15000,
+  transformRequest: [(data) => {
+    data = JSON.stringify(data)
+    return data
+  }],
+  validateStatus() {
+    // 使用async-await，处理reject情况较为繁琐，所以全部返回resolve，在业务代码中处理异常
+    return true
+  },
+  transformResponse: [(data) => {
+    if (typeof data === 'string' && data.startsWith('{')) {
+      data = JSON.parse(data)
+    }
+    return data
+  }]
+})
+
+
+export function storeGet(url: string, params = {}) {
+  // default use timestamp params
+  return new Promise<responseData>((resolve, reject) => {
+    store.get<responseData>(url, {
+      params
+    })
+      .then(res => {
+        resolve(res.data)
+      })
+      .catch(err => {
+        reject(err)
+      })
+  })
+}
+
+/**
+* 封装post请求
+* @param url
+* @param params
+* @returns {Promise}
+*/
+export function storePost(url: string, params = {}) {
+  // default use timestamp params
+  return new Promise<responseData>((resolve, reject) => {
+    store.post<responseData>(url, {
+      ...params
+    })
+      .then(res => {
+        resolve(res.data)
+      })
+      .catch(err => {
+        reject(err)
+      })
+  })
+}
+
+
+
+
+export default { get, post, storeGet, storePost }

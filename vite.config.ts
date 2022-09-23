@@ -20,8 +20,14 @@ export default defineConfig({
       // 正则表达式写法
       '^/music': {
         target: 'http://43.143.12.132:8888/', // 后端服务实际地址
+        // target: 'http://localhost:3000/', // 本地测试
         changeOrigin: true, //开启代理
         rewrite: (path) => path.replace(/^\/music/, '')
+      },
+      '^/store': {
+        target: 'http://43.143.12.132:8889/', // 后端服务实际地址
+        changeOrigin: true, //开启代理
+        rewrite: (path) => path.replace(/^\/store/, '')
       }
     }
   }
