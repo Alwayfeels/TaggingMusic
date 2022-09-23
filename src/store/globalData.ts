@@ -208,6 +208,14 @@ export const useGlobalData = defineStore({
         return url
       }
       return false
+    },
+    /**
+     * @desc: 埋点
+     * @params: {any}
+     */
+    async point(params: any) {
+      const res = await api.storePost('/store', params);
+      console.log('>>>>>>>>>', res)
     }
   }
 })

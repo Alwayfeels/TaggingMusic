@@ -26,6 +26,7 @@ export default defineConfig({
       },
       '^/store': {
         target: 'http://43.143.12.132:8889/', // 后端服务实际地址
+        // target: 'http://127.0.0.1:8889/', // 本地测试
         changeOrigin: true, //开启代理
         rewrite: (path) => path.replace(/^\/store/, '')
       }

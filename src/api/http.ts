@@ -229,7 +229,9 @@ export function storeGet(url: string, params = {}) {
   // default use timestamp params
   return new Promise<responseData>((resolve, reject) => {
     store.get<responseData>(url, {
-      params
+      params: {
+        ...params
+      }
     })
       .then(res => {
         resolve(res.data)
