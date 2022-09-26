@@ -15,7 +15,7 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     open: false, //自动打开 
-    base: "./ ", //生产环境路径
+    base: "./", //生产环境路径
     proxy: { // 本地开发环境通过代理实现跨域，生产环境使用 nginx 转发
       // 正则表达式写法
       '^/music': {
@@ -27,7 +27,7 @@ export default defineConfig({
       '^/store': {
         target: 'http://43.143.12.132:8889/', // 后端服务实际地址
         // target: 'http://127.0.0.1:8889/', // 本地测试
-        changeOrigin: true, //开启代理
+        changeOrigin: true, //开启代理  
         rewrite: (path) => path.replace(/^\/store/, '')
       }
     }

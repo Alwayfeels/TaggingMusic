@@ -49,9 +49,8 @@ const service = axios.create({
   // 联调
   // baseURL: "https://tagging-music-9apvcrf74-alwayfeels.vercel.app/",
   // 自有服务器
-  baseURL: "/music",
-  // 友情服务器（弃用）
-  // baseURL: "http://47.105.100.125:8082/",
+  // baseURL: "/music",
+  baseURL: import.meta.env.VITE_MUSIC_API,
   // headers: {
   //   get: {
   //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
@@ -82,6 +81,7 @@ const service = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use((config: AxiosRequestConfig) => {
+  console.log('////////////', import.meta.env.VITE_MUSIC_API)
   return config
 }, (error) => {
   // 错误抛到业务代码
@@ -196,7 +196,7 @@ export function post(url: string, params = {}, config: requestConfig = {}) {
 
  const store = axios.create({
   // 自有服务器
-  baseURL: "/store",
+  baseURL: import.meta.env.VITE_STORE_API,
   // headers: {
   //   get: {
   //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
