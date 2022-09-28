@@ -56,6 +56,7 @@ export const useGlobalState = defineStore({
      */
     async init() {
       await useGlobalData().init() // 初始化 user, playlist, taggedSongs
+      useGlobalData().welcome() // 登录统计
       this.playlist.active = this.playlist.data[0];
       if (this.playlist.active?.id) {
         this.songlist.data = await useGlobalData().getSonglist(this.playlist.active?.id) || []

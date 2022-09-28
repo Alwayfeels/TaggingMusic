@@ -215,6 +215,12 @@ export const useGlobalData = defineStore({
      */
     async point(data: any) {
       await api.storePost('/store', data);
+    },
+    /**
+     * @desc: 页面被访问
+     */
+    async welcome() {
+      await api.storeGet('/store/welcome')
     }
   }
 })
