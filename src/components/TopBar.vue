@@ -78,7 +78,7 @@ function toGithub() {
 }
 
 function toEntry() {
-  globalData.point({ desc: 'click title' })
+  globalData.point({ desc: 'click title', profile: globalData.user?.profile || null })
   router.push('/')
 }
 </script>

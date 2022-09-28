@@ -197,42 +197,30 @@ export function post(url: string, params = {}, config: requestConfig = {}) {
  const store = axios.create({
   // 自有服务器
   baseURL: import.meta.env.VITE_STORE_API,
-  // headers: {
-  //   get: {
-  //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-  //   },
-  //   post: {
-  //     'Content-Type': 'application/json;charset=utf-8'
-  //   }
-  // },
   // 是否跨站点访问控制请求
   withCredentials: true,
   timeout: 15000,
-  transformRequest: [(data) => {
-    data = JSON.stringify(data)
-    return data
-  }],
-  validateStatus() {
-    // 使用async-await，处理reject情况较为繁琐，所以全部返回resolve，在业务代码中处理异常
-    return true
-  },
-  transformResponse: [(data) => {
-    if (typeof data === 'string' && data.startsWith('{')) {
-      data = JSON.parse(data)
-    }
-    return data
-  }]
+  // transformRequest: [(data) => {
+  //   data = JSON.stringify(data)
+  //   return data
+  // }],
+  // validateStatus() {
+  //   // 使用async-await，处理reject情况较为繁琐，所以全部返回resolve，在业务代码中处理异常
+  //   return true
+  // },
+  // transformResponse: [(data) => {
+  //   if (typeof data === 'string' && data.startsWith('{')) {
+  //     data = JSON.parse(data)
+  //   }
+  //   return data
+  // }]
 })
 
 
 export function storeGet(url: string, params = {}) {
   // default use timestamp params
   return new Promise<responseData>((resolve, reject) => {
-    store.get<responseData>(url, {
-      params: {
-        ...params
-      }
-    })
+    store.get<responseData>(url, { params })
       .then(res => {
         resolve(res.data)
       })
@@ -245,15 +233,13 @@ export function storeGet(url: string, params = {}) {
 /**
 * 封装post请求
 * @param url
-* @param params
+* @param data
 * @returns {Promise}
 */
-export function storePost(url: string, params = {}) {
+export function storePost(url: string, data = {}) {
   // default use timestamp params
   return new Promise<responseData>((resolve, reject) => {
-    store.post<responseData>(url, {
-      ...params
-    })
+    store.post<responseData>(url, data)
       .then(res => {
         resolve(res.data)
       })

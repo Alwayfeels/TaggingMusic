@@ -213,9 +213,8 @@ export const useGlobalData = defineStore({
      * @desc: 埋点
      * @params: {any}
      */
-    async point(params: any) {
-      const res = await api.storePost('/store', params);
-      console.log('>>>>>>>>>', res)
+    async point(data: any) {
+      await api.storePost('/store', data);
     }
   }
 })
