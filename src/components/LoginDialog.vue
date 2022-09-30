@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, reactive, ref, watch } from 'vue'
 import { NModal, NSpin } from 'naive-ui'
-import api from '@/api/http'
+import api from '@/api/musicApi'
 import { useGlobalState } from '@/store/globalState';
 import { useGlobalData } from '@/store/globalData';
 const app = getCurrentInstance()

@@ -21,6 +21,10 @@
     <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="success" @click="onGenerate">
       生成tag歌单
     </NButton>
+    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="info"
+      @click="onUploadTaggedSongs">
+      上传tag
+    </NButton>
     <!-- Login -->
     <NButton class="ml-2" size="large" strong type="error" @click="onLogin">
       {{ globalState.user.isLogin ? '切换用户' : '登录' }}
@@ -31,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, getCurrentInstance } from 'vue'
 import { NButton, NIcon, NTag } from 'naive-ui';
 import { LogoGithub } from '@vicons/ionicons4'
 import { useRouter, useRoute } from 'vue-router'
@@ -40,21 +44,11 @@ import { useGlobalState } from '@/store/globalState'
 import SearchBar from '@/components/SearchBar.vue'
 import LoginDialog from '@/components/LoginDialog.vue'
 import MergeTaggedSongDialog from '@/components/MergeTaggedSongDialog.vue'
-// import { createDiscreteApi } from 'naive-ui'
-
-// const { notification } = createDiscreteApi(['notification'])
-// function openN() {
-//   notification.create({
-//       type: 'error',
-//       title: "该歌曲暂无音源",
-//       duration: 3000
-//     })
-// }
-
 const route = useRoute()
 const router = useRouter()
 const globalData = useGlobalData()
 const globalState = useGlobalState()
+const app = getCurrentInstance()
 
 
 /** 
@@ -80,6 +74,19 @@ function toGithub() {
 function toEntry() {
   globalData.point({ desc: 'click title', profile: globalData.user?.profile || null })
   router.push('/')
+}
+/**
+ * @desc: 上传 Tag
+ */
+async function onUploadTaggedSongs() {
+  const res = await globalData.uploadTaggedSong()
+  if (res.code === 200) {
+    (app as any).proxy.$notification.create({
+      type: 'success',
+      title: "上传成功",
+      duration: 3000
+    })
+  }
 }
 </script>
 

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-import api from '@/api/http'
+import musicApi from '@/api/musicApi'
+import storeApi from '@/api/storeApi'
 import localforage from "localforage";
 import { computed, toRaw } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
@@ -37,7 +38,6 @@ export const useGlobalData = defineStore({
           })
         }
       })
-      console.log('tagList', tagList);
       localforage.setItem('tagList', tagList)
       return tagList
     },
@@ -67,7 +67,7 @@ export const useGlobalData = defineStore({
           return userInfo;
         }
       }
-      const res = await api.get("login/status");
+      const res = await musicApi.get("login/status");
       // API Call
       if (res.data?.profile) {
         profile = res.data.profile;
@@ -87,7 +87,7 @@ export const useGlobalData = defineStore({
      * @desc 注销登录
      */
     async logout() {
-      await api.get("logout")
+      await musicApi.get("logout")
     },
     /** 
      * @desc 初始化已标记歌曲信息
@@ -141,7 +141,7 @@ export const useGlobalData = defineStore({
         return false
       }
       // API Call
-      const res = await api.get("/user/playlist", {
+      const res = await musicApi.get("/user/playlist", {
         uid: this.user.account.id,
       });
       playlist = res.playlist
@@ -172,7 +172,7 @@ export const useGlobalData = defineStore({
       // API Call
       const requests = []
       for (let offset = 0; offset < songNum; offset += 1000) {
-        requests.push(api.get("/playlist/track/all", { id, limit: 1000, offset }))
+        requests.push(musicApi.get("/playlist/track/all", { id, limit: 1000, offset }))
       }
       const responses = await Promise.all(requests)
       songlist = []
@@ -202,7 +202,7 @@ export const useGlobalData = defineStore({
     async getSongUrl(song: Song, force = false) {
       if (!song.id) return;
       if (song.url && !force) return;
-      const detail = await api.get('/song/url', { id: song.id, br: 320000 });
+      const detail = await musicApi.get('/song/url', { id: song.id, br: 320000 });
       if (detail?.data[0]?.url) {
         const url = detail.data[0].url;
         return url
@@ -210,17 +210,28 @@ export const useGlobalData = defineStore({
       return false
     },
     /**
+     * =============================== Store ==================================
      * @desc: 埋点
      * @params: {any}
      */
     async point(data: any) {
-      await api.storePost('/store', data);
+      await storeApi.post('/store', data);
     },
     /**
      * @desc: 页面被访问
      */
     async welcome() {
-      await api.storeGet('/store/welcome')
+      await storeApi.get('/store/welcome')
+    },
+    async uploadTaggedSong() {
+      const taggedSongs: TaggedSong[] = await localforage.getItem("taggedSongs") || [];
+      const data = {
+        taggedSongs,
+        userId: this.user.profile.userId,
+        profile: this.user.profile
+      }
+      const res = await storeApi.post('/store/postTaggedSong', data)
+      return res
     }
   }
 })
