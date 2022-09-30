@@ -6,6 +6,8 @@ import { computed, toRaw } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
 import type { GlobalData, UserInfo, Song, TagRef, TaggedSong } from "@/store/types";
 import { useGlobalState } from "@/store/globalState";
+import app from '@/main'
+
 /** 
  * @desc 全局数据存储
  * @tips 该文件是唯一和 indexedDB 交互的入口
@@ -178,7 +180,7 @@ export const useGlobalData = defineStore({
       songlist = []
       responses.forEach(res => {
         const songs = res?.songs || []
-        songlist.push(...songs) 
+        songlist.push(...songs)
       })
       // // 过滤不需要的属性
       songlist = songlist.map(item => ({
@@ -230,8 +232,48 @@ export const useGlobalData = defineStore({
         userId: this.user.profile.userId,
         profile: this.user.profile
       }
-      const res = await storeApi.post('/store/postTaggedSong', data)
+      const res = await storeApi.post('/store/postTaggedSongs', data)
       return res
+    },
+    async downloadTaggedSongs() {
+      const userId = this.user.account.id;
+      if (!userId) return false;
+      const res = await storeApi.get('/store/getTaggedSongs', { userId })
+      if (res.code === 200) {
+        const remoteSongs = res.data.taggedSongs;
+
+        // merge remote and local tags
+        const sumSongs = [...remoteSongs, ...toRaw(this.taggedSongs)];
+        for (let i = 0; i < sumSongs.length; i++) {
+          const row = sumSongs[i];
+          if (row === null) continue;
+
+          // compare all next row.id is same or not
+          for (let j = i + 1; j < sumSongs.length; j++) {
+            const checkRow = sumSongs[j]
+
+            // is same, merge tags and clear it
+            if (checkRow && checkRow.id === row.id) {
+              row.tags.push(...checkRow.tags)
+              sumSongs[j] = null;
+            }
+          }
+
+          // remove duplicate
+          row.tags = Array.from(new Set([...row.tags]))
+        }
+        const newTaggedSongs = sumSongs.filter(e => e !== null)
+
+        // save tags
+        this.taggedSongs = newTaggedSongs;
+        localforage.setItem('taggedSongs', newTaggedSongs)
+
+        app?.config?.globalProperties?.$notification?.create({
+          type: 'success',
+          title: '加载完成！',
+          duration: 3000
+        })
+      }
     }
   }
 })

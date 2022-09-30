@@ -21,9 +21,11 @@
     <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="success" @click="onGenerate">
       生成tag歌单
     </NButton>
-    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="info"
-      @click="onUploadTaggedSongs">
+    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="info" @click="onUploadTaggedSongs">
       上传tag
+    </NButton>
+    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="info" @click="onDownloadTags">
+      下载并合并tag
     </NButton>
     <!-- Login -->
     <NButton class="ml-2" size="large" strong type="error" @click="onLogin">
@@ -36,6 +38,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, getCurrentInstance } from 'vue'
+import storeApi from '@/api/storeApi'
 import { NButton, NIcon, NTag } from 'naive-ui';
 import { LogoGithub } from '@vicons/ionicons4'
 import { useRouter, useRoute } from 'vue-router'
@@ -87,6 +90,12 @@ async function onUploadTaggedSongs() {
       duration: 3000
     })
   }
+}
+/**
+ * @desc: 下载 Tag
+ */
+async function onDownloadTags() {
+  globalData.downloadTaggedSongs()
 }
 </script>
 

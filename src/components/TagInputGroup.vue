@@ -63,7 +63,9 @@ watch(() => props.songId, async (propSongId) => {
 globalData.$onAction(
   ({ name, store, args, after, onError }) => {
     after(() => {
-      if (name === 'setTagsInTaggedSongs' && args[0] === props.songId) {
+      const isTagsSettled = name === 'setTagsInTaggedSongs' && args[0] === props.songId
+      const isTagsDownload = name === 'downloadTaggedSongs'
+      if (isTagsSettled || isTagsDownload) {
         state.val = store.taggedSongs.find(e => e.id === props.songId)?.tags || []
       }
     })
