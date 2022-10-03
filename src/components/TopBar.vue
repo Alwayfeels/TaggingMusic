@@ -18,15 +18,12 @@
       <img class="user-avatar rounded" :src="`${globalData.user.profile?.avatarUrl}?param=40y40`" alt="avatar">
     </div>
     <!-- Tag Handler -->
-    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="success" @click="onGenerate">
+    <NButton v-if="globalState.user.isLogin" class="mx-2" size="large" strong type="success" @click="onGenerate">
       生成tag歌单
     </NButton>
-    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="info" @click="onUploadTaggedSongs">
-      上传tag
-    </NButton>
-    <NButton v-if="globalState.user.isLogin" class="ml-2" size="large" strong type="info" @click="onDownloadTags">
-      下载并合并tag
-    </NButton>
+    <NDropdown :options="tagStoreOptions">
+      <NButton size="large" strong type="info" >歌曲 Tags 存储</NButton>
+    </NDropdown>
     <!-- Login -->
     <NButton class="ml-2" size="large" strong type="error" @click="onLogin">
       {{ globalState.user.isLogin ? '切换用户' : '登录' }}
@@ -37,10 +34,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, getCurrentInstance } from 'vue'
+import { computed, reactive, ref, getCurrentInstance, h } from 'vue'
+import type { Component } from 'vue'
 import storeApi from '@/api/storeApi'
-import { NButton, NIcon, NTag } from 'naive-ui';
+import { NButton, NIcon, NTag, NDropdown } from 'naive-ui';
 import { LogoGithub } from '@vicons/ionicons4'
+import { CloudArrowDown20Regular, CloudArrowUp20Regular } from '@vicons/fluent'
+import { FileUpload, FileDownload } from '@vicons/tabler'
 import { useRouter, useRoute } from 'vue-router'
 import { useGlobalData } from '@/store/globalData'
 import { useGlobalState } from '@/store/globalState'
@@ -78,6 +78,51 @@ function toEntry() {
   globalData.point({ desc: 'click title', profile: globalData.user?.profile || null })
   router.push('/')
 }
+
+/**
+ * @params tagStoreOptions
+ */
+const renderIcon = (icon: Component) => {
+  return () => {
+    return h(NIcon, null, {
+      default: () => h(icon)
+    })
+  }
+}
+const tagStoreOptions = [
+  {
+    label: '上传 tags',
+    key: 'upload',
+    icon: renderIcon(CloudArrowUp20Regular),
+    props: {
+      onClick: onUploadTaggedSongs
+    }
+  },
+  {
+    label: '下载 tags',
+    key: 'download',
+    icon: renderIcon(CloudArrowDown20Regular),
+    props: {
+      onClick: globalData.downloadTaggedSongs
+    }
+  },
+  {
+    label: '导出 tags',
+    key: 'export',
+    icon: renderIcon(FileDownload),
+    props: {
+      onClick: globalData.exportTaggedSong
+    }
+  },
+  {
+    label: '导入 tags',
+    key: 'import',
+    icon: renderIcon(FileUpload),
+    props: {
+      onClick: globalData.importTaggedSong
+    }
+  },
+]
 /**
  * @desc: 上传 Tag
  */
@@ -90,12 +135,6 @@ async function onUploadTaggedSongs() {
       duration: 3000
     })
   }
-}
-/**
- * @desc: 下载 Tag
- */
-async function onDownloadTags() {
-  globalData.downloadTaggedSongs()
 }
 </script>
 

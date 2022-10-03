@@ -49,9 +49,9 @@ const dynamicTags = ref()
 // 监听 songId 初始化 state.val
 watch(() => props.songId, async (propSongId) => {
   if (!propSongId) return;
-  const taggedSong = globalData.taggedSongs?.find(song => song.id === props.songId)
-  if (taggedSong) {
-    state.val = [...taggedSong.tags]
+  const taggedSongs = globalData.taggedSongs?.find(song => song.id === props.songId)
+  if (taggedSongs) {
+    state.val = [...taggedSongs.tags]
   } else {
     state.val = []
   }
@@ -65,7 +65,8 @@ globalData.$onAction(
     after(() => {
       const isTagsSettled = name === 'setTagsInTaggedSongs' && args[0] === props.songId
       const isTagsDownload = name === 'downloadTaggedSongs'
-      if (isTagsSettled || isTagsDownload) {
+      const isTagImport = name === 'importTaggedSong'
+      if (isTagsSettled || isTagsDownload || isTagImport) {
         state.val = store.taggedSongs.find(e => e.id === props.songId)?.tags || []
       }
     })

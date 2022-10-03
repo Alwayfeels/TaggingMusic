@@ -109,7 +109,7 @@ export const useGlobalData = defineStore({
     },
     /** 
      * @desc 保存 传入的 tags，到指定的 taggedSongs[id].tags 中
-     * @cond 若无匹配的 id 或没有传入 id, 则创建新的 taggedSong 并初始化
+     * @cond 若无匹配的 id 或没有传入 id, 则创建新的 taggedSongs 并初始化
      */
     setTagsInTaggedSongs(id: number, tags: string[], song?: Song): void {
       const existSong = this.taggedSongs.find(e => e.id === id)
@@ -119,7 +119,7 @@ export const useGlobalData = defineStore({
         return;
       }
       if (song) {
-        // 新建 taggedSong 并初始化 tags
+        // 新建 taggedSongs 并初始化 tags
         this.taggedSongs.push({ tags, ...toRaw(song) })
         this.setTaggedSongs()
         return;
@@ -173,7 +173,7 @@ export const useGlobalData = defineStore({
       }
       // API Call
       const requests = []
-      for (let offset = 0; offset < songNum; offset += 1000) {
+      for (let offset = 0; offset < songNum; offset += songNum) {
         requests.push(musicApi.get("/playlist/track/all", { id, limit: 1000, offset }))
       }
       const responses = await Promise.all(requests)
@@ -285,7 +285,7 @@ export const useGlobalData = defineStore({
      * @desc 导出TaggedSong
      */
     async exportTaggedSong() {
-      const exportTaggedSong = await localforage.getItem("taggedSong");
+      const exportTaggedSong = await localforage.getItem("taggedSongs");
       if (exportTaggedSong === null) {
         app?.config?.globalProperties?.$notification?.create({
           type: 'warning',
@@ -328,8 +328,8 @@ export const useGlobalData = defineStore({
           reader.readAsText(file);
           reader.onload = (e) => {
             const data = JSON.parse(e.target?.result as string);
-            localforage.setItem("taggedSong", data);
-            _this.taggedSong = data;
+            localforage.setItem("taggedSongs", data);
+            _this.taggedSongs = data;
             app?.config?.globalProperties?.$notification?.create({
               type: 'success',
               title: "成功",
