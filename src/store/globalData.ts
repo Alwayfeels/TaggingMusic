@@ -225,6 +225,9 @@ export const useGlobalData = defineStore({
     async welcome() {
       await storeApi.get('/store/welcome')
     },
+    /**
+     * @desc 上传 Tags
+     */
     async uploadTaggedSong() {
       const taggedSongs: TaggedSong[] = await localforage.getItem("taggedSongs") || [];
       const data = {
@@ -235,6 +238,9 @@ export const useGlobalData = defineStore({
       const res = await storeApi.post('/store/postTaggedSongs', data)
       return res
     },
+    /**
+     * @desc 下载 Tags
+     */
     async downloadTaggedSongs() {
       const userId = this.user.account.id;
       if (!userId) return false;
@@ -274,7 +280,68 @@ export const useGlobalData = defineStore({
           duration: 3000
         })
       }
-    }
+    },
+    /**
+     * @desc 导出TaggedSong
+     */
+    async exportTaggedSong() {
+      const exportTaggedSong = await localforage.getItem("taggedSong");
+      if (exportTaggedSong === null) {
+        app?.config?.globalProperties?.$notification?.create({
+          type: 'warning',
+          title: "失败",
+          content: '当前没有任何带有标签的歌曲',
+          duration: 3000
+        })
+        return false;
+      }
+      const link = document.createElement("a");
+      link.download = "标签歌曲数据.json";
+      link.href = "data:text/plain," + JSON.stringify(exportTaggedSong);
+      link.click();
+      app?.config?.globalProperties?.$notification?.create({
+        type: 'success',
+        title: "成功",
+        content: '导出完成！',
+        duration: 3000
+      })
+    },
+    /**
+     * @desc 导入TaggedSong
+     */
+    async importTaggedSong() {
+      const _this = this;
+      return new Promise((resolve, reject) => {
+        // 创建一个file input
+        let input = document.createElement("input");
+        // 绑定onchange事件
+        input.type = "file";
+        input.accept = ".json";
+        input.onchange = (e) => {
+          const file = e.target?.files[0];
+          if (!file) {
+            input = null;
+            reject('file is null')
+          }
+          // 当选择文件后，使用FileReader API读取文件，返回数据
+          const reader = new FileReader();
+          reader.readAsText(file);
+          reader.onload = (e) => {
+            const data = JSON.parse(e.target?.result as string);
+            localforage.setItem("taggedSong", data);
+            _this.taggedSong = data;
+            app?.config?.globalProperties?.$notification?.create({
+              type: 'success',
+              title: "成功",
+              content: '导入完成！',
+              duration: 3000
+            })
+            resolve(data);
+          };
+        };
+        input.click();
+      })
+    },
   }
 })
 
