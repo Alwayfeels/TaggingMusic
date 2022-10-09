@@ -43,7 +43,6 @@ watch(tagInput, (el) => {
 // 键盘输入处理
 function onEnterHandler() {
   if (state.val) {
-    console.log('、、、、、、、、、、、、、、、、 enter')
     emit("pressEnter", state.val);
   }
 }
