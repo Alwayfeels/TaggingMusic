@@ -59,6 +59,7 @@ export interface GlobalState {
     isLoading: boolean;
     data: Song[];
     active: Song;
+    activeTagInputSong: Song | null;
   };
   player: {
     isShow: boolean;

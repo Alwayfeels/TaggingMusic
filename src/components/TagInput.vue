@@ -1,7 +1,8 @@
 <template>
   <NAutoComplete size="small" ref="tagInput" v-model:value="state.val" v-model:options="state.activeTags"
-    :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keypress.enter.prevent="onEnterHandler"
-    @keydown.tab.prevent="onTabHandler" @keydown.esc.prevent="onEscHandler" :on-blur="onBlurHandler" />
+    :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keyup.enter.prevent="onEnterHandler"
+    @keydown.tab.prevent="onTabHandler" @keydown.esc.prevent="onEscHandler"
+    @keyup.ctrl.enter.prevent="onCtrlEnterHandler" :on-blur="onBlurHandler" />
 </template>
 
 <script setup lang='ts'>
@@ -11,7 +12,7 @@ import { useGlobalData } from '@/store/globalData';
 import type { TagInputState, LabelValue, TagRef } from '@/store/types';
 
 const globalData = useGlobalData()
-const emit = defineEmits(["change", "blur", "pressTab", "pressEnter"]);
+const emit = defineEmits(["change", "blur", "pressTab", "pressEnter", "pressCtrlEnter"]);
 
 // 该组件应该是一个存粹的无状态输入组件
 
@@ -42,18 +43,22 @@ watch(tagInput, (el) => {
 // 键盘输入处理
 function onEnterHandler() {
   if (state.val) {
+    console.log('、、、、、、、、、、、、、、、、 enter')
     emit("pressEnter", state.val);
   }
 }
 function onTabHandler() {
-  if (state.val) {
-    emit("pressTab", state.val);
-  }
+  emit("pressTab");
 }
 function onBlurHandler() {
   emit("blur", state.val);
 }
 function onEscHandler() {
   tagInput.value.blur()
+}
+function onCtrlEnterHandler() {
+  if (state.val) {
+    emit("pressCtrlEnter", state.val);
+  }
 }
 </script>

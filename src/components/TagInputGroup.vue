@@ -1,13 +1,14 @@
 <template>
-  <NDynamicTags ref="dynamicTags" v-model:value="state.val" @mousedown.self="onClickHandler" @click.stop=""
+  <NDynamicTags ref="dynamicTags" v-model:value="state.val" @mousedown.self="onTagGroupClick" @click.stop=""
     :on-update:value="onTagsChange">
     <template #input="{ submit, deactivate }">
-      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)"
-        @pressTab="onTabHandler($event, submit, deactivate)" @blur="onBlurHandler($event, submit, deactivate)">
+      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)" @pressTab="onTabHandler(submit, deactivate)"
+        @blur="onBlurHandler($event, submit, deactivate)"
+        @pressCtrlEnter="onCtrlEnterHandler($event, submit, deactivate)">
       </TagInput>
     </template>
     <template #trigger="{ activate, disabled }">
-      <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="activate()">
+      <n-button size="small" type="primary" dashed :disabled="disabled" @click.stop="onAddBtnClick(activate)">
         添加
       </n-button>
     </template>
@@ -20,9 +21,11 @@ import { ref, h, computed, nextTick, watch, reactive, toRaw } from "vue";
 import type { Ref } from 'vue'
 import TagInput from "@/components/TagInput.vue";
 import { useGlobalData } from '@/store/globalData';
+import { useGlobalState } from '@/store/globalState';
 import type { Song, TaggedSong } from "@/store/types";
 // 全局数据中心
 const globalData = useGlobalData()
+const globalState = useGlobalState()
 
 const props = defineProps({
   // 是否仅仅作为input使用，不储存至indexDb
@@ -59,7 +62,15 @@ watch(() => props.songId, async (propSongId) => {
   immediate: true
 })
 
-// 监听 globalData.setTagsInTaggedSongs 更新组件 value
+// 监听 activeTagInputSongId 初始化 tagInput focus 状态
+watch(() => globalState.songlist.activeTagInputSong, (activeTagInputSong) => {
+  if (activeTagInputSong?.id === null) return
+  if (activeTagInputSong?.id === props.songId) {
+    focusTagInputGroup()
+  }
+})
+
+// 监听 globalData.setTagsInTaggedSongs 更新组件初始值 default value
 globalData.$onAction(
   ({ name, store, args, after, onError }) => {
     after(() => {
@@ -94,29 +105,75 @@ function onTagsChange(newVal: string[]) {
  * @desc enter 按键事件处理
  */
 function onEnterHandler(tag: string, submit: any, deactivate: any) {
-  // tag = tag.trim()
+  // when you press enter, save and activating next <tagInput>
+  if (!tag) return false;
   tag ? submit(tag) : deactivate();
+  // focus next <tagInput>
+  focusTagInputGroup()
 }
 
 /** 
  * @desc tab 按键事件处理
  */
-function onTabHandler(tag: string, submit: any, deactivate: any) {
-  // when you press tab, save and open next <tagInput>
-  // tag = tag.trim()
-  if (!tag) return false;
-  tag ? submit(tag) : deactivate();
-  // focus next <tagInput>
-  setTimeout(() => {
-    dynamicTags.value.showInput = true
-  }, 0);
+function onTabHandler(submit: any, deactivate: any) {
+  // when you press tab, activating <tagInput> in next row
+  // return directly if this is the last song
+  if (globalState.activeSongIdx + 1 >= globalState.songlist.data.length) return false;
+  if (globalState.songlist.activeTagInputSong === null) return;
+  // focus next <tagInput> in next row
+  focusNextTagInput()
 }
 
-/** 
- * @desc click 点击事件处理
+/**
+ * @desc: ctrl + enter 按键事件处理
  */
-function onClickHandler() {
+function onCtrlEnterHandler(tag: string, submit: any, deactivate: any) {
+  // when you press ctrl + enter, save tags and activating <tagInput> in next row
+  tag ? submit(tag) : deactivate();
+  // return directly if this is the last song
+  if (globalState.activeSongIdx + 1 >= globalState.songlist.data.length) return false;
+  if (globalState.songlist.activeTagInputSong === null) return;
+  // focus next <tagInput> in next row
+  focusNextTagInput()
+}
+/**
+ * @desc: focus tagInput on NextSong
+ * @desc: 激活当前焦点的下一行
+ */
+function focusNextTagInput() {
+  const tagInputActiveIdx = globalState.songlist.data.findIndex(e => e.id === globalState.songlist.activeTagInputSong?.id)
+  const nextSong = globalState.songlist.data[tagInputActiveIdx + 1];
+  globalState.songlist.activeTagInputSong = nextSong || null;
+}
+/** 
+ * @desc 组件空白处（非 add 按钮）被点击事件处理，激活 tagInput
+ */
+function onTagGroupClick() {
+  focusTagInputGroup()
+}
+/**
+ * @desc: 点击 add 按钮事件处理, 激活 tagInput
+ */
+function onAddBtnClick(activate: any) {
+  setActiveTagInputSong()
+  activate()
+}
+
+/**
+ * @desc: 设置 ActiveTagInputSong 为 props.songId 的 Song
+ */
+function setActiveTagInputSong() {
+  // update globalState
+  const activeTagInputSong = globalState.songlist.data.find(e => e.id === props.songId) ?? null;
+  globalState.songlist.activeTagInputSong = activeTagInputSong;
+}
+/**
+ * @desc: 激活 TagInput 状态 - create and focus <TagInput>
+ * @desc: 同时存储激活Song数据
+ */
+function focusTagInputGroup() {
   if (dynamicTags.value.showInput) return false
+  setActiveTagInputSong()
   setTimeout(() => {
     dynamicTags.value.showInput = !dynamicTags.value.showInput
   }, 0);
@@ -126,8 +183,9 @@ function onClickHandler() {
  * @desc blur 失焦事件处理
  */
 function onBlurHandler($event: string, submit: any, deactivate: any) {
-  // if (globalData.appConfig.removeTagOnBlur) {
   deactivate()
+  // if (globalData.appConfig.removeTagOnBlur) {
+  //   deactivate()
   //   return;
   // }
   // onEnterHandler($event, submit, deactivate)

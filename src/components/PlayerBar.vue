@@ -95,7 +95,7 @@ import { useGlobalData } from '@/store/globalData';
 import { IosVolumeHigh, IosVolumeLow, IosVolumeMute, IosVolumeOff } from '@vicons/ionicons4'
 import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
-import { NIcon, NSlider, NIconWrapper, NTag, createDiscreteApi } from 'naive-ui'
+import { NIcon, NSlider, NIconWrapper, NTag } from 'naive-ui'
 import TagInputGroup from './TagInputGroup.vue';
 import { PlayMode } from '@/store/types'
 

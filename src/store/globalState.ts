@@ -31,7 +31,8 @@ export const useGlobalState = defineStore({
       isShow: true,
       isLoading: false,
       data: [],
-      active: {}
+      active: {},
+      activeTagInputSong: null
     },
     player: {
       isShow: false,
@@ -92,7 +93,7 @@ export const useGlobalState = defineStore({
       return true
     },
     /** 
-     * @desc 获取歌曲详情（url）
+     * @desc 获取活动中的歌曲的详情（url）
      */
     async getActiveSongUrl(force = false) {
       // thottle(async () => {

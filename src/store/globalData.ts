@@ -27,7 +27,6 @@ export const useGlobalData = defineStore({
   getters: {
     tagList: (state) => {
       const tagArray = state.taggedSongs.map(item => item.tags).flat()
-      console.log('tagArray', tagArray);
       const tagList: TagRef[] = []
       tagArray.forEach((tag: string) => {
         const index = tagList.findIndex(item => item.name === tag)
@@ -156,13 +155,14 @@ export const useGlobalData = defineStore({
      * @tips 获取歌单接口单次最高获取 1000 首，否则会报错
      * @params id: 歌单id
      * @params force: 是否不使用本地存储直接调用接口
-     * @params setStore: 是否将歌曲列表存入globalData
+     * @params setStore: 是否将歌曲列表存入globalData和globalState
      * @params songNumber: 获取的歌曲数量, 大于1000将拆分请求
      */
     async getSonglist(id: number | null, songNum = 1000, force = false, setStore = true) {
       if (!id) return false
       useGlobalState().songlist.isLoading = true
       let songlist: Song[]
+      // @force: will ignore IndexedDB data, direct get data from API 
       if (!force) {
         songlist = await localforage.getItem(`songlist_${id}`) || [];
         if (songlist.length) {
@@ -182,7 +182,7 @@ export const useGlobalData = defineStore({
         const songs = res?.songs || []
         songlist.push(...songs)
       })
-      // // 过滤不需要的属性
+      // 过滤不需要的属性
       songlist = songlist.map(item => ({
         id: item.id,
         name: item.name,
@@ -190,7 +190,9 @@ export const useGlobalData = defineStore({
         al: item.al,
         fee: item.fee,
       }))
+      // save to indexedDB
       localforage.setItem(`songlist_${id}`, songlist);
+      // @setStore: will save songlist to globalState and globalData
       if (setStore) {
         this.songlist = songlist;
         useGlobalState().songlist.data = songlist
