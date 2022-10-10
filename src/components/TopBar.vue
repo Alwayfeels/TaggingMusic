@@ -22,12 +22,14 @@
       生成tag歌单
     </NButton>
     <NDropdown :options="tagStoreOptions">
-      <NButton size="large" strong type="info" >歌曲 Tags 存储</NButton>
+      <NButton size="large" strong type="info">歌曲 Tags 存储</NButton>
     </NDropdown>
     <!-- Login -->
     <NButton class="ml-2" size="large" strong type="error" @click="onLogin">
       {{ globalState.user.isLogin ? '切换用户' : '登录' }}
     </NButton>
+    <!-- <NButton size="large" strong type="info" @click="globalState.revokeTags">撤销</NButton>
+    <NButton size="large" strong type="info" @click="globalState.unRevokeTags">反撤销</NButton> -->
     <LoginDialog ref="LoginDialogRef" />
     <MergeTaggedSongDialog ref="mergeTaggedSongRef" />
   </div>

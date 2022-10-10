@@ -103,24 +103,31 @@ export const useGlobalData = defineStore({
     /** 
      * @desc 保存 taggedSongs 到 indexedDB
      */
-    setTaggedSongs(taggedSongs?: TaggedSong[]) {
+    setTaggedSongs2DB(taggedSongs?: TaggedSong[]) {
       localforage.setItem("taggedSongs", toRaw(taggedSongs || this.taggedSongs));
     },
     /** 
      * @desc 保存 传入的 tags，到指定的 taggedSongs[id].tags 中
-     * @cond 若无匹配的 id 或没有传入 id, 则创建新的 taggedSongs 并初始化
+     * @cond 若无匹配的 id 或没有传入 id, 则创建新的 taggedSong 并初始化
      */
-    setTagsInTaggedSongs(id: number, tags: string[], song?: Song): void {
+    setTagsInTaggedSongs(id: number, tags: string[], song?: Song, saveHistory = true): void {
       const existSong = this.taggedSongs.find(e => e.id === id)
       if (existSong) {
+        if (existSong.tags.toString() === tags.toString()) return;
+        if (saveHistory) {
+          useGlobalState().addTagsHistory(id, existSong.name as string, tags, existSong.tags)
+        }
         existSong.tags = tags
-        this.setTaggedSongs()
+        this.setTaggedSongs2DB()
         return;
       }
       if (song) {
+        if (saveHistory) {
+          useGlobalState().addTagsHistory(id, song.name as string, tags)
+        }
         // 新建 taggedSongs 并初始化 tags
         this.taggedSongs.push({ tags, ...toRaw(song) })
-        this.setTaggedSongs()
+        this.setTaggedSongs2DB()
         return;
       }
       console.error('setTagsInTaggedSongs error: params is unvalid')

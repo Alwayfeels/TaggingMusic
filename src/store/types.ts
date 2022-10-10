@@ -60,6 +60,8 @@ export interface GlobalState {
     data: Song[];
     active: Song;
     activeTagInputSong: Song | null;
+    tagsHistory: TagHistory[],
+    historyIndex: number
   };
   player: {
     isShow: boolean;
@@ -69,6 +71,12 @@ export interface GlobalState {
     duration: number;
     playMode: PlayMode;
   };
+}
+export interface TagHistory {
+  id: number;
+  name: string;
+  oldTags: string[];
+  newTags: string[]
 }
 
 export interface TagRef {

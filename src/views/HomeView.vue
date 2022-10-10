@@ -4,8 +4,8 @@
       show-trigger="arrow-circle" content-style="padding: 24px;" bordered v-menus:right="rightMenus"
       :native-scrollbar="false">
       <n-spin :show="playlist.isLoading">
-        <n-menu v-if="playlist.active?.id" v-model:value="playlist.active.id" :root-indent="36" :indent="12" key-field="id"
-          :options="playlist.data" :render-icon="renderMenuIcon" :render-label="renderMenuLabel"
+        <n-menu v-if="playlist.active?.id" v-model:value="playlist.active.id" :root-indent="36" :indent="12"
+          key-field="id" :options="playlist.data" :render-icon="renderMenuIcon" :render-label="renderMenuLabel"
           :on-update:value="activeMenuChange" />
       </n-spin>
     </n-layout-sider>
@@ -47,6 +47,20 @@ const { playlist, songlist, user, player } = globalState
 watch(() => globalState.player.isPlaying, (isPlaying: boolean) => {
   if (isPlaying) {
     globalState.player.isShow = true
+  }
+})
+
+/**
+ * @desc: 监听 键盘操作
+ */
+onMounted(() => {
+  document.onkeyup = (e) => {
+    if (e.ctrlKey && e.key === 'z') {
+      globalState.revokeTags()
+    }
+    if (e.ctrlKey && e.key === 'y') {
+      globalState.unRevokeTags()
+    }
   }
 })
 

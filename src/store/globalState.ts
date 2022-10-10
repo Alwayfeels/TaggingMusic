@@ -32,7 +32,9 @@ export const useGlobalState = defineStore({
       isLoading: false,
       data: [],
       active: {},
-      activeTagInputSong: null
+      activeTagInputSong: null,
+      tagsHistory: [],
+      historyIndex: 0,
     },
     player: {
       isShow: false,
@@ -122,6 +124,43 @@ export const useGlobalState = defineStore({
       if (this.player.playMode === PlayMode.SINGLE) {
         return this.setActiveSong({ id: this.songlist.active.id })
       }
+    },
+    /**
+     * @desc: 新增 tags 操作历史数据
+     */
+    addTagsHistory(id: number, name: string, newTags: string[], oldTags: string[] = []) {
+      const newHistoryItem = { id, name, newTags, oldTags };
+      if (this.songlist.historyIndex !== 0) {
+        this.songlist.tagsHistory.splice(0, this.songlist.historyIndex, newHistoryItem)
+        return
+      }
+      this.songlist.tagsHistory.unshift(newHistoryItem);
+    },
+    /**
+     * @desc: 撤销 tags 操作
+     */
+    revokeTags() {
+      const { tagsHistory, historyIndex } = this.songlist;
+      if (historyIndex >= tagsHistory.length) {
+        console.error('can not Revoke')
+        return;
+      }
+      const { id, oldTags } = tagsHistory[historyIndex]
+      useGlobalData().setTagsInTaggedSongs(id, oldTags, undefined, false)
+      this.songlist.historyIndex++
+    },
+    /**
+     * @desc: 反撤销 tags 操作
+     */
+    unRevokeTags() {
+      if (this.songlist.historyIndex <= 0) {
+        console.error('can not unRevoke')
+        return;
+      }
+      this.songlist.historyIndex--
+      const { tagsHistory, historyIndex } = this.songlist;
+      const { id, newTags } = tagsHistory[historyIndex]
+      useGlobalData().setTagsInTaggedSongs(id, newTags, undefined, false)
     }
   }
 })
