@@ -4,7 +4,8 @@
     <template #input="{ submit, deactivate }">
       <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)" @pressTab="onTabHandler(submit, deactivate)"
         @blur="onBlurHandler($event, submit, deactivate)"
-        @pressCtrlEnter="onCtrlEnterHandler($event, submit, deactivate)">
+        @pressCtrlEnter="onCtrlEnterHandler($event, submit, deactivate)"
+        @pressShiftTab="onShiftTabHandler($event, submit, deactivate)">
       </TagInput>
     </template>
     <template #trigger="{ activate, disabled }">
@@ -118,10 +119,21 @@ function onEnterHandler(tag: string, submit: any, deactivate: any) {
 function onTabHandler(submit: any, deactivate: any) {
   // when you press tab, activating <tagInput> in next row
   // return directly if this is the last song
-  if (globalState.activeSongIdx + 1 >= globalState.songlist.data.length) return false;
+  // if (globalState.activeSongIdx + 1 >= globalState.songlist.data.length) return false;
   if (globalState.songlist.activeTagInputSong === null) return;
-  // focus next <tagInput> in next row
+  // focus <tagInput> in next row
   focusNextTagInput()
+}
+
+/**
+ * @desc: Shift + tab 事件处理
+ */
+function onShiftTabHandler(tag: string, submit: any, deactivate: any) {
+  // return directly if this is the first song
+  // if (globalState.activeSongIdx <= 0) return false;
+  if (globalState.songlist.activeTagInputSong === null) return;
+  // focus <tagInput> in prev row
+  focusPrevTagInput()
 }
 
 /**
@@ -136,15 +148,27 @@ function onCtrlEnterHandler(tag: string, submit: any, deactivate: any) {
   // focus next <tagInput> in next row
   focusNextTagInput()
 }
+
 /**
  * @desc: focus tagInput on NextSong
- * @desc: 激活当前焦点的下一行
+ * @desc: 激活当前焦点下一行的 tagInput
  */
 function focusNextTagInput() {
   const tagInputActiveIdx = globalState.songlist.data.findIndex(e => e.id === globalState.songlist.activeTagInputSong?.id)
   const nextSong = globalState.songlist.data[tagInputActiveIdx + 1];
   globalState.songlist.activeTagInputSong = nextSong || null;
 }
+
+/**
+ * @desc: focus tagInput on PrevSong
+ * @desc: 激活当前焦点上一行的 tagInput
+ */
+function focusPrevTagInput() {
+  const tagInputActiveIdx = globalState.songlist.data.findIndex(e => e.id === globalState.songlist.activeTagInputSong?.id)
+  const prevSong = globalState.songlist.data[tagInputActiveIdx - 1];
+  globalState.songlist.activeTagInputSong = prevSong || null;
+}
+
 /** 
  * @desc 组件空白处（非 add 按钮）被点击事件处理，激活 tagInput
  */

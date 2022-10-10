@@ -137,7 +137,7 @@ export const useGlobalState = defineStore({
       this.songlist.tagsHistory.unshift(newHistoryItem);
     },
     /**
-     * @desc: 撤销 tags 操作
+     * @desc: 撤销 tags 操作 ctrl+z
      */
     revokeTags() {
       const { tagsHistory, historyIndex } = this.songlist;
@@ -150,7 +150,7 @@ export const useGlobalState = defineStore({
       this.songlist.historyIndex++
     },
     /**
-     * @desc: 反撤销 tags 操作
+     * @desc: 反撤销 tags 操作 ctrl+y
      */
     unRevokeTags() {
       if (this.songlist.historyIndex <= 0) {
