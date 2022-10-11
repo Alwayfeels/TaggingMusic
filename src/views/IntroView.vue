@@ -1,30 +1,39 @@
 <template>
-  <div class="view-container flex flex-col items-center w-full h-full mt-2 ml-10">
-    <h1 class="text-5xl mt-32">Tagging Music</h1>
-    <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
-    <div class="flex justify-center">
-      <NButton class="my-4" type="primary" secondary size="large" @click="toIntro">
-        <span>使用方法</span>
-        <n-icon class="ml-2" :size="24" :component="ArrowCircleDown24Filled" />
-      </NButton>
-      <NButton class="ml-4 my-4" type="primary" size="large" @click="toMainView">
-        <span>开始使用</span>
-        <n-icon class="ml-2" :size="20" :component="ArrowCircleRight24Filled" />
-      </NButton>
-    </div>
-    <n-divider />
-    <div class="detail flex flex-1">
-      <div v-for="(item, index) in detailInfo" :key="index" class="flex-1 px-4">
-        <div class="title text-xl">{{ item.title }}</div>
-        <div class="content mt-4 text-slate-500">
-          <p v-for="row in item.content" :key="row">{{ row }}</p>
+  <div class="view-container flex flex-col items-center w-full ml-10">
+    <div class="screen-view items-center pt-20">
+      <div class="flex">
+        <div class="flex flex-col">
+          <h1 class="text-5xl mt-12">Tagging Music</h1>
+          <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
+          <div class="flex ml-8 my-16">
+            <NButton class="my-4" type="primary" secondary size="large" @click="toIntro">
+              <span>使用方法</span>
+              <n-icon class="ml-2" :size="24" :component="ArrowCircleDown24Filled" />
+            </NButton>
+            <NButton class="ml-4 my-4" type="primary" size="large" @click="toMainView">
+              <span>开始使用</span>
+              <n-icon class="ml-2" :size="20" :component="ArrowCircleRight24Filled" />
+            </NButton>
+          </div>
+        </div>
+        <div class="flex-1">
+          <DemoAnimate />
+        </div>
+      </div>
+      <n-divider />
+      <div class="detail flex flex-1">
+        <div v-for="(item, index) in detailInfo" :key="index" class="flex-1 px-4">
+          <div class="title text-xl">{{ item.title }}</div>
+          <div class="content mt-4 text-slate-500">
+            <p v-for="row in item.content" :key="row">{{ row }}</p>
+          </div>
         </div>
       </div>
     </div>
-    <div class="footer mt-40">
-      MIT Licensed | Copyright © 2022-present
-      <a href="https://github.com/yyx990803" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
-    </div>
+  </div>
+  <div class="footer pt-40 w-full flex justify-center">
+    <span class="mr-2">MIT Licensed | Copyright © 2022-present</span>
+    <a href="https://github.com/yyx990803" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
   </div>
 </template>
 
@@ -32,6 +41,7 @@
 import { NButton, NDivider, NIcon } from "naive-ui";
 import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router'
+import DemoAnimate from '@/components/DemoAnimate.vue'
 import { ArrowCircleDown24Filled, ArrowCircleRight24Filled } from '@vicons/fluent'
 
 const app = getCurrentInstance()
@@ -75,6 +85,13 @@ function toIntro() {
 .view-container {
   box-sizing: border-box;
   padding: 0 20%;
+  height: calc(100vh - 80px);
+  min-width: 800px;
+
+  .screen-view {
+    height: 100%;
+    overflow: hidden;
+  }
 
   .footer {}
 }

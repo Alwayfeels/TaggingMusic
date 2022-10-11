@@ -29,7 +29,7 @@ body {
 }
 
 #app {
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   font-family: "Inter", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   /* font-family: Avenir, Helvetica, Arial, sans-serif; */
