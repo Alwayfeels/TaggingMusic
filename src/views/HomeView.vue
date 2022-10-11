@@ -71,42 +71,48 @@ const rightMenus = reactive({
   menus: [
     // 菜单使用示例：https://github.com/xfy520/vue3-menus
     {
-      label: "刷新左侧歌单列表",
-      tip: '',
+      label: "刷新歌单列表",
+      tip: '(左侧)',
       click: async () => {
-        // state.playlistLoading = true
-        // await globalData.getRemotePlaylist()
-        // state.playlistLoading = false
+        globalState.playlist.isLoading = true
+        await globalData.initPlaylist(true)
+        globalState.playlist.isLoading = false
       }
     }, {
-      label: "刷新右侧当前歌单",
-      tip: '',
+      label: "刷新当前歌单",
+      tip: '(右侧)',
       click: async () => {
-        // if (state.currSonglistId) {
-        //   state.songlistLoading = true
-        //   await globalData.getSonglist({
-        //     playlistId: state.currSonglistId,
-        //     force: true,
-        //     setStore: true
-        //   })
-        //   state.songlistLoading = false
-        // } else {
-        //   console.warning('右键刷新失败，当前歌单id为空，请选择一个menu后再试')
-        // }
+        const activePlaylistId = globalState.playlist.active.id || null
+        globalState.playlist.isLoading = true
+        await globalData.getSonglist(activePlaylistId, 1000, true)
+        globalState.playlist.isLoading = false
       }
     }, {
-      label: '选择 tag 导入到当前歌单',
-      tip: '',
+      label: "撤销上一次 tags 输入",
+      tip: 'ctrl + z',
       click: () => {
-        // state.showTaggingDialog = true
+        globalState.revokeTags()
       }
     }, {
-      label: '歌单全体添加或删除 tag',
-      tip: '',
+      label: "回退上一次 tags 输入",
+      tip: 'ctrl + y',
       click: () => {
-        // state.showTaggingPlaylistDialog = true
+        globalState.unRevokeTags()
       }
-    }
+    },
+    // {
+    //   label: '选择 tag 导入到当前歌单',
+    //   tip: '',
+    //   click: () => {
+    //     // state.showTaggingDialog = true
+    //   }
+    // }, {
+    //   label: '歌单全体添加或删除 tag',
+    //   tip: '',
+    //   click: () => {
+    //     // state.showTaggingPlaylistDialog = true
+    //   }
+    // }
   ]
 })
 /** 

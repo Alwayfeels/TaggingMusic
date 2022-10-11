@@ -112,22 +112,29 @@ export const useGlobalData = defineStore({
      */
     setTagsInTaggedSongs(id: number, tags: string[], song?: Song, saveHistory = true): void {
       const existSong = this.taggedSongs.find(e => e.id === id)
+      const GlobalState = useGlobalState();
       if (existSong) {
         if (existSong.tags.toString() === tags.toString()) return;
         if (saveHistory) {
-          useGlobalState().addTagsHistory(id, existSong.name as string, tags, existSong.tags)
+          GlobalState.addTagsHistory(id, existSong.name as string, tags, existSong.tags)
         }
         existSong.tags = tags
         this.setTaggedSongs2DB()
+        if (GlobalState.topBar.tagsIsSync) {
+          GlobalState.topBar.tagsIsSync = false
+        }
         return;
       }
       if (song) {
         if (saveHistory) {
-          useGlobalState().addTagsHistory(id, song.name as string, tags)
+          GlobalState.addTagsHistory(id, song.name as string, tags)
         }
         // 新建 taggedSongs 并初始化 tags
         this.taggedSongs.push({ tags, ...toRaw(song) })
         this.setTaggedSongs2DB()
+        if (GlobalState.topBar.tagsIsSync) {
+          GlobalState.topBar.tagsIsSync = false
+        }
         return;
       }
       console.error('setTagsInTaggedSongs error: params is unvalid')
@@ -322,12 +329,12 @@ export const useGlobalData = defineStore({
       const _this = this;
       return new Promise((resolve, reject) => {
         // 创建一个file input
-        let input = document.createElement("input");
+        let input: any = document.createElement("input");
         // 绑定onchange事件
         input.type = "file";
         input.accept = ".json";
-        input.onchange = (e) => {
-          const file = e.target?.files[0];
+        input.onchange = (e: any) => {
+          const file = (e.target as any)?.files[0];
           if (!file) {
             input = null;
             reject('file is null')
@@ -341,8 +348,8 @@ export const useGlobalData = defineStore({
             _this.taggedSongs = data;
             app?.config?.globalProperties?.$notification?.create({
               type: 'success',
-              title: "成功",
-              content: '导入完成！',
+              title: "导入成功",
+              content: '导入的 tags 数据已经成功和本地数据合并',
               duration: 3000
             })
             resolve(data);

@@ -2,7 +2,8 @@
   <NAutoComplete size="small" ref="tagInput" v-model:value="state.val" v-model:options="state.activeTags"
     :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keyup.enter.prevent="onEnterHandler"
     @keydown.tab.exact="onTabHandler" @keydown.shift.tab="onShiftTabHandler" @keydown.esc.prevent="onEscHandler"
-    @keyup.space.prevent="onEnterHandler" @keyup.ctrl.enter.prevent="onCtrlEnterHandler" :on-blur="onBlurHandler" />
+    @keyup.space.prevent="onSpaceHandler" @keyup.ctrl.enter.prevent="onCtrlEnterHandler" @keyup.ctrl.s.prevent="onEnterHandler"
+    :on-blur="onBlurHandler" />
 </template>
 
 <script setup lang='ts'>
@@ -46,6 +47,9 @@ function onEnterHandler() {
   if (val) {
     emit("pressEnter", state.val);
   }
+}
+function onSpaceHandler() {
+  onEnterHandler()
 }
 function onTabHandler() {
   emit("pressTab");

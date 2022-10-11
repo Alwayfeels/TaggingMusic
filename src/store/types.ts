@@ -47,6 +47,7 @@ export interface GlobalState {
   topBar: {
     isShow: boolean;
     isShowSearch: boolean;
+    tagsIsSync: boolean;
   };
   playlist: {
     isShow: boolean;

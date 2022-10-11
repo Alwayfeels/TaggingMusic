@@ -2,7 +2,12 @@
   <div class="top-bar w-full h-20 flex items-center justify-center">
     <!-- Title -->
     <NIcon class="cursor-pointer mr-6" size="32" :component="LogoGithub" @click="toGithub" />
-    <div class="text-2xl cursor-pointer" @click="toEntry">Tagging Music</div>
+    <NTooltip placement="bottom" trigger="hover">
+      <template #trigger>
+        <div class="text-2xl cursor-pointer" @click="toEntry">Tagging Music</div>
+      </template>
+      <span>点击返回首页</span>
+    </NTooltip>
     <div class="ml-2 rounded-full bg-gray-400 text-white px-2 py-0.5">beta</div>
     <!-- Search -->
     <div class="mx-8 flex-1 flex justify-center">
@@ -18,7 +23,18 @@
       <img class="user-avatar rounded" :src="`${globalData.user.profile?.avatarUrl}?param=40y40`" alt="avatar">
     </div>
     <!-- Tag Handler -->
-    <NButton v-if="globalState.user.isLogin" class="mx-2" size="large" strong type="success" @click="onGenerate">
+    <NTooltip placement="bottom" trigger="hover">
+      <template #trigger>
+        <NButton class="mr-4" size="large" :secondary="!globalState.topBar.tagsIsSync" circle
+          :type="globalState.topBar.tagsIsSync ? 'success' : 'success'">
+          <NIcon class="cursor-pointer" size="24"
+            :component="globalState.topBar.tagsIsSync ? ArrowSyncCheckmark24Filled : ArrowSync24Regular"
+            @click="onUploadTaggedSongs" />
+        </NButton>
+      </template>
+      <span> {{ globalState.topBar.tagsIsSync ? '歌曲 tags 数据已在云端同步' : '点击同步 tags 数据'}} </span>
+    </NTooltip>
+    <NButton v-if="globalState.user.isLogin" class="mr-2" size="large" strong type="success" @click="onGenerate">
       生成tag歌单
     </NButton>
     <NDropdown :options="tagStoreOptions">
@@ -41,7 +57,7 @@ import type { Component } from 'vue'
 import storeApi from '@/api/storeApi'
 import { NButton, NIcon, NTag, NDropdown } from 'naive-ui';
 import { LogoGithub } from '@vicons/ionicons4'
-import { CloudArrowDown20Regular, CloudArrowUp20Regular } from '@vicons/fluent'
+import { CloudArrowDown20Regular, CloudArrowUp20Regular, ArrowSync24Regular, ArrowSyncCheckmark24Filled } from '@vicons/fluent'
 import { FileUpload, FileDownload } from '@vicons/tabler'
 import { useRouter, useRoute } from 'vue-router'
 import { useGlobalData } from '@/store/globalData'
@@ -133,9 +149,10 @@ async function onUploadTaggedSongs() {
   if (res.code === 200) {
     (app as any).proxy.$notification.create({
       type: 'success',
-      title: "上传成功",
+      title: "歌曲 tags 数据同步完成",
       duration: 3000
     })
+    globalState.topBar.tagsIsSync = true;
   }
 }
 </script>
