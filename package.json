@@ -20,7 +20,8 @@
     "sass-loader": "^13.0.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2",
-    "vue3-menus": "^1.1.2"
+    "vue3-menus": "^1.1.2",
+    "vue3-seamless-scroll": "^2.0.1"
   },
   "devDependencies": {
     "@pinia/testing": "0.0.13",
