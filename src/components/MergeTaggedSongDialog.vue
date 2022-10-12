@@ -61,6 +61,7 @@ import api from '@/api/musicApi'
 import { useGlobalData } from '@/store/globalData';
 import { MdAnalytics } from '@vicons/ionicons4';
 import { createDiscreteApi } from 'naive-ui'
+import { filterSongWithTag } from '@/assets/tool'
 
 const app = getCurrentInstance()
 // 全局数据中心
@@ -82,18 +83,6 @@ enum GenerateMode {
  * @desc 初始化 tagOptions
  */
 const showDialog = ref(false)
-// onMounted(() => {
-//     initTagsOptions()
-// })
-
-// function initTagsOptions() {
-//     state.tagOptions = globalData.tagList.map(item => {
-//         return {
-//             label: item.name,
-//             value: item.name
-//         }
-//     })
-// }
 
 interface State {
     tagOptions?: any[],
@@ -189,6 +178,8 @@ function submit() {
         insertSonglist() // 插入原有的歌单
     }
 }
+
+// 生成新的歌单
 async function generateSonglist() {
     state.loading = true;
     const songlist = await api.get('playlist/create', { name: state.songlistName });
@@ -200,6 +191,8 @@ async function generateSonglist() {
     }
     state.loading = false;
 }
+
+// 插入原有的歌单
 async function insertSonglist() {
     const songlistId: number = props.playlist?.id;
     if (songlistId) {
@@ -231,6 +224,7 @@ function showChangeHandler(show: boolean) {
     showDialog.value = false;
     // emits('update:showDialog', show)
 }
+
 async function generatePreview() {
     if (state.includedTag.length === 0) {
         return false;
@@ -239,13 +233,16 @@ async function generatePreview() {
     const taggedSongs = globalData.taggedSongs;
     const includedTag = state.includedTag;
     const disabledTag = state.disabledTag;
-    const songlist = taggedSongs.filter(song => {
-        const hasIncludedTag = song.tags.filter((tag: string) => includedTag.includes(tag))?.length > 0;
-        const hasDisabledTag = song.tags.filter((tag: string) => disabledTag.includes(tag))?.length > 0;
-        return hasIncludedTag && !hasDisabledTag;
-    })
+    const songlist = filterSongWithTag(taggedSongs, includedTag, disabledTag)
+    // const songlist = taggedSongs.filter(song => {
+    //     const hasIncludedTag = song.tags.filter((tag: string) => includedTag.includes(tag))?.length > 0;
+    //     const hasDisabledTag = song.tags.filter((tag: string) => disabledTag.includes(tag))?.length > 0;
+    //     return hasIncludedTag && !hasDisabledTag;
+    // })
     state.previewSonglist = songlist;
 }
+
+
 
 defineExpose({
     showDialog

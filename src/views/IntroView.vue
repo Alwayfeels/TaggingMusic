@@ -1,6 +1,6 @@
 <template>
-  <div class="view-container flex flex-col items-center w-full ml-10">
-    <div class="screen-view flex items-center pt-20">
+  <div class="view-container flex flex-col items-center justify-center w-full">
+    <div class="screen-view flex items-center justify-center pt-20">
       <div class="flex shrink-0 mr-8 flex-col">
         <h1 class="text-5xl mt-12">Tagging Music</h1>
         <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
@@ -15,12 +15,20 @@
           </NButton>
         </div>
       </div>
-      <div class="flex-1 h-full pt-20">
-        <DemoAnimate ref="demoAnimateRef" class="demoAnimate" @change='onTagChange' />
-        <div class="">
-          <NDynamicTags v-model:value="filterTag" :render-tag="renderTag">
+      <div class="h-full pt-20 demoAnimate">
+        <DemoAnimate ref="demoAnimateRef" class="w-full" @change='onTagChange' />
+        <div class="mt-4 w-full overflow-hidden">
+          <NDynamicTags class="w-full" v-model:value="activeTags" :render-tag="renderTag">
             <template #trigger="{}"></template>
           </NDynamicTags>
+        </div>
+        <div class="flex items-center">
+          <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
+          <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
+          <NButton class="ml-4" type="success" size="tiny" @click="playRandom">
+            <span>随便听听</span>
+            <n-icon class="ml-2" :size="20" :component="Play12Filled" />
+          </NButton>
         </div>
       </div>
     </div>
@@ -42,16 +50,18 @@
 
 <script setup lang="ts">
 import { NButton, NDivider, NIcon, NDynamicTags, NTag } from "naive-ui";
-import { ref, getCurrentInstance, reactive, h } from "vue";
+import { BookQuestionMark20Filled } from '@vicons/fluent'
+import { ref, getCurrentInstance, reactive, h, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import DemoAnimate from "@/components/DemoAnimate.vue";
-import {
-  ArrowCircleDown24Filled,
-  ArrowCircleRight24Filled,
-} from "@vicons/fluent";
+import { useGlobalData } from '@/store/globalData'
+import { filterSongWithTag } from '@/assets/tool'
+import localforage from "localforage";
+import { ArrowCircleDown24Filled, ArrowCircleRight24Filled, Play12Filled } from "@vicons/fluent";
 
 const app = getCurrentInstance();
 const router = useRouter();
+const globalData = useGlobalData()
 
 const detailInfo = ref([
   {
@@ -86,39 +96,55 @@ function toIntro() {
   });
 }
 
-// const filterTagData = reactive<{ selected: string[]; disabled: string[] }>({
-//   selected: [],
-//   disabled: []
-// })
-const filterTag = ref<{ label: string; value: string; }[]>([])
+/**
+ * @desc demoAnimate
+ */
+
+const activeTags = ref<{ label: string; value: string; }[]>([])
+
 const demoAnimateRef = ref()
 function onTagChange(data: any) {
-  filterTag.value = data.map((e: any) => ({
+  activeTags.value = data.map((e: any) => ({
     label: e.name,
     value: e.state
   }))
 }
 function renderTag(tag: { label: string; value: string }, index: number) {
-  return h(
-    NTag, {
+  return h(NTag, {
     type: tag.value === 'selected' ? 'success' : 'error',
     disabled: false,
     closable: true,
     onClose: () => {
       demoAnimateRef.value.changeTagState(tag.label, null)
-      filterTag.value.splice(index, 1)
+      activeTags.value.splice(index, 1)
     }
   }, {
     default: () => tag.label
-  }
-  )
+  })
 }
+
+let taggedSongs: any[] = []
+onMounted(async () => {
+  taggedSongs = await localforage.getItem("taggedSongs") || [];
+})
+
+const canPlaySong = computed(() => {
+  const includedTag: string[] = activeTags.value.filter(e => e.value === 'selected').map(e => e.label);
+  const disabledTag: string[] = activeTags.value.filter(e => e.value === 'disabled').map(e => e.label);
+  const songlist = filterSongWithTag(taggedSongs, includedTag, disabledTag)
+  return songlist
+})
+
+/**
+ * @desc playRandom
+ */
+function playRandom() { }
+
 </script>
 
 <style lang="scss" scoped>
 .view-container {
   box-sizing: border-box;
-  padding: 0 20%;
   height: calc(100vh - 80px);
   overflow: hidden;
   min-width: 800px;

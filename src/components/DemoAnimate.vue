@@ -61,7 +61,7 @@ onMounted(async () => {
 })
 
 
-const activeTags: any[] = [];
+let activeTags: any[] = [];
 /**
  * @desc: 左键点击 tags
  */
@@ -74,7 +74,8 @@ function onTagClick(index: number) {
     } else {
         activeTags.push(toRaw(targetTag))
     }
-    emits('change', activeTags.filter((e: any) => e.state))
+    activeTags = activeTags.filter((e: any) => e.state)
+    emits('change', activeTags)
 }
 
 /**
@@ -89,7 +90,8 @@ function onTagRightClick(index: number) {
     } else {
         activeTags.push(toRaw(targetTag))
     }
-    emits('change', activeTags.filter((e: any) => e.state))
+    activeTags = activeTags.filter((e: any) => e.state)
+    emits('change', activeTags)
 }
 
 /**
