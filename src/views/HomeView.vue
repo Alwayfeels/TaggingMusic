@@ -18,7 +18,6 @@
       <Unlogin />
     </n-layout-content>
   </n-layout>
-  <PlayerBar />
 </template>
 
 <script setup lang="ts">

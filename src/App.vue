@@ -3,12 +3,14 @@
     <TopBar />
   </header>
   <RouterView />
+  <PlayerBar />
 </template>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import TopBar from './components/TopBar.vue';
 import { useGlobalState } from '@/store/globalState';
+import PlayerBar from '@/components/PlayerBar.vue';
 
 const globalState = useGlobalState()
 

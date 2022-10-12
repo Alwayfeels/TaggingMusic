@@ -15,8 +15,13 @@
           </NButton>
         </div>
       </div>
-      <div class="scroll-wrapper">
-        <DemoAnimate />
+      <div class="flex-1 h-full pt-20">
+        <DemoAnimate ref="demoAnimateRef" class="demoAnimate" @change='onTagChange' />
+        <div class="">
+          <NDynamicTags v-model:value="filterTag" :render-tag="renderTag">
+            <template #trigger="{}"></template>
+          </NDynamicTags>
+        </div>
       </div>
     </div>
     <n-divider />
@@ -36,8 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NDivider, NIcon } from "naive-ui";
-import { ref, getCurrentInstance } from "vue";
+import { NButton, NDivider, NIcon, NDynamicTags, NTag } from "naive-ui";
+import { ref, getCurrentInstance, reactive, h } from "vue";
 import { useRouter } from "vue-router";
 import DemoAnimate from "@/components/DemoAnimate.vue";
 import {
@@ -80,6 +85,34 @@ function toIntro() {
     duration: 3000,
   });
 }
+
+// const filterTagData = reactive<{ selected: string[]; disabled: string[] }>({
+//   selected: [],
+//   disabled: []
+// })
+const filterTag = ref<{ label: string; value: string; }[]>([])
+const demoAnimateRef = ref()
+function onTagChange(data: any) {
+  filterTag.value = data.map((e: any) => ({
+    label: e.name,
+    value: e.state
+  }))
+}
+function renderTag(tag: { label: string; value: string }, index: number) {
+  return h(
+    NTag, {
+    type: tag.value === 'selected' ? 'success' : 'error',
+    disabled: false,
+    closable: true,
+    onClose: () => {
+      demoAnimateRef.value.changeTagState(tag.label, null)
+      filterTag.value.splice(index, 1)
+    }
+  }, {
+    default: () => tag.label
+  }
+  )
+}
 </script>
 
 <style lang="scss" scoped>
@@ -87,6 +120,7 @@ function toIntro() {
   box-sizing: border-box;
   padding: 0 20%;
   height: calc(100vh - 80px);
+  overflow: hidden;
   min-width: 800px;
 
   .screen-view {
@@ -95,12 +129,26 @@ function toIntro() {
     overflow: hidden;
   }
 
-  .scroll-wrapper {
-    height: 100%;
-    min-width: 500px;
+  .demoAnimate {
+    width: 600px;
+
+    .scroll-btn-disabled {
+      color: #d03050;
+      background-color: rgba(208, 48, 80, 0.16)
+    }
+
+    .scroll-btn-selected {
+      background-color: #36ad6a;
+      color: #ffffff;
+    }
   }
-  .footer {
-  }
+
+  // .scroll-wrapper {
+  //   height: 100%;
+  //   min-width: 500px;
+  // }
+
+  .footer {}
 }
 
 @media screen and (max-width: 1280px) {
