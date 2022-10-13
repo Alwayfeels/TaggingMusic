@@ -15,53 +15,60 @@
           </NButton>
         </div>
       </div>
-      <div class="h-full pt-20 demoAnimate">
+      <div class="h-full flex flex-col justify-end demoAnimate">
         <DemoAnimate ref="demoAnimateRef" class="w-full" @change='onTagChange' />
-        <div class="mt-4 w-full overflow-hidden">
+        <div class="my-4 w-full overflow-hidden">
           <NDynamicTags class="w-full" v-model:value="activeTags" :render-tag="renderTag">
             <template #trigger="{}"></template>
           </NDynamicTags>
         </div>
-        <div class="flex items-center mt-4">
+        <div v-if="activeTags.length" class="flex items-center pb-12">
           <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
           <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
-          <NButton class="ml-4" type="success" size="tiny" @click="playRandom">
+          <NButton class="ml-4" type="success" size="tiny" @click="playPreview">
             <span>随便听听</span>
             <n-icon class="ml-2" :size="20" :component="Play12Filled" />
           </NButton>
         </div>
+        <div v-else class="flex items-center pb-12">
+          <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
+          如何使用：点击上方的 tag, 随机推送歌曲
+        </div>
       </div>
     </div>
     <n-divider />
-    <div class="detail flex flex-1">
-      <div v-for="(item, index) in detailInfo" :key="index" class="flex-1 px-4">
+    <div class="detail flex flex-1 px-36">
+      <div v-for="(item, index) in detailInfo" :key="index" class="desc-view flex-1 px-4">
         <div class="title text-xl">{{ item.title }}</div>
         <div class="content mt-4 text-slate-500">
           <p v-for="row in item.content" :key="row">{{ row }}</p>
         </div>
       </div>
     </div>
-  </div>
-  <div class="footer pt-40 w-full flex justify-center">
-    <span class="mr-2">MIT Licensed | Copyright © 2022-present</span>
-    <a href="https://github.com/yyx990803" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
+    <div class="footer pt-40 w-full flex justify-center">
+      <span class="mr-2">MIT Licensed | Copyright © 2022-present</span>
+      <a href="https://github.com/yyx990803" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { NButton, NDivider, NIcon, NDynamicTags, NTag } from "naive-ui";
 import { BookQuestionMark20Filled } from '@vicons/fluent'
-import { ref, getCurrentInstance, reactive, h, computed, onMounted } from "vue";
+import { ref, getCurrentInstance, reactive, h, computed, onMounted, watch, toRaw } from "vue";
 import { useRouter } from "vue-router";
 import DemoAnimate from "@/components/DemoAnimate.vue";
 import { useGlobalData } from '@/store/globalData'
 import { filterSongWithTag } from '@/assets/tool'
 import localforage from "localforage";
 import { ArrowCircleDown24Filled, ArrowCircleRight24Filled, Play12Filled } from "@vicons/fluent";
+import { useGlobalState } from "@/store/globalState";
+import type { Song } from '@/store/types';
 
 const app = getCurrentInstance();
 const router = useRouter();
 const globalData = useGlobalData()
+const globalState = useGlobalState()
 
 const detailInfo = ref([
   {
@@ -142,14 +149,17 @@ const canPlaySong = computed(() => {
     else if (tag.value === 'disabled') disabledTags.push(tag.label)
     else if (tag.value === 'required') requiredTags.push(tag.label)
   })
-  const songlist = filterSongWithTag(taggedSongs, includedTags, requiredTags, disabledTags)
+  const songlist: Song[] = filterSongWithTag(taggedSongs, includedTags, requiredTags, disabledTags)
   return songlist
 })
 
 /**
  * @desc playRandom
  */
-function playRandom() { }
+function playPreview() {
+  globalState.player.playlist = canPlaySong.value;
+  globalState.setPlayerActiveSong({ index: 0 })
+}
 
 </script>
 
@@ -157,13 +167,18 @@ function playRandom() { }
 .view-container {
   box-sizing: border-box;
   height: calc(100vh - 80px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   min-width: 800px;
 
   .screen-view {
     width: 100%;
     height: 100%;
-    overflow: hidden;
+  }
+
+  .desc-view {
+    min-width: 400px;
+    max-width: 600px;
   }
 
   .demoAnimate {

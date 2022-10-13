@@ -6,21 +6,21 @@
     </div>
     <div class="w-full h-full px-10 flex items-center justify-center">
       <!-- 歌曲信息 -->
-      <img v-if="globalState.songlist.active?.al?.picUrl"
-        :src="`${globalState.songlist.active?.al?.picUrl}?param=64y64`" class="w-16 h-16" alt="">
+      <img v-if="globalState.player.active?.al?.picUrl" :src="`${globalState.player.active?.al?.picUrl}?param=64y64`"
+        class="w-16 h-16" alt="">
       <div class="ml-4 flex flex-col">
         <div class="text-lg max-w-sm flex items-center">
-          <span class="truncate">{{ globalState.songlist.active?.name }}</span>
-          <NTag v-if="globalState.songlist.active?.fee == 8" type="warning" size="small"
+          <span class="truncate">{{ globalState.player.active?.name }}</span>
+          <NTag v-if="globalState.player.active?.fee == 8" type="warning" size="small"
             class="ml-2 mini-tag float-right">VIP
           </NTag>
         </div>
-        <div class="max-w-sm truncate">{{ globalState.songlist.active?.ar?.map((e: any) => e.name)?.join(' / ') }}</div>
+        <div class="max-w-sm truncate">{{ globalState.player.active?.ar?.map((e: any) => e.name)?.join(' / ') }}</div>
       </div>
       <!-- 播放控制 -->
       <div class="ml-4 flex items-center">
         <n-spin :show="globalState.player.isLoading">
-          <n-icon-wrapper :class="globalState.songlist.active ? 'cursor-pointer' : 'cursor-not-allowed'" :size="48"
+          <n-icon-wrapper :class="globalState.player.active ? 'cursor-pointer' : 'cursor-not-allowed'" :size="48"
             :border-radius="24" @click="() => { globalState.player.isPlaying ? audioPause() : audioPlay() }">
             <n-icon v-if="globalState.player.isPlaying" :size="24" :component="Pause48Filled" />
             <n-icon v-else :size="24" :component="Play48Filled" />
@@ -50,16 +50,16 @@
           <n-icon class="cursor-pointer ml-4" size="24" :component="TextBulletListLtr24Filled" />
         </template>
         <div class="w-full p-1 mb-1 flex justify-between">
-          <div>播放列表</div>
+          <div>播放列表 {{`(${globalState.player.playlist.length})`}}</div>
           <div class="text-green-800 hover:underline cursor-pointer" @click="setPlaylistScrollTop">跳转到播放歌曲</div>
         </div>
         <div class="player-list w-full pt-1">
           <n-scrollbar ref="playerlistRef" style="max-height: 300px">
             <div class="flex w-full items-center cursor-pointer hover:bg-gray-100 box-border p-2 mr-2"
-              v-for="(item, index) in globalState.songlist.data" :key="item.id" @click="onPlaylistClick(index)">
-              <n-icon v-if="globalState.songlist.active.id === item.id" color="#18a058" :size="16"
+              v-for="(item, index) in globalState.player.playlist" :key="item.id" @click="onPlaylistClick(index)">
+              <n-icon v-if="globalState.player.active.id === item.id" color="#18a058" class="float-left" :size="16"
                 :component="Play12Filled" />
-              <div class="pl-1 flex-1 text-gray-500 leading-4">{{ item.name }}</div>
+              <div class="pl-1 flex-1 text-gray-500 leading-4">{{ `${index+1}. ${item.name}` }}</div>
               <!-- <div class="pr-2 text-red-400 justify-items-end leading-4 hover:underline"
                 @click="onRemovePlaylist(item)">
                 删除</div> -->
@@ -74,15 +74,19 @@
         </template>
         {{ globalState.player.playMode }}
       </n-tooltip>
-      <!-- 快捷 Taginput -->
-      <div class="input-tag flex-1 ml-16">
-        <TagInputGroup :songId="globalState.songlist.active.id"
-          :song="globalState.songlist.active"></TagInputGroup>
+      <!-- 仅展示的 TagInput -->
+      <NDynamicTags v-if="globalState.player.active?.tags?.length" class="ml-8 w-80" :closable="false" type="success"
+        :default-value="globalState.player.active.tags">
+        <template #trigger="{}"></template>
+      </NDynamicTags>
+      <!-- 快捷输入 Taginput -->
+      <div v-else class="input-tag flex-1 ml-16">
+        <TagInputGroup :songId="globalState.player.active.id" :song="globalState.player.active"></TagInputGroup>
       </div>
     </div>
     <!-- 播放器实例 -->
-    <audio ref="audio" :src="globalState.songlist.active?.url" @ended="globalState.setNextSong()" @canplay="audioGetDuration"
-      @timeupdate="audioTimeUpdate"  style="display: none"
+    <audio ref="audio" :src="globalState.player.active?.url" @ended="globalState.setNextSong()"
+      @canplay="audioGetDuration" @timeupdate="audioTimeUpdate" style="display: none"
       :loop="globalState.player.playMode === PlayMode.SINGLE"></audio>
   </div>
 </template>
@@ -98,16 +102,15 @@ import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent
 import { NIcon, NSlider, NIconWrapper, NTag } from 'naive-ui'
 import TagInputGroup from './TagInputGroup.vue';
 import { PlayMode } from '@/store/types'
+import { useRoute } from 'vue-router'
 
 const app = getCurrentInstance()
 
+const route = useRoute()
 const globalState = useGlobalState()
 const globalData = useGlobalData()
 
 const state = reactive({
-  // playerlist: computed(() => {
-  //   return globalState.player.playerList;
-  // }), // 播放列表
   inputTag: [], // 快捷输入标签
 })
 
@@ -117,15 +120,6 @@ const state = reactive({
 watch(() => globalState.player.isPlaying, (val: boolean) => {
   val ? audioPlay() : audioPause()
 })
-
-// 同步 player 中和 table 中 tagInput 组件的值
-// function updateAllTagInput(newTag) {
-//   console.log('updateAllTagInput', newTag)
-//   globalData.status.updateTagInput = new Date().getTime();
-// }
-
-
-
 
 /** 
  * @desc 进度条
@@ -177,9 +171,18 @@ const timeFormatter = (value: number) => {
   const second = Math.floor(value % 60)
   return `${minute}:${second < 10 ? '0' + second : second}`
 }
+
+/**
+ * @params 播放音乐时，弹出播放器 playerBar
+ */
+watch(() => globalState.player.isPlaying, (isPlaying: boolean) => {
+  if (isPlaying) {
+    globalState.player.isShow = true
+  }
+})
+
 /** 
  * @desc 播放器控制
- * =============================================================== 
  */
 const audio = ref()
 
@@ -196,7 +199,7 @@ function audioPause() {
 
 // 播放
 async function audioPlay() {
-  if (globalState.songlist.active.url) {
+  if (globalState.player.active.url) {
     nextTick(() => {
       if (audio.value) {
         audio.value.play()
@@ -205,7 +208,7 @@ async function audioPlay() {
     })
     return true;
   }
-  if (globalState.songlist.active?.is404) {
+  if (globalState.player.active?.is404) {
     (app as any).proxy.$notification.create({
       type: 'error',
       title: "该歌曲暂无音源",
@@ -213,7 +216,7 @@ async function audioPlay() {
     })
     return false;
   }
-  const canPlay = await globalState.setActiveSong({ index: globalState.activeSongIdx });
+  const canPlay = await globalState.setPlayerActiveSong({ index: globalState.activePlayingSongIdx });
   if (canPlay) {
     audio.value?.play()
     globalState.player.isPlaying = true;
@@ -226,8 +229,8 @@ const audioTimeUpdate = (e: any) => {
 };
 
 // 播放歌曲变动时，播放新的歌曲
-watch(() => globalState.activeSongIdx, (val) => {
-  if (globalState.songlist.active.is404) {
+watch(() => globalState.activePlayingSongIdx, (val) => {
+  if (globalState.player.active.is404) {
     setTimeout(() => {
       globalState.setNextSong()
     }, 3000);
@@ -238,7 +241,6 @@ watch(() => globalState.activeSongIdx, (val) => {
 
 /** 
  * @desc 音量控制
- * =============================================================== 
  */
 const volume = reactive({
   val: 100, // max 100
@@ -264,11 +266,10 @@ function onVolumnMute() {
 
 /** 
  * @desc 播放列表
- * =============================================================== 
  */
 const playerlistRef = ref()
 function onPlaylistClick(index: number) {
-  globalState.setActiveSong({ index })
+  globalState.setPlayerActiveSong({ index })
 }
 function setPlaylistScrollTop() {
   const scrollTop = globalState.activeSongIdx * 32;
@@ -277,7 +278,6 @@ function setPlaylistScrollTop() {
 
 /**
  * @desc 播放模式
- * =============================================================== 
  */
 const playModeIcon = {
   [PlayMode.LOOP]: ArrowRepeatAll16Regular,
@@ -293,6 +293,7 @@ function onPlayModeChange() {
   const nextIndex = (index + 1) % mode.length;
   globalState.player.playMode = mode[nextIndex];
 }
+
 </script>
 
 <style lang="scss" scoped>

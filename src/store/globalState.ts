@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import { useGlobalData } from './globalData'
-import { PlayMode, type GlobalState } from './types'
+import { PlayMode, type GlobalState, type Song } from './types'
 // import { thottle } from 'lodash'
 
 /** 
@@ -23,7 +23,7 @@ export const useGlobalState = defineStore({
     playlist: {
       isShow: false,
       isLoading: false,
-      data: computed<any>(() => useGlobalData().playlist),
+      data: [],
       active: {
         id: null
       }
@@ -38,6 +38,8 @@ export const useGlobalState = defineStore({
       historyIndex: 0,
     },
     player: {
+      playlist: [],
+      active: {},
       isShow: false,
       isLoading: false,
       isPlaying: false,
@@ -47,60 +49,109 @@ export const useGlobalState = defineStore({
     }
   }),
   getters: {
+    // 歌单列表 active
     activePlaylistIdx: (state) => {
       return state.playlist.data.findIndex(item => item.id === state.playlist.active.id)
     },
+    // 歌曲列表 active
     activeSongIdx: (state) => {
       return state.songlist.data.findIndex(item => item.id === state.songlist.active.id)
-    }
+    },
+    // 播放列表 active
+    activePlayingSongIdx: (state) => {
+      return state.player.playlist.findIndex(item => item.id === state.player.active.id)
+    },
   },
   actions: {
     /** 
      * @desc 初始化全局状态
      */
     async init() {
-      await useGlobalData().init() // 初始化 user, playlist, taggedSongs
-      useGlobalData().welcome() // 访问统计
-      this.playlist.active = this.playlist.data[0];
-      if (this.playlist.active?.id) {
-        this.songlist.data = await useGlobalData().getSonglist(this.playlist.active?.id) || []
-        this.songlist.active = this.songlist.data[0] || {}
-      }
+      const globalData = useGlobalData()
+      globalData.welcome() // 访问统计
+      await globalData.initUserInfo(false)
     },
+
     /** 
-     * @desc 设置正在播放的歌曲
+     * @desc 从 player.playlist 中设置 player.active 的歌曲, 并获取歌曲 url，然后播放歌曲
      * 支持通过 index 或 id 查找，优先 id
      */
-    async setActiveSong(config: { index?: number, id?: number, autoPlay?: boolean }) {
+    async setPlayerActiveSong(config: { index?: number, id?: number, autoPlay?: boolean }) {
       config = { autoPlay: true, ...config }
-      if (!this.songlist.data.length) {
-        console.error('setActiveSong error: songlist is empty')
-        return;
-      }
-      let active = null
-      if (typeof config.id === 'number' && config.id >= 0) {
-        active = this.songlist.data.find(item => item.id === config.id) || this.songlist.data[0]
-      }
-      else if (typeof config.index === 'number' && config.index >= 0) {
-        active = this.songlist.data[config.index || 0];
-      }
-      else {
-        console.error('setActiveSong: params is wrong')
+      if (!this.player.playlist.length) {
+        console.error('setPlayerActiveSong error: playerList is empty', config)
         return false;
       }
-      this.songlist.active = active
+      let active = null // song need to set
+      // search
+      const searchSonglist = this.player.playlist
+      if (typeof config.id === 'number' && config.id >= 0) {
+        active = searchSonglist.find(item => item.id === config.id)
+      } else if (typeof config.index === 'number' && config.index >= 0) {
+        active = searchSonglist[config.index];
+      } else {
+        console.error('setPlayerActiveSong: params is wrong', config)
+        return false;
+      }
+      // set value
+      if (!active) {
+        console.error('set song is not found');
+        return false;
+      }
+      this.player.active = active
+      // fetch song Url
       await this.getActiveSongUrl()
       if (config.autoPlay) {
+        await nextTick()
         this.player.isPlaying = true
       }
       return true
     },
+
+    /**
+     * @desc: 设置 songlist.active
+     * @desc: 设置完成后会自动调用 setPlayerActiveSong 
+     * 支持通过 index 或 id 查找，优先 id
+     */
+    setSonglistActive(config: { index?: number, id?: number, autoPlay?: boolean }) {
+      config = { autoPlay: true, ...config }
+      let active = null;
+      // search
+      const searchSonglist = this.songlist.data
+      if (typeof config.id === 'number' && config.id >= 0) {
+        active = searchSonglist.find(item => item.id === config.id)
+      } else if (typeof config.index === 'number' && config.index >= 0) {
+        active = searchSonglist[config.index];
+      } else {
+        console.error('setSonglistActive: params is wrong')
+        return false;
+      }
+
+      if (!active) {
+        console.error('set song is not found in songlist.data');
+        return false;
+      }
+      this.songlist.active = active
+      // set player.active, SYNC songlist.data & player.playlist
+      if (this.player.playlist.length === 0) {
+        this.player.playlist = this.songlist.data;
+      }
+      this.setPlayerActiveSong({ id: active.id })
+    },
+
+    /**
+     * @desc: 设置播放器 - 歌单列表
+     */
+    setPlayerPlaylist(songlist: Song[]) {
+      this.player.playlist = songlist;
+    },
+
     /** 
      * @desc 获取活动中的歌曲的详情（url）
      */
     async getActiveSongUrl(force = false) {
       // thottle(async () => {
-      const song = this.songlist.active
+      const song = this.player.active
       if (!song.id) return false;
       if (!force && song.url) return false;
       this.player.isLoading = true;
@@ -109,23 +160,25 @@ export const useGlobalState = defineStore({
       return song
       // }, 100)
     },
+
     /** 
      * @desc 播放下一首
      */
     async setNextSong() {
       if (this.player.playMode === PlayMode.LOOP) {
-        const index = this.songlist.data.findIndex(item => item.id === this.songlist.active.id)
-        const nextIdx = (index + 1) % this.songlist.data.length
-        return this.setActiveSong({ index: nextIdx })
+        const index = this.player.playlist.findIndex(item => item.id === this.player.active.id)
+        const nextIdx = (index + 1) % this.player.playlist.length
+        return this.setPlayerActiveSong({ index: nextIdx })
       }
       if (this.player.playMode === PlayMode.RANDOM) {
-        const nextIdx = Math.floor(Math.random() * this.songlist.data.length);
-        return this.setActiveSong({ index: nextIdx })
+        const nextIdx = Math.floor(Math.random() * this.player.playlist.length);
+        return this.setPlayerActiveSong({ index: nextIdx })
       }
       if (this.player.playMode === PlayMode.SINGLE) {
-        return this.setActiveSong({ id: this.songlist.active.id })
+        return this.setPlayerActiveSong({ id: this.player.active.id })
       }
     },
+
     /**
      * @desc: 新增 tags 操作历史数据
      */
@@ -137,6 +190,7 @@ export const useGlobalState = defineStore({
       }
       this.songlist.tagsHistory.unshift(newHistoryItem);
     },
+
     /**
      * @desc: 撤销 tags 操作 ctrl+z
      */
@@ -150,6 +204,7 @@ export const useGlobalState = defineStore({
       useGlobalData().setTagsInTaggedSongs(id, oldTags, undefined, false)
       this.songlist.historyIndex++
     },
+
     /**
      * @desc: 反撤销 tags 操作 ctrl+y
      */

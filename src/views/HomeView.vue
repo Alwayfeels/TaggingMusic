@@ -22,17 +22,12 @@
 
 <script setup lang="ts">
 import SongTable from '@/components/SongTable.vue';
-import { h, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { h, onMounted, reactive, ref, nextTick, watch } from 'vue';
 import { directive } from 'vue3-menus';
 import { NMenu, NLayout, NLayoutContent, NSpin, NLayoutSider, NScrollbar } from 'naive-ui';
-// import { useglobalState.player } from '@/store/globalState.player';
 import { useGlobalData } from '@/store/globalData';
 import { useGlobalState } from '@/store/globalState';
 import Unlogin from '@/components/UnLogin.vue';
-// import TaggingSongDialog from '@/components/TaggingSongDialog.vue';
-// import TaggingPlaylistDialog from '@/components/TaggingPlaylistDialog.vue';
-// import MergePlaylistDialog from '@/components/MergePlaylistDialog.vue';
-import PlayerBar from '@/components/PlayerBar.vue';
 
 // 全局数据中心
 const globalData = useGlobalData()
@@ -41,13 +36,26 @@ const globalState = useGlobalState()
 const { playlist, songlist, user, player } = globalState
 
 /**
- * @params 播放音乐时，弹出播放器 playerBar
+ * @desc: 初始化 homeView 数据
  */
-watch(() => globalState.player.isPlaying, (isPlaying: boolean) => {
-  if (isPlaying) {
-    globalState.player.isShow = true
+async function initHomeView() {
+  // init taggedSongs, userInfo
+  globalData.initTaggedSongs();
+  await globalData.initUserInfo(false)
+  // init playlist
+  if (globalData.user.account?.id) {
+    const playlist = await globalData.initPlaylist()
+    globalState.playlist.data = playlist
+    globalState.playlist.active = playlist[0]
   }
-})
+  // init songlist, player
+  const songlist = await globalData.getSonglist(globalState.playlist.active?.id || null) || []
+  globalState.songlist.data = songlist;
+  globalState.songlist.active = songlist[0] || {}
+  globalState.player.playlist = songlist;
+  globalState.player.active = songlist[0] || {}
+}
+initHomeView()
 
 /**
  * @desc: 监听 键盘操作
@@ -114,16 +122,22 @@ const rightMenus = reactive({
     // }
   ]
 })
+
 /** 
- * @desc 左侧歌单点击事件
+ * @desc 左侧歌单 active change 事件
  */
 const songTableRef = ref()
 const activeMenuChange = async (id: number, item: any) => {
   globalState.playlist.active = item
-  globalState.songlist.data = await globalData.getSonglist(id, item.trackCount) || []
-  globalState.setActiveSong({ index: 0 })
+  const newSonglist = await globalData.getSonglist(id, item.trackCount) || []
+  // 同时修改 songlist 和 playerList
+  globalState.songlist.data = newSonglist;
+  globalState.player.playlist = newSonglist;
+
+  globalState.setSonglistActive({ index: 0 })
   songTableRef.value.resetPager()
 }
+
 /** 
  * @desc 菜单渲染函数
  */

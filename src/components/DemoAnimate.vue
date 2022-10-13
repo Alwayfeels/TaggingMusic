@@ -12,7 +12,8 @@
                         }" @click.exact="onTagClick(item.name, item.state)"
                         @click.right.exact.prevent="onTagRightClick(item.name, item.state)"
                         @click.ctrl.exact="onTagCtrlClick(item.name, item.state)">
-                        {{`${item.name} (${item.ref})`}}
+                        <!-- {{`${item.name} (${item.ref})`}} -->
+                        {{`${item.name}`}}
                     </div>
                 </div>
             </div>
@@ -33,7 +34,7 @@ const emits = defineEmits(['change'])
 
 // ================= 配置
 const tagRow = 3;
-const tagsPerRow = 4;
+const tagsPerRow = 5;
 
 // ================
 const screenConfig = Array(tagRow).fill(null).map((e, index) => ({
@@ -125,7 +126,7 @@ defineExpose({ changeTagState })
     overflow: hidden;
     width: 100%;
     border-radius: 12px;
-    box-shadow: 0 0 20px #eee;
+    box-shadow: 0 0 12px rgba(24, 160, 88, 0.16);
 }
 
 .row-moving {

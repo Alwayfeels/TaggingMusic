@@ -52,7 +52,7 @@ export interface GlobalState {
   playlist: {
     isShow: boolean;
     isLoading: boolean;
-    data: ComputedRef<Playlist[]>;
+    data: Playlist[];
     active: Playlist;
   };
   songlist: {
@@ -65,6 +65,8 @@ export interface GlobalState {
     historyIndex: number
   };
   player: {
+    playlist: Song[];
+    active: Song,
     isShow: boolean;
     isLoading: boolean;
     isPlaying: boolean;

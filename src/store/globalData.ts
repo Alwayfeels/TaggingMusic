@@ -45,17 +45,6 @@ export const useGlobalData = defineStore({
   },
   actions: {
     /** 
-     * @desc 初始化 globalData
-     * @includes user, playlist, taggedSongs 属性
-     */
-    async init() {
-      this.initTaggedSongs()
-      await this.initUserInfo(true)
-      if (this.user.account?.id) {
-        await this.initPlaylist()
-      }
-    },
-    /** 
      * @desc 初始化用户信息
      */
     async initUserInfo(force = false) {
