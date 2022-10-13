@@ -142,7 +142,7 @@ const activeMenuChange = async (id: number, item: any) => {
  * @desc 菜单渲染函数
  */
 const renderMenuIcon = (option: any) => {
-  return h('img', { src: option.coverImgUrl, class: 'w-8 h-8' })
+  return h('img', { src: `${option.coverImgUrl}?param=40y40`, class: 'w-8 h-8' })
 }
 const renderMenuLabel = (option: any) => {
   const el = h('div', { style: 'display: flex;' }, {
