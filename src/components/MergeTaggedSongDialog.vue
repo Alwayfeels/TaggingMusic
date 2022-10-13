@@ -233,12 +233,7 @@ async function generatePreview() {
     const taggedSongs = globalData.taggedSongs;
     const includedTag = state.includedTag;
     const disabledTag = state.disabledTag;
-    const songlist = filterSongWithTag(taggedSongs, includedTag, disabledTag)
-    // const songlist = taggedSongs.filter(song => {
-    //     const hasIncludedTag = song.tags.filter((tag: string) => includedTag.includes(tag))?.length > 0;
-    //     const hasDisabledTag = song.tags.filter((tag: string) => disabledTag.includes(tag))?.length > 0;
-    //     return hasIncludedTag && !hasDisabledTag;
-    // })
+    const songlist = filterSongWithTag(taggedSongs, includedTag, [], disabledTag)
     state.previewSonglist = songlist;
 }
 

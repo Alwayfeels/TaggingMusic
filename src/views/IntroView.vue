@@ -22,7 +22,7 @@
             <template #trigger="{}"></template>
           </NDynamicTags>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center mt-4">
           <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
           <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
           <NButton class="ml-4" type="success" size="tiny" @click="playRandom">
@@ -110,8 +110,13 @@ function onTagChange(data: any) {
   }))
 }
 function renderTag(tag: { label: string; value: string }, index: number) {
+  const STATE_MAP: any = {
+    'selected': 'success',
+    'required': 'warning',
+    'disabled': 'error'
+  }
   return h(NTag, {
-    type: tag.value === 'selected' ? 'success' : 'error',
+    type: STATE_MAP[tag.value] || '',
     disabled: false,
     closable: true,
     onClose: () => {
@@ -129,9 +134,15 @@ onMounted(async () => {
 })
 
 const canPlaySong = computed(() => {
-  const includedTag: string[] = activeTags.value.filter(e => e.value === 'selected').map(e => e.label);
-  const disabledTag: string[] = activeTags.value.filter(e => e.value === 'disabled').map(e => e.label);
-  const songlist = filterSongWithTag(taggedSongs, includedTag, disabledTag)
+  const includedTags: string[] = []
+  const disabledTags: string[] = []
+  const requiredTags: string[] = []
+  activeTags.value.forEach(tag => {
+    if (tag.value === 'selected') includedTags.push(tag.label)
+    else if (tag.value === 'disabled') disabledTags.push(tag.label)
+    else if (tag.value === 'required') requiredTags.push(tag.label)
+  })
+  const songlist = filterSongWithTag(taggedSongs, includedTags, requiredTags, disabledTags)
   return songlist
 })
 

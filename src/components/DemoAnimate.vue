@@ -5,10 +5,13 @@
                 <div class="row flex justify-around normal-row" :class="{'cross-row': rowIdx % 2=== 0}"
                     v-for="(screen, rowIdx) in screenConfig" :key="rowIdx">
                     <div class="px-6 py-2 mx-4 my-2 inline-block scroll-btn"
-                        v-for="(item, index) in list.slice(screen.start, screen.end)" :key="index"
-                        :class="{'scroll-btn-selected': item.state === 'selected', 'scroll-btn-disabled': item.state === 'disabled'}"
-                        @click.exact="onTagClick(rowIdx * tagsPerRow + index)"
-                        @click.right.prevent="onTagRightClick(rowIdx * tagsPerRow + index)">
+                        v-for="(item, index) in list.slice(screen.start, screen.end)" :key="index" :class="{
+                        'scroll-btn-selected': item.state === 'selected',
+                        'scroll-btn-disabled': item.state === 'disabled',
+                        'scroll-btn-required': item.state === 'required'
+                        }" @click.exact="onTagClick(item.name, item.state)"
+                        @click.right.exact.prevent="onTagRightClick(item.name, item.state)"
+                        @click.ctrl.exact="onTagCtrlClick(item.name, item.state)">
                         {{`${item.name} (${item.ref})`}}
                     </div>
                 </div>
@@ -60,72 +63,61 @@ onMounted(async () => {
     list.value = tagList
 })
 
-
+// 选中的 tag
 let activeTags: any[] = [];
+
 /**
- * @desc: 左键点击 tags
+ * @desc: 事件处理
  */
-function onTagClick(index: number) {
-    const targetTag = list.value[index]
-    targetTag.state = targetTag.state !== 'selected' ? 'selected' : null
-    const exist = activeTags.find(e => e.name === targetTag.name)
-    if (exist) {
-        exist.state = targetTag.state;
-    } else {
-        activeTags.push(toRaw(targetTag))
+// 左键点击 tags
+function onTagClick(name: string, oldState: string) {
+    const newState = oldState !== 'selected' ? 'selected' : null
+    changeTagState(name, newState)
+    setActiveTagState(name, newState)
+}
+
+// 右键点击 tags
+function onTagRightClick(name: string, oldState: string) {
+    const newState = oldState !== 'disabled' ? 'disabled' : null
+    changeTagState(name, newState)
+    setActiveTagState(name, newState)
+}
+
+// ctrl+左键点击
+function onTagCtrlClick(name: string, oldState: string) {
+    const newState = oldState !== 'required' ? 'required' : null
+    changeTagState(name, newState)
+    setActiveTagState(name, newState)
+}
+
+/**
+ * @desc: 将传入 tag 存入 activeTag 中，在 emit change
+ */
+function setActiveTagState(name: string, state: string | null) {
+    if (state === null) {
+        const removeIndex: number = activeTags.findIndex(e => e.name === name)
+        activeTags.splice(removeIndex, 1);
+        emits('change', activeTags)
+        return;
     }
-    activeTags = activeTags.filter((e: any) => e.state)
+    const existTag = activeTags.find(e => e.name === name)
+    if (existTag) {
+        existTag.state = state;
+    } else {
+        activeTags.push({ name, state })
+    }
     emits('change', activeTags)
 }
 
 /**
- * @desc: 右键点击 tags
+ * @desc: 提供外部修改 tag state 的方法
  */
-function onTagRightClick(index: number) {
-    const targetTag = list.value[index]
-    targetTag.state = targetTag.state !== 'disabled' ? 'disabled' : null
-    const exist = activeTags.find(e => e.name === targetTag.name)
-    if (exist) {
-        exist.state = targetTag.state;
-    } else {
-        activeTags.push(toRaw(targetTag))
-    }
-    activeTags = activeTags.filter((e: any) => e.state)
-    emits('change', activeTags)
-}
-
-/**
- * @desc: 修改 tag state
- */
-function changeTagState(name: string, state: string) {
+function changeTagState(name: string, state: string | null) {
     const targetTag = list.value.find(e => e.name === name)
     targetTag.state = state
 }
-
-const tagsCondition = computed(() => {
-    const selected: string[] = [];
-    const disabled: string[] = [];
-    const raw: object[] = []
-    list.value.forEach(tag => {
-        if (tag.state === null) return;
-        raw.push(tag)
-        if (tag.state === 'selected') {
-            selected.push(tag.name)
-        } else if (tag.state === 'disabled') {
-            disabled.push(tag.name)
-        }
-    })
-    return { selected, disabled, raw }
-})
-
-// const tagList = computed(() => {
-//     if (globalData.tagList.length) {
-//         list.value = JSON.parse(JSON.stringify(globalData.tagList))
-//         return globalData.tagList || []
-//     }
-//     return []
-// })
 defineExpose({ changeTagState })
+
 </script>
 
 <style lang="scss" scoped>
@@ -179,10 +171,10 @@ defineExpose({ changeTagState })
     color: #ffffff;
 }
 
-// .scroll-btn:hover {
-//     background-color: rgba(24, 160, 88, 0.22);
-//     color: #18a058;
-// }
+.scroll-btn-required {
+    background-color: rgba(240, 160, 32, 0.22);
+    color: #f0a020
+}
 
 @keyframes moveRightAnimation {
     from {

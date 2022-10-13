@@ -2,32 +2,61 @@ import type { Song } from '@/store/types';
 
 /**
  * @desc 根据 tags 返回过滤歌曲
- * @params songlist 歌单
- * @params disabledTags 只要歌曲中存在 disabledTags 中的任何tags，将会被剔除
- * @params includedTags 未被剔除的歌曲中，只要包含任意一个 includedTags，都会被返回
+ * @params songlist 歌单 Song[]
+ * @params disabledTags: 对于 songlist[?].tags 中, 存在 disabledTags 中的任何tags，将会被剔除
+ * @params requiredTags: 对于 songlist[?].tags 中，只要包含任意所有的 requiredTags，才会被返回
+ * @params includedTags: 对于 songlist[?].tags 中，只要包含任意一个 includedTags，就会被返回
  */
-export function filterSongWithTag(songlist: Song[], includedTags: string[] = [], disabledTags: string[] = []) {
-    if (includedTags.length === 0) return songlist;
+export function filterSongWithTag(songlist: Song[], includedTags: string[] = [], requiredTags: string[] = [], disabledTags: string[] = []) {
+    if (includedTags.length === 0) return [];
+    let filteredSongs = filterIncludedTags(songlist, includedTags);
+    if (disabledTags.length) {
+        filteredSongs = filterDisabledTags(filteredSongs, disabledTags);
+    }
+    if (requiredTags.length) {
+        filteredSongs = filterRequiredTags(filteredSongs, requiredTags);
+    }
+    return filteredSongs
+}
+
+/**
+ * 根据 tags 返回过滤歌曲 disabled
+ * @desc song.tags 不能含有任何 disabledTags 中的tags，否则将会被剔除
+ */
+function filterDisabledTags(songlist: Song[], disabledTags: string[] = []) {
+    if (disabledTags.length === 0) return songlist;
     return songlist.filter(song => {
-        const hasDisabledTags = song.tags.filter((tag: string) => disabledTags.includes(tag))?.length > 0;
-        if (hasDisabledTags) return false;
-        const hasIncludedTags = song.tags.filter((tag: string) => includedTags.includes(tag))?.length > 0;
-        return hasIncludedTags
+        const isDisabledSong = song.tags.find((tag: string) => {
+            const hasDisabledTag = disabledTags.includes(tag)
+            return hasDisabledTag
+        })
+        return !isDisabledSong;
     })
 }
 
 /**
- * @desc 根据 tags 返回过滤歌曲（强校验）
- * @params songlist 歌单
- * @params disabledTags 只要歌曲中存在 disabledTags 中的任何tags，将会被剔除
- * @params includedTags 未被剔除的歌曲中，只有包含所有的 includedTags，才会被返回
+ * 根据 tags 返回过滤歌曲 required
+ * @desc song.tags 必须全部包含 requiredTags，否则将会被剔除
  */
- export function filterSongWithFullTag(songlist: Song[], includedTags: string[] = [], disabledTags: string[] = []) {
-    if (includedTags.length === 0) return songlist;
+function filterRequiredTags(songlist: Song[], requiredTags: string[] = []) {
+    if (requiredTags.length === 0) return songlist;
     return songlist.filter(song => {
-        const hasDisabledTags = song.tags.filter((tag: string) => disabledTags.includes(tag))?.length > 0;
-        if (hasDisabledTags) return false;
-        const hasFullIncludedTags = song.tags.filter((tag: string) => includedTags.includes(tag))?.length === includedTags.length;
-        return hasFullIncludedTags
+        const hasAllRequiredTags = new Set([...song.tags, ...requiredTags]).size === song.tags.length
+        return hasAllRequiredTags;
+    })
+}
+
+/**
+ * 根据 tags 返回过滤歌曲 included
+ * @desc: song.tags 中只要含有任何 includedTags 中的tags，就会被返回
+ */
+function filterIncludedTags(songlist: Song[], includedTags: string[] = []) {
+    if (includedTags.length === 0) return [];
+    return songlist.filter(song => {
+        const isIncludedSong = song.tags.find((tag: string) => {
+            const hasIncludedTags = includedTags.includes(tag)
+            return hasIncludedTags
+        })
+        return isIncludedSong;
     })
 }
