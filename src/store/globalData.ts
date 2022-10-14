@@ -324,7 +324,11 @@ export const useGlobalData = defineStore({
           content: '同步完成！',
           duration: 3000
         })
+        
+        useGlobalState().topBar.tagsIsSync = true;
+        return true
       }
+      return false;
     },
 
     /**

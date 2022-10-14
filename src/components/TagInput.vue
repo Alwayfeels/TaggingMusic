@@ -49,7 +49,7 @@ function onEnterHandler() {
   }
 }
 function onSpaceHandler() {
-  onEnterHandler()
+  // onEnterHandler()
 }
 function onTabHandler() {
   emit("pressTab");

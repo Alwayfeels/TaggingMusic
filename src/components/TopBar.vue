@@ -4,7 +4,7 @@
     <NIcon class="cursor-pointer mr-6" size="32" :component="LogoGithub" @click="toGithub" />
     <NTooltip placement="bottom" trigger="hover">
       <template #trigger>
-        <div class="text-2xl cursor-pointer" @click="toEntry">Tagging Music</div>
+        <div class="text-2xl cursor-pointer whitespace-nowrap" @click="toEntry">Tagging Music</div>
       </template>
       <span>点击返回首页</span>
     </NTooltip>

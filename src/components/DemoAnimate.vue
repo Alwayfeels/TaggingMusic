@@ -1,14 +1,15 @@
 <template>
-    <div class="scroll-wrapper" @click.right.prevent="">
+    <div class="scroll-wrapper" v-show="list.length" @click.right.prevent="">
         <div class="scroll-content row-moving">
             <div class="w-1/3 py-4" v-for="v in [1,2,3]" :key="v">
                 <div class="row flex justify-around normal-row" :class="{'cross-row': rowIdx % 2=== 0}"
-                    v-for="(screen, rowIdx) in screenConfig" :key="rowIdx">
+                    v-for="(rowIdx) in Array(tagRow).fill(null).map((e, index) => index)" :key="rowIdx">
                     <div class="px-6 py-2 mx-4 my-2 inline-block scroll-btn"
-                        v-for="(item, index) in list.slice(screen.start, screen.end)" :key="index" :class="{
-                        'scroll-btn-selected': item.state === 'selected',
-                        'scroll-btn-disabled': item.state === 'disabled',
-                        'scroll-btn-required': item.state === 'required'
+                        v-for="(item, index) in showTags.slice(rowIdx * tagsPerRow, (rowIdx+1) * tagsPerRow)"
+                        :key="index" :class="{
+                            'scroll-btn-selected': item.state === 'selected',
+                            'scroll-btn-disabled': item.state === 'disabled',
+                            'scroll-btn-required': item.state === 'required'
                         }" @click.exact="onTagClick(item.name, item.state)"
                         @click.right.exact.prevent="onTagRightClick(item.name, item.state)"
                         @click.ctrl.exact="onTagCtrlClick(item.name, item.state)">
@@ -25,8 +26,6 @@
 import { NButton, NIcon, NTag } from "naive-ui";
 import { h, Transition, ref, onMounted, computed, watch, toRaw } from "vue";
 import { useGlobalData } from '@/store/globalData'
-import localforage from "localforage";
-import { LayoutDistributeVertical } from "@vicons/tabler";
 import storeApi from '@/api/storeApi'
 
 const globalData = useGlobalData()
@@ -37,13 +36,25 @@ const emits = defineEmits(['change'])
 const tagRow = 3;
 const tagsPerRow = 5;
 
-// ================
-const screenConfig = Array(tagRow).fill(null).map((e, index) => ({
-    start: (index * tagsPerRow),
-    end: ((index + 1) * tagsPerRow)
-}))
-
+// preview Data
 const list = ref<any[]>([])
+
+// 换下一批 tags 展示
+let showTagsBatch = 0;
+const showTagsNumber = tagRow * tagsPerRow;
+const showTags = computed(() => {
+    const tagsSum = list.value.length
+    let startIndex: number, endIndex: number;
+    showTagsBatch++
+    if (showTagsBatch * showTagsNumber > list.value.length) {
+        startIndex = showTagsBatch * showTagsNumber
+        endIndex = showTagsBatch * showTagsNumber % tagsSum;
+        return [...list.value.slice(startIndex, tagsSum), ...list.value.slice(0, endIndex)]
+    }
+    startIndex = (showTagsBatch - 1) * tagsSum;
+    endIndex = showTagsBatch * tagsSum
+    return list.value.slice(startIndex, endIndex);
+})
 
 onMounted(async () => {
     const taggedSongs: any[] = await getPreviewData() || [];
@@ -64,6 +75,7 @@ onMounted(async () => {
     list.value = tagList
 })
 
+// data fetch
 async function getPreviewData() {
     const res = await storeApi.get('/store/getPreviewData')
     if (res.code === 200) {
@@ -73,7 +85,7 @@ async function getPreviewData() {
 }
 
 // 选中的 tag
-let activeTags: any[] = [];
+const activeTags: any[] = [];
 
 /**
  * @desc: 事件处理
@@ -125,6 +137,11 @@ function changeTagState(name: string, state: string | null) {
     const targetTag = list.value.find(e => e.name === name)
     targetTag.state = state
 }
+
+function changeDisplayTags() {
+
+}
+
 defineExpose({ changeTagState })
 
 </script>

@@ -1,10 +1,10 @@
 <template>
   <div class="view-container flex flex-col items-center justify-center w-full">
-    <div class="screen-view flex items-center justify-center pt-20">
-      <div class="flex shrink-0 mr-8 flex-col">
+    <div class="screen-view flex items-center justify-start">
+      <div class="flex shrink-0 mr-8 flex-col max-w-md">
         <h1 class="text-5xl mt-12">Tagging Music</h1>
         <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
-        <div class="flex ml-8 my-16">
+        <div class="flex ml-4 my-16">
           <NButton class="my-4" type="primary" secondary size="large" @click="toIntro">
             <span>使用方法</span>
             <n-icon class="ml-2" :size="24" :component="ArrowCircleDown24Filled" />
@@ -22,38 +22,60 @@
             <template #trigger="{}"></template>
           </NDynamicTags>
         </div>
-        <div v-if="activeTags.length" class="flex items-center pb-12">
-          <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
-          <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
-          <NButton class="ml-4" type="success" size="tiny" @click="playPreview">
-            <span>随便听听</span>
-            <n-icon class="ml-2" :size="20" :component="Play12Filled" />
-          </NButton>
-        </div>
-        <div v-else class="flex items-center pb-12">
-          <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
-          如何使用：点击上方的 tag, 随机推送歌曲
+        <div class="flex items-center pb-12">
+          <NPopover trigger="hover">
+            <template #trigger>
+              <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
+            </template>
+            <div style="width: 300px;">
+              <div class="font-bold mb-4">Demo 使用方法</div>
+              <div class="mb-2 flex justify-between">
+                <NTag type="success">左键点击</NTag>
+                <span>含有该 tag 的歌曲都会被收录</span>
+              </div>
+              <div class="mb-2 flex justify-between">
+                <NTag type="warning">ctrl + 左键</NTag>
+                <span>不含该 tag 的歌曲都会被剔除</span>
+              </div>
+              <div class="flex justify-between">
+                <NTag type="error">右键点击</NTag>
+                <span>含有该 tag 的歌曲都会被剔除</span>
+              </div>
+            </div>
+          </NPopover>
+          <div v-if="activeTags.length" class="flex items-center">
+            <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
+            <NButton class="ml-4" type="success" size="tiny" @click="playPreview">
+              <span>随便听听</span>
+              <n-icon class="ml-2" :size="20" :component="Play12Filled" />
+            </NButton>
+          </div>
+          <div v-else>
+            如何使用：点击上方的 tag, 随机推送歌曲
+          </div>
         </div>
       </div>
     </div>
-    <n-divider />
-    <div class="detail flex flex-1 px-36">
-      <div v-for="(item, index) in detailInfo" :key="index" class="desc-view flex-1 px-4">
-        <div class="title text-xl">{{ item.title }}</div>
-        <div class="content mt-4 text-slate-500">
-          <p v-for="row in item.content" :key="row">{{ row }}</p>
+    <div class="screen-view flex flex-col items-center justify-start">
+      <n-divider />
+      <div class="detail flex flex-1">
+        <div v-for="(item, index) in detailInfo" :key="index" class="desc-view flex-1 px-4">
+          <div class="title text-xl">{{ item.title }}</div>
+          <div class="content mt-4 text-slate-500">
+            <p v-for="row in item.content" :key="row">{{ row }}</p>
+          </div>
         </div>
       </div>
     </div>
-    <div class="footer pt-40 w-full flex justify-center">
+    <div class="footer flex justify-center">
       <span class="mr-2">MIT Licensed | Copyright © 2022-present</span>
-      <a href="https://github.com/yyx990803" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
+      <a href="https://github.com/Alwayfeels" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { NButton, NDivider, NIcon, NDynamicTags, NTag } from "naive-ui";
+import { NButton, NDivider, NIcon, NDynamicTags, NTag, NPopover } from "naive-ui";
 import { BookQuestionMark20Filled } from '@vicons/fluent'
 import { ref, getCurrentInstance, reactive, h, computed, onMounted, watch, toRaw } from "vue";
 import { useRouter } from "vue-router";
@@ -72,7 +94,7 @@ const globalState = useGlobalState()
 
 const detailInfo = ref([
   {
-    title: "技术栈",
+    title: "技术栈 (Tech Stack)",
     content: [
       "Tagging Music 基于 NeteaseCloudMusicApi 开发（目前只支持网易云），使用 indexedDB 缓存数据（新增云端存储）。",
       "清除浏览器缓存将会丢失所有Tag数据，清除缓存前请记得保存数据避免数据丢失。",
@@ -81,7 +103,7 @@ const detailInfo = ref([
     ],
   },
   {
-    title: "开发原因",
+    title: "开发原因 (User Story)",
     content: [
       "网易云音乐的歌单快速导入是基于古老的多选框构建的",
       "如果想要把歌曲分类成不同的维度来创建歌单：比如『粤语/男/情歌』，分类会十分麻烦。并且如果再想创建『粤语/女/情歌』那么所有的工作必须从头开始。",
@@ -169,16 +191,18 @@ function playPreview() {
   height: calc(100vh - 80px);
   overflow-x: hidden;
   overflow-y: auto;
-  min-width: 800px;
+  min-width: 1000px;
+  padding-bottom: 20px;
 
   .screen-view {
     width: 100%;
     height: 100%;
+    min-width: 1024px;
+    max-width: 1280px;
   }
 
   .desc-view {
-    min-width: 400px;
-    max-width: 600px;
+    min-width: 500px;
   }
 
   .demoAnimate {
@@ -200,7 +224,10 @@ function playPreview() {
   //   min-width: 500px;
   // }
 
-  .footer {}
+  .footer {
+    position: fixed;
+    bottom: 0;
+  }
 }
 
 @media screen and (max-width: 1280px) {
