@@ -6,6 +6,7 @@ import { computed, toRaw } from "vue";
 import { FlashSettings20Filled } from "@vicons/fluent";
 import type { GlobalData, UserInfo, Song, TagRef, TaggedSong } from "@/store/types";
 import { useGlobalState } from "@/store/globalState";
+import { mergeTaggedSongs } from "@/assets/tool"
 import app from '@/main'
 
 /** 
@@ -224,12 +225,14 @@ export const useGlobalData = defineStore({
     async point(data: any) {
       await storeApi.post('/store', data);
     },
+
     /**
      * @desc: 页面被访问
      */
     async welcome() {
       await storeApi.get('/store/welcome')
     },
+
     /**
      * @desc 上传 Tags
      */
@@ -241,8 +244,17 @@ export const useGlobalData = defineStore({
         profile: this.user.profile
       }
       const res = await storeApi.post('/store/postTaggedSongs', data)
+
+      if (res.code === 200) {
+        app?.config?.globalProperties?.$notification?.create({
+          type: 'success',
+          title: '上传完成！',
+          duration: 3000
+        })
+      }
       return res
     },
+
     /**
      * @desc 下载 Tags
      */
@@ -286,6 +298,35 @@ export const useGlobalData = defineStore({
         })
       }
     },
+    /**
+     * @desc: 同步 tags 数据
+     */
+    async syncTaggedSongs() {
+      const userId = this.user.account.id;
+      if (!userId) return false;
+
+      const taggedSongs: TaggedSong[] = await localforage.getItem("taggedSongs") || [];
+      const data = {
+        taggedSongs,
+        userId: this.user.profile.userId,
+        profile: this.user.profile
+      }
+      const res = await storeApi.post('/store/syncTags', data)
+      if (res.code === 200) {
+        const mergedSong = mergeTaggedSongs(this.taggedSongs, res.data.taggedSongs)
+        // set merged Data
+        this.setTaggedSongs2DB(mergedSong)
+        this.taggedSongs = mergedSong
+
+        app?.config?.globalProperties?.$notification?.create({
+          type: 'success',
+          title: "成功",
+          content: '同步完成！',
+          duration: 3000
+        })
+      }
+    },
+
     /**
      * @desc 导出TaggedSong
      */

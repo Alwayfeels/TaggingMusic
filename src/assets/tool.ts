@@ -1,4 +1,4 @@
-import type { Song } from '@/store/types';
+import type { Song, TaggedSong } from '@/store/types';
 
 /**
  * @desc 根据 tags 返回过滤歌曲
@@ -59,4 +59,34 @@ function filterIncludedTags(songlist: Song[], includedTags: string[] = []) {
         })
         return isIncludedSong;
     })
+}
+
+/**
+ * @desc: 合并taggedSongs数据
+ * @params: 
+ */
+export function mergeTaggedSongs(taggedSongs: Song[], target: Song[]) {
+    // merge taggedSongs and target tags
+    const result: (Song | null)[] = [...target, ...taggedSongs];
+
+    for (let i = 0; i < result.length; i++) {
+        const row = result[i];
+        if (row === null) continue;
+
+        // compare all next row.id is same or not
+        for (let j = i + 1; j < result.length; j++) {
+            const checkRow = result[j]
+
+            // is same, merge tags and clear it
+            if (checkRow && checkRow.id === row.id) {
+                row.tags.push(...checkRow.tags)
+                result[j] = null;
+            }
+        }
+
+        // remove duplicate
+        row.tags = Array.from(new Set([...row.tags]))
+    }
+    const newTaggedSongs: TaggedSong[] = result.filter(e => e !== null) as TaggedSong[]
+    return newTaggedSongs
 }

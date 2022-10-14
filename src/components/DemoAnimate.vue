@@ -27,6 +27,7 @@ import { h, Transition, ref, onMounted, computed, watch, toRaw } from "vue";
 import { useGlobalData } from '@/store/globalData'
 import localforage from "localforage";
 import { LayoutDistributeVertical } from "@vicons/tabler";
+import storeApi from '@/api/storeApi'
 
 const globalData = useGlobalData()
 
@@ -45,8 +46,7 @@ const screenConfig = Array(tagRow).fill(null).map((e, index) => ({
 const list = ref<any[]>([])
 
 onMounted(async () => {
-    const taggedSongs: any[] = await localforage.getItem("taggedSongs") || [];
-
+    const taggedSongs: any[] = await getPreviewData() || [];
     const tagArray = (taggedSongs.map(item => item.tags) as any[]).flat()
     const tagList: any[] = []
     tagArray.forEach((tag: string) => {
@@ -63,6 +63,14 @@ onMounted(async () => {
     })
     list.value = tagList
 })
+
+async function getPreviewData() {
+    const res = await storeApi.get('/store/getPreviewData')
+    if (res.code === 200) {
+        return res.data
+    }
+    return false
+}
 
 // 选中的 tag
 let activeTags: any[] = [];

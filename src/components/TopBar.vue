@@ -25,11 +25,11 @@
     <!-- Tag Handler -->
     <NTooltip placement="bottom" trigger="hover">
       <template #trigger>
-        <NButton class="mr-4" size="large" :secondary="!globalState.topBar.tagsIsSync" circle
+        <NButton class="mr-4" size="large" :secondary="globalState.topBar.tagsIsSync" circle
           :type="globalState.topBar.tagsIsSync ? 'success' : 'success'">
           <NIcon class="cursor-pointer" size="24"
             :component="globalState.topBar.tagsIsSync ? ArrowSyncCheckmark24Filled : ArrowSync24Regular"
-            @click="onUploadTaggedSongs" />
+            @click="() => globalState.topBar.tagsIsSync ? '' : globalData.syncTaggedSongs()" />
         </NButton>
       </template>
       <span> {{ globalState.topBar.tagsIsSync ? '歌曲 tags 数据已在云端同步' : '点击同步 tags 数据'}} </span>
@@ -113,7 +113,7 @@ const tagStoreOptions = [
     key: 'upload',
     icon: renderIcon(CloudArrowUp20Regular),
     props: {
-      onClick: onUploadTaggedSongs
+      onClick: globalData.uploadTaggedSong
     }
   },
   {
@@ -155,6 +155,7 @@ async function onUploadTaggedSongs() {
     globalState.topBar.tagsIsSync = true;
   }
 }
+
 </script>
 
 <style lang="scss" scoped>
