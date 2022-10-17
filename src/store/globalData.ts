@@ -151,6 +151,7 @@ export const useGlobalData = defineStore({
       });
       playlist = res.playlist
       this.playlist = playlist;
+      useGlobalState().playlist = playlist;
       localforage.setItem('playlist', playlist);
       return playlist
     },
