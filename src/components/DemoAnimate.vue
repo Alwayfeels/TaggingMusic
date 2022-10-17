@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { NButton, NIcon, NTag } from "naive-ui";
-import { h, Transition, ref, onMounted, computed, watch, toRaw } from "vue";
+import { h, Transition, ref, onMounted, computed, watch, toRaw, reactive } from "vue";
 import { useGlobalData } from '@/store/globalData'
 import storeApi from '@/api/storeApi'
 
@@ -40,21 +40,27 @@ const tagsPerRow = 5;
 const list = ref<any[]>([])
 
 // 换下一批 tags 展示
-let showTagsBatch = 0;
-const showTagsNumber = tagRow * tagsPerRow;
-const showTags = computed(() => {
+const showTagsIndex = reactive({
+    startIndex: 0,
+    endIndex: 0
+});
+// 单次显示的 tags 数目
+const showTagsSum = tagRow * tagsPerRow;
+
+// showTags.length should equal tagRow * tagsPerRow
+const showTags = ref([]) 
+function changeDisplayTags() {
     const tagsSum = list.value.length
-    let startIndex: number, endIndex: number;
-    showTagsBatch++
-    if (showTagsBatch * showTagsNumber > list.value.length) {
-        startIndex = showTagsBatch * showTagsNumber
-        endIndex = showTagsBatch * showTagsNumber % tagsSum;
+    if (showTagsSum >= tagsSum) return list.value;
+    let { startIndex, endIndex } = showTagsIndex;
+    // need merge endItem and startItem
+    if (endIndex + showTagsSum >= tagsSum) {
+        startIndex = endIndex + 1;
+        endIndex =  endIndex + showTagsSum - tagsSum;
         return [...list.value.slice(startIndex, tagsSum), ...list.value.slice(0, endIndex)]
     }
-    startIndex = (showTagsBatch - 1) * tagsSum;
-    endIndex = showTagsBatch * tagsSum
     return list.value.slice(startIndex, endIndex);
-})
+}
 
 onMounted(async () => {
     const taggedSongs: any[] = await getPreviewData() || [];
@@ -138,11 +144,7 @@ function changeTagState(name: string, state: string | null) {
     targetTag.state = state
 }
 
-function changeDisplayTags() {
-
-}
-
-defineExpose({ changeTagState })
+defineExpose({ changeTagState, changeDisplayTags })
 
 </script>
 

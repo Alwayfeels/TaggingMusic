@@ -49,9 +49,17 @@
               <span>随便听听</span>
               <n-icon class="ml-2" :size="20" :component="Play12Filled" />
             </NButton>
+            <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
+              <span>换一批</span>
+              <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
+            </NButton>
           </div>
-          <div v-else>
-            如何使用：点击上方的 tag, 随机推送歌曲
+          <div class="flex justify-between w-full" v-else>
+            <span>如何使用：点击上方的 tag, 随机推送歌曲</span>
+            <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
+              <span>换一批</span>
+              <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
+            </NButton>
           </div>
         </div>
       </div>
@@ -83,7 +91,7 @@ import DemoAnimate from "@/components/DemoAnimate.vue";
 import { useGlobalData } from '@/store/globalData'
 import { filterSongWithTag } from '@/assets/tool'
 import localforage from "localforage";
-import { ArrowCircleDown24Filled, ArrowCircleRight24Filled, Play12Filled } from "@vicons/fluent";
+import { ArrowCircleDown24Filled, ArrowCircleRight24Filled, Play12Filled, ArrowSync24Regular } from "@vicons/fluent";
 import { useGlobalState } from "@/store/globalState";
 import type { Song } from '@/store/types';
 
@@ -174,6 +182,10 @@ const canPlaySong = computed(() => {
   const songlist: Song[] = filterSongWithTag(taggedSongs, includedTags, requiredTags, disabledTags)
   return songlist
 })
+
+function changeDisplayTags() {
+  demoAnimateRef.value.changeDisplayTags()
+}
 
 /**
  * @desc playRandom
