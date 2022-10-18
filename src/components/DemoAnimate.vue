@@ -1,5 +1,5 @@
 <template>
-    <div class="scroll-wrapper" v-show="list.length" @click.right.prevent="">
+    <div class="scroll-wrapper" v-show="tagList.length" @click.right.prevent="">
         <div class="scroll-content row-moving">
             <div class="w-1/3 py-4" v-for="v in [1,2,3]" :key="v">
                 <div class="row flex justify-around normal-row" :class="{'cross-row': rowIdx % 2=== 0}"
@@ -36,8 +36,8 @@ const emits = defineEmits(['change'])
 const tagRow = 3;
 const tagsPerRow = 5;
 
-// preview Data
-const list = ref<any[]>([])
+// 预览数据，tag
+const tagList = ref<any[]>([])
 
 // 换下一批 tags 展示
 const showTagsSum = tagRow * tagsPerRow;
@@ -50,15 +50,17 @@ const showTagsIndex = reactive({
 // showTags.length should equal tagRow * tagsPerRow
 const showTags = computed(() => {
     const { start, end } = showTagsIndex;
-    const tagsSum = list.value.length
+    const tagsSum = tagList.value.length
     if (end > start) {
-        return list.value.slice(showTagsIndex.start, showTagsIndex.end) as any
+        return tagList.value.slice(showTagsIndex.start, showTagsIndex.end) as any
     }
-    return [...list.value.slice(showTagsIndex.start, tagsSum), ...list.value.slice(0, showTagsIndex.end)] as any
+    return [...tagList.value.slice(showTagsIndex.start, tagsSum), ...tagList.value.slice(0, showTagsIndex.end)] as any
 })
+
+// 切换下一批标签
 function changeDisplayTags() {
-    const tagsSum = list.value.length
-    if (showTagsSum >= tagsSum) return list.value;
+    const tagsSum = tagList.value.length
+    if (showTagsSum >= tagsSum) return tagList.value;
     // need merge endItem and startItem
     if (showTagsIndex.end + showTagsSum >= tagsSum) {
         showTagsIndex.start = showTagsIndex.end;
@@ -70,23 +72,24 @@ function changeDisplayTags() {
     console.log('showTags.value', showTags.value)
 }
 
+const taggedSongs = ref([])
 onMounted(async () => {
-    const taggedSongs: any[] = await getPreviewData() || [];
-    const tagArray = (taggedSongs.map(item => item.tags) as any[]).flat()
-    const tagList: any[] = []
+    taggedSongs.value = await getPreviewData() || [];
+    const tagArray = (taggedSongs.value.map((item: any) => item.tags) as any[]).flat()
+    const tags: any[] = []
     tagArray.forEach((tag: string) => {
-        const index = tagList.findIndex(item => item.name === tag)
+        const index = tags.findIndex(item => item.name === tag)
         if (index >= 0) {
-            (tagList[index].ref as number) += 1
+            (tags[index].ref as number) += 1
         } else {
-            tagList.push({
+            tags.push({
                 name: tag,
                 ref: 1,
                 state: null
             })
         }
     })
-    list.value = tagList
+    tagList.value = tags
 })
 
 // data fetch
@@ -148,11 +151,11 @@ function setActiveTagState(name: string, state: string | null) {
  * @desc: 提供外部修改 tag state 的方法
  */
 function changeTagState(name: string, state: string | null) {
-    const targetTag = list.value.find(e => e.name === name)
+    const targetTag = tagList.value.find(e => e.name === name)
     targetTag.state = state
 }
 
-defineExpose({ changeTagState, changeDisplayTags })
+defineExpose({ changeTagState, changeDisplayTags, taggedSongs })
 
 </script>
 

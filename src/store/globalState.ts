@@ -18,7 +18,7 @@ export const useGlobalState = defineStore({
     topBar: {
       isShow: false,
       isShowSearch: true,
-      tagsIsSync: true
+      tagsIsSync: false
     },
     playlist: {
       isShow: false,

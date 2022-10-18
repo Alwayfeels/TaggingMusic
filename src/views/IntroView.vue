@@ -43,18 +43,18 @@
               </div>
             </div>
           </NPopover>
-          <div v-if="activeTags.length" class="flex items-center">
+          <div v-if="activeTags.length" class="flex items-center w-full">
             <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
-            <NButton class="ml-4" type="success" size="tiny" @click="playPreview">
-              <span>随便听听</span>
-              <n-icon class="ml-2" :size="20" :component="Play12Filled" />
-            </NButton>
             <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
               <span>换一批</span>
               <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
             </NButton>
+            <NButton v-if="canPlaySong.length" class="ml-4 float-right" type="success" size="tiny" @click="playPreview">
+              <span>随便听听</span>
+              <n-icon class="ml-2" :size="20" :component="Play12Filled" />
+            </NButton>
           </div>
-          <div class="flex justify-between w-full" v-else>
+          <div class="flex w-full" v-else>
             <span>如何使用：点击上方的 tag, 随机推送歌曲</span>
             <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
               <span>换一批</span>
@@ -165,12 +165,9 @@ function renderTag(tag: { label: string; value: string }, index: number) {
   })
 }
 
-let taggedSongs: any[] = []
-onMounted(async () => {
-  taggedSongs = await localforage.getItem("taggedSongs") || [];
-})
-
 const canPlaySong = computed(() => {
+  const taggedSongs = toRaw(demoAnimateRef.value.taggedSongs) || []
+  if (!taggedSongs.length) return []
   const includedTags: string[] = []
   const disabledTags: string[] = []
   const requiredTags: string[] = []

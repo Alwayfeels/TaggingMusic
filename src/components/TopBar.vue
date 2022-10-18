@@ -22,7 +22,7 @@
       </div>
       <img class="user-avatar rounded" :src="`${globalData.user.profile?.avatarUrl}?param=40y40`" alt="avatar">
     </div>
-    <!-- Tag Handler -->
+    <!-- Tag Sync -->
     <NTooltip placement="bottom" trigger="hover">
       <template #trigger>
         <NButton class="mr-4" size="large" :secondary="globalState.topBar.tagsIsSync" circle
