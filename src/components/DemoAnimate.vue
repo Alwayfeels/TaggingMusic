@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { NButton, NIcon, NTag } from "naive-ui";
-import { h, Transition, ref, onMounted, computed, watch, toRaw, reactive } from "vue";
+import { h, Transition, ref, onMounted, computed, watch, toRaw, reactive, nextTick } from "vue";
 import { useGlobalData } from '@/store/globalData'
 import storeApi from '@/api/storeApi'
 
@@ -40,26 +40,34 @@ const tagsPerRow = 5;
 const list = ref<any[]>([])
 
 // 换下一批 tags 展示
+const showTagsSum = tagRow * tagsPerRow;
 const showTagsIndex = reactive({
-    startIndex: 0,
-    endIndex: 0
+    start: 0,
+    end: showTagsSum
 });
 // 单次显示的 tags 数目
-const showTagsSum = tagRow * tagsPerRow;
 
 // showTags.length should equal tagRow * tagsPerRow
-const showTags = ref([]) 
+const showTags = computed(() => {
+    const { start, end } = showTagsIndex;
+    const tagsSum = list.value.length
+    if (end > start) {
+        return list.value.slice(showTagsIndex.start, showTagsIndex.end) as any
+    }
+    return [...list.value.slice(showTagsIndex.start, tagsSum), ...list.value.slice(0, showTagsIndex.end)] as any
+})
 function changeDisplayTags() {
     const tagsSum = list.value.length
     if (showTagsSum >= tagsSum) return list.value;
-    let { startIndex, endIndex } = showTagsIndex;
     // need merge endItem and startItem
-    if (endIndex + showTagsSum >= tagsSum) {
-        startIndex = endIndex + 1;
-        endIndex =  endIndex + showTagsSum - tagsSum;
-        return [...list.value.slice(startIndex, tagsSum), ...list.value.slice(0, endIndex)]
+    if (showTagsIndex.end + showTagsSum >= tagsSum) {
+        showTagsIndex.start = showTagsIndex.end;
+        showTagsIndex.end = showTagsIndex.end + showTagsSum - tagsSum;
+    } else {
+        showTagsIndex.start = showTagsIndex.end;
+        showTagsIndex.end = showTagsIndex.end + showTagsSum
     }
-    return list.value.slice(startIndex, endIndex);
+    console.log('showTags.value', showTags.value)
 }
 
 onMounted(async () => {
