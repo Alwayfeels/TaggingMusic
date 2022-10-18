@@ -1,81 +1,87 @@
 <template>
-  <div class="view-container flex flex-col items-center justify-center w-full">
-    <div class="screen-view flex items-center justify-start">
-      <div class="flex shrink-0 mr-8 flex-col max-w-md">
-        <h1 class="text-5xl mt-12">Tagging Music</h1>
-        <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
-        <div class="flex ml-4 my-16">
-          <NButton class="my-4" type="primary" secondary size="large" @click="toIntro">
-            <span>使用方法</span>
-            <n-icon class="ml-2" :size="24" :component="ArrowCircleDown24Filled" />
-          </NButton>
-          <NButton class="ml-4 my-4" type="primary" size="large" @click="toMainView">
-            <span>开始使用</span>
-            <n-icon class="ml-2" :size="20" :component="ArrowCircleRight24Filled" />
-          </NButton>
+  <div class="view-container w-full">
+    <div class="screen-view w-full">
+      <div class="flex items-center justify-start">
+        <div class="flex shrink-0 mr-8 flex-col max-w-md">
+          <h1 class="text-5xl mt-12">Tagging Music</h1>
+          <p class="text-2xl text-slate-400 test-class">使用 Tag 标记歌曲，然后快速生成歌单</p>
+          <div class="flex ml-4 my-16">
+            <NButton class="my-4" type="primary" size="large" @click="toMainView">
+              <span>开始使用</span>
+              <n-icon class="ml-2" :size="24" :component="ArrowCircleDown24Filled" />
+            </NButton>
+            <NButton class="ml-4 my-4" type="primary" secondary size="large">
+              <span>试用 Demo</span>
+              <n-icon class="ml-2" :size="24" :component="ArrowCircleRight24Filled" />
+            </NButton>
+          </div>
         </div>
-      </div>
-      <div class="h-full flex flex-col justify-end demoAnimate">
-        <DemoAnimate ref="demoAnimateRef" class="w-full" @change='onTagChange' />
-        <div class="my-4 w-full overflow-hidden">
-          <NDynamicTags class="w-full" v-model:value="activeTags" :render-tag="renderTag">
-            <template #trigger="{}"></template>
-          </NDynamicTags>
-        </div>
-        <div class="flex items-center pb-12">
-          <NPopover trigger="hover">
-            <template #trigger>
-              <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
-            </template>
-            <div style="width: 300px;">
-              <div class="font-bold mb-4">Demo 使用方法</div>
-              <div class="mb-2 flex justify-between">
-                <NTag type="success">左键点击</NTag>
-                <span>含有该 tag 的歌曲都会被收录</span>
+        <div class="h-full flex flex-col justify-end demoAnimate">
+          <DemoAnimate ref="demoAnimateRef" class="w-full" @change='onTagChange' />
+          <div class="my-4 w-full overflow-hidden">
+            <NDynamicTags class="w-full" v-model:value="activeTags" :render-tag="renderTag">
+              <template #trigger="{}"></template>
+            </NDynamicTags>
+          </div>
+          <div class="flex items-center pb-12">
+            <NPopover trigger="hover">
+              <template #trigger>
+                <n-icon size="24" class="text-green-700 cursor-pointer" :component="BookQuestionMark20Filled" />
+              </template>
+              <div style="width: 300px;">
+                <div class="font-bold mb-4">Demo 使用方法</div>
+                <div class="mb-2 flex justify-between">
+                  <NTag type="success">左键点击</NTag>
+                  <span>含有该 tag 的歌曲都会被收录</span>
+                </div>
+                <div class="mb-2 flex justify-between">
+                  <NTag type="warning">ctrl + 左键</NTag>
+                  <span>不含该 tag 的歌曲都会被剔除</span>
+                </div>
+                <div class="flex justify-between">
+                  <NTag type="error">右键点击</NTag>
+                  <span>含有该 tag 的歌曲都会被剔除</span>
+                </div>
               </div>
-              <div class="mb-2 flex justify-between">
-                <NTag type="warning">ctrl + 左键</NTag>
-                <span>不含该 tag 的歌曲都会被剔除</span>
-              </div>
-              <div class="flex justify-between">
-                <NTag type="error">右键点击</NTag>
-                <span>含有该 tag 的歌曲都会被剔除</span>
-              </div>
+            </NPopover>
+            <div v-if="activeTags.length" class="flex items-center w-full">
+              <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
+              <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
+                <span>换一批</span>
+                <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
+              </NButton>
+              <NButton v-if="canPlaySong.length" class="ml-4 float-right" type="success" size="tiny"
+                @click="playPreview">
+                <span>随便听听</span>
+                <n-icon class="ml-2" :size="20" :component="Play12Filled" />
+              </NButton>
             </div>
-          </NPopover>
-          <div v-if="activeTags.length" class="flex items-center w-full">
-            <div class="search-result">有 {{canPlaySong.length}} 首歌曲符合你的要求，要试听吗?</div>
-            <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
-              <span>换一批</span>
-              <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
-            </NButton>
-            <NButton v-if="canPlaySong.length" class="ml-4 float-right" type="success" size="tiny" @click="playPreview">
-              <span>随便听听</span>
-              <n-icon class="ml-2" :size="20" :component="Play12Filled" />
-            </NButton>
+            <div class="flex w-full" v-else>
+              <span>如何使用：点击上方的 tag, 随机推送歌曲</span>
+              <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
+                <span>换一批</span>
+                <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
+              </NButton>
+            </div>
           </div>
-          <div class="flex w-full" v-else>
-            <span>如何使用：点击上方的 tag, 随机推送歌曲</span>
-            <NButton class="ml-4" type="info" size="tiny" @click="changeDisplayTags">
-              <span>换一批</span>
-              <n-icon class="ml-2" :size="20" :component="ArrowSync24Regular" />
-            </NButton>
+        </div>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-start">
+        <n-divider />
+        <div class="detail flex flex-1">
+          <div v-for="(item, index) in detailInfo" :key="index" class="desc-view flex-1 px-4">
+            <div class="title text-xl">{{ item.title }}</div>
+            <div class="content mt-4 text-slate-500">
+              <p v-for="row in item.content" :key="row">{{ row }}</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="screen-view flex flex-col items-center justify-start">
-      <n-divider />
-      <div class="detail flex flex-1">
-        <div v-for="(item, index) in detailInfo" :key="index" class="desc-view flex-1 px-4">
-          <div class="title text-xl">{{ item.title }}</div>
-          <div class="content mt-4 text-slate-500">
-            <p v-for="row in item.content" :key="row">{{ row }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="footer flex justify-center">
+    <!-- <div class="screen-view intro-screen">
+
+    </div> -->
+    <div class="footer flex justify-center w-full pb-2">
       <span class="mr-2">MIT Licensed | Copyright © 2022-present</span>
       <a href="https://github.com/Alwayfeels" target="_blank" rel="noopener noreferrer">Alwayfeels</a>
     </div>
@@ -123,14 +129,6 @@ const detailInfo = ref([
 
 function toMainView() {
   router.push("/home");
-}
-
-function toIntro() {
-  (app as any).proxy.$notification.create({
-    type: "error",
-    title: "在做了在做了!",
-    duration: 3000,
-  });
 }
 
 /**
@@ -198,16 +196,22 @@ function playPreview() {
 .view-container {
   box-sizing: border-box;
   height: calc(100vh - 80px);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: auto;
+  scroll-snap-type: y mandatory;
   min-width: 1000px;
-  padding-bottom: 20px;
 
   .screen-view {
+    background-color: #ffffff;
+    scroll-snap-align: start;
+    margin: 0 auto;
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 80px);
     min-width: 1024px;
     max-width: 1280px;
+  }
+
+  .intro-screen {
+    background-color: rgba(24, 160, 88, 0.16);
   }
 
   .desc-view {

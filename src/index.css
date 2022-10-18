@@ -2,3 +2,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* scroll bar css */
+.router-view::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+.router-view::-webkit-scrollbar-track{
+    background: rgb(239, 239, 239);
+    border-radius:2px;
+}
+.router-view::-webkit-scrollbar-thumb{
+    background: #bfbfbf;
+    border-radius:10px;
+}
+.router-view::-webkit-scrollbar-thumb:hover{
+    background: #333;
+}
+.router-view::-webkit-scrollbar-corner{
+    background: #179a16;
+}

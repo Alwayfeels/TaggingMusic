@@ -2,7 +2,7 @@
   <header>
     <TopBar />
   </header>
-  <RouterView />
+  <RouterView class="router-view" />
   <PlayerBar />
 </template>
 
