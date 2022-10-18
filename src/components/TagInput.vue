@@ -2,8 +2,8 @@
   <NAutoComplete size="small" ref="tagInput" v-model:value="state.val" v-model:options="state.activeTags"
     :get-show="() => true" placeholder="请输入Tag, 按下enter确认" @keyup.enter.prevent="onEnterHandler"
     @keydown.tab.exact="onTabHandler" @keydown.shift.tab="onShiftTabHandler" @keydown.esc.prevent="onEscHandler"
-    @keyup.space.prevent="onSpaceHandler" @keyup.ctrl.enter.prevent="onCtrlEnterHandler" @keyup.ctrl.s.prevent="onEnterHandler"
-    :on-blur="onBlurHandler" />
+    @keyup.space.prevent="onSpaceHandler" @keyup.ctrl.enter.prevent="onCtrlEnterHandler"
+    @keyup.ctrl.s.prevent="onEnterHandler" :on-blur="onBlurHandler" />
 </template>
 
 <script setup lang='ts'>
@@ -17,23 +17,23 @@ const emit = defineEmits(["change", "blur", "pressTab", "pressEnter", "pressCtrl
 
 // 该组件应该是一个存粹的无状态输入组件
 
+const tagList = computed<LabelValue[]>(() => {
+  return globalData.tagList?.map((e: TagRef) => ({ label: e.name, value: e.name })) || []
+})
 const state: TagInputState = reactive({
   val: '',
-  tagList: computed(() => {
-    return globalData.tagList?.map((e: TagRef) => ({ label: e.name, value: e.name })) || []
-  }),
   activeTags: computed(() => {
     if (state.val) {
-      return state.tagList?.filter((e: LabelValue) => e.label.includes(state.val)) || []
+      return tagList.value?.filter((e: LabelValue) => e.label.includes(state.val)) || []
     }
-    return state.tagList
+    return tagList.value
   }),
 })
 
 // 根据 globalData.tagList 中的数据联想
 const tagInput = ref();
 
-// 组件加载完成时自动 focus
+// 组件加载完成时自动 focus, 并且计算 tagList
 watch(tagInput, (el) => {
   if (el)
     nextTick(() => {

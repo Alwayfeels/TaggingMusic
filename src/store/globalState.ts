@@ -82,7 +82,7 @@ export const useGlobalState = defineStore({
         console.error('setPlayerActiveSong error: playerList is empty', config)
         return false;
       }
-      let active = null // song need to set
+      let active: any = null // song need to set
       // search
       const searchSonglist = this.player.playlist
       if (typeof config.id === 'number' && config.id >= 0) {

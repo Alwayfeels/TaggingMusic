@@ -96,6 +96,5 @@ export type LabelValue = import('naive-ui').AutoCompleteOption & {
 
 export interface TagInputState {
   val: string;
-  tagList: LabelValue[];
   activeTags: LabelValue[];
 }

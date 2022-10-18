@@ -192,15 +192,6 @@ const songTableColumns: DataTableColumns = [
   cursor: url(@/assets/Play.svg) 8 8, pointer;
 }
 
-:deep(.n-data-table-tr .n-data-table-td:last-child) {
-  padding: 0;
-  cursor: pointer;
-}
-
-:deep(.n-data-table-tr .n-data-table-td:last-child .n-dynamic-tags) {
-  padding: 18px;
-}
-
 :deep(.n-data-table__pagination) {
   padding-right: 80px;
 }

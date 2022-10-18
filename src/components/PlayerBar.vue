@@ -74,15 +74,14 @@
         </template>
         {{ globalState.player.playMode }}
       </n-tooltip>
+      <!-- 快捷输入 Taginput -->
+      <!-- <div class="input-tag flex-1 ml-16">
+        <TagInputGroup :songId="globalState.player.active.id" :song="globalState.player.active"></TagInputGroup>
+      </div> -->
       <!-- 仅展示的 TagInput -->
-      <NDynamicTags v-if="globalState.player.active?.tags?.length" class="ml-8 w-80" :closable="false" type="success"
-        :default-value="globalState.player.active.tags">
+      <NDynamicTags class="ml-8 w-80" :closable="false" type="success" v-model:value="playingSongTags">
         <template #trigger="{}"></template>
       </NDynamicTags>
-      <!-- 快捷输入 Taginput -->
-      <div v-else class="input-tag flex-1 ml-16">
-        <TagInputGroup :songId="globalState.player.active.id" :song="globalState.player.active"></TagInputGroup>
-      </div>
     </div>
     <!-- 播放器实例 -->
     <audio ref="audio" :src="globalState.player.active?.url" @ended="globalState.setNextSong()"
@@ -101,7 +100,7 @@ import { RepeatOnce, ArrowsShuffle } from '@vicons/tabler'
 import { CaretUp24Filled, CaretDown24Filled, Next24Filled } from '@vicons/fluent'
 import { NIcon, NSlider, NIconWrapper, NTag } from 'naive-ui'
 import TagInputGroup from './TagInputGroup.vue';
-import { PlayMode } from '@/store/types'
+import { PlayMode, type TaggedSong } from '@/store/types'
 import { useRoute } from 'vue-router'
 
 const app = getCurrentInstance()
@@ -112,6 +111,14 @@ const globalData = useGlobalData()
 
 const state = reactive({
   inputTag: [], // 快捷输入标签
+})
+const playingSongTags = computed(() => {
+  const activeSong = globalState.player.active
+  if (activeSong?.tags?.length) {
+    return activeSong?.tags
+  }
+  const taggedSong: TaggedSong | null = globalData.taggedSongs.find(e => e.id === activeSong.id) || null
+  return taggedSong ? taggedSong.tags : []
 })
 
 /** 
