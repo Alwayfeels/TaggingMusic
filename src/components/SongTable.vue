@@ -196,6 +196,15 @@ const songTableColumns: DataTableColumns = [
   padding-right: 80px;
 }
 
+:deep(.n-data-table-tr .n-data-table-td:last-child) {
+  padding: 0;
+  cursor: default;
+}
+
+:deep(.n-data-table-tr .n-data-table-td:last-child .n-dynamic-tags) {
+  padding: 18px;
+}
+
 @-webkit-keyframes Gradient {
   0% {
     background-position: 0% 50%
