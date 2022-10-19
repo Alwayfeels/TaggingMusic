@@ -52,7 +52,8 @@ function onSpaceHandler() {
   // onEnterHandler()
 }
 function onTabHandler() {
-  emit("pressTab");
+  const val = state.val.trim()
+  emit("pressTab", val);
 }
 function onShiftTabHandler() {
   emit("pressShiftTab");

@@ -1,7 +1,8 @@
 <template>
-  <NDynamicTags ref="dynamicTags" v-model:value="state.val" :on-update:value="onTagsChange" @click.self.stop>
+  <NDynamicTags ref="dynamicTags" v-model:value="state.val" :render-tag="renderTag" :on-update:value="onTagsChange"
+    @click.self.stop>
     <template #input="{ submit, deactivate }">
-      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)" @pressTab="onTabHandler(submit, deactivate)"
+      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)" @pressTab="onTabHandler($event, submit, deactivate)"
         @blur="onBlurHandler($event, submit, deactivate)"
         @pressCtrlEnter="onCtrlEnterHandler($event, submit, deactivate)"
         @pressShiftTab="onShiftTabHandler($event, submit, deactivate)">
@@ -16,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { NDynamicTags, NSelect, NButton } from "naive-ui";
+import { NDynamicTags, NSelect, NButton, NTag } from "naive-ui";
 import { ref, h, computed, nextTick, watch, reactive, toRaw } from "vue";
 import type { Ref } from 'vue'
 import TagInput from "@/components/TagInput.vue";
@@ -115,11 +116,12 @@ function onEnterHandler(tag: string, submit: any, deactivate: any) {
 /** 
  * @desc tab 按键事件处理
  */
-function onTabHandler(submit: any, deactivate: any) {
+function onTabHandler(tag: string, submit: any, deactivate: any) {
   // when you press tab, activating <tagInput> in next row
   // return directly if this is the last song
   // if (globalState.activeSongIdx + 1 >= globalState.songlist.data.length) return false;
   if (globalState.songlist.activeTagInputSong === null) return;
+  if (tag) submit(tag)
   // focus <tagInput> in next row
   focusNextTagInput()
 }
@@ -212,6 +214,25 @@ function onBlurHandler($event: string, submit: any, deactivate: any) {
   //   return;
   // }
   // onEnterHandler($event, submit, deactivate)
+}
+
+/**
+ * @desc: 渲染 Tag
+ */
+function renderTag(tag: string, index: number) {
+  return h(
+    NTag,
+    {
+      type: 'success',
+      closable: true,
+      onClose: () => {
+        state.val.splice(index, 1)
+      }
+    },
+    {
+      default: () => tag
+    }
+  )
 }
 
 </script>
