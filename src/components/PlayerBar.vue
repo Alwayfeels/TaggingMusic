@@ -199,8 +199,8 @@ function audioGetDuration() {
 }
 
 // 暂停
-function audioPause() {
-  audio.value?.pause()
+async function audioPause() {
+  await audio.value?.pause()
   globalState.player.isPlaying = false;
 }
 
@@ -209,8 +209,13 @@ async function audioPlay() {
   if (globalState.player.active.url) {
     nextTick(() => {
       if (audio.value) {
-        audio.value.play()
-        globalState.player.isPlaying = true;
+        const playPromise = audio.value.play()
+        playPromise.then(() => {
+          globalState.player.isPlaying = true;
+        }).catch((err: any) => {
+          console.error(JSON.stringify(err))
+          globalState.player.isPlaying = false;
+        })
       }
     })
     return true;
@@ -225,8 +230,13 @@ async function audioPlay() {
   }
   const canPlay = await globalState.setPlayerActiveSong({ index: globalState.activePlayingSongIdx });
   if (canPlay) {
-    audio.value?.play()
-    globalState.player.isPlaying = true;
+    const playPromise = audio.value.play()
+    playPromise.then(() => {
+      globalState.player.isPlaying = true;
+    }).catch((err: any) => {
+      console.error(JSON.stringify(err))
+      globalState.player.isPlaying = false;
+    })
   }
 }
 
