@@ -1,9 +1,9 @@
 <template>
   <NDynamicTags ref="dynamicTags" v-model:value="state.val" :render-tag="renderTag" :on-update:value="onTagsChange"
-    @click.self.stop>
+    @click.self.stop="() => {}">
     <template #input="{ submit, deactivate }">
-      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)" @pressTab="onTabHandler($event, submit, deactivate)"
-        @blur="onBlurHandler($event, submit, deactivate)"
+      <TagInput @pressEnter="onEnterHandler($event, submit, deactivate)"
+        @pressTab="onTabHandler($event, submit, deactivate)" @blur="onBlurHandler($event, submit, deactivate)"
         @pressCtrlEnter="onCtrlEnterHandler($event, submit, deactivate)"
         @pressShiftTab="onShiftTabHandler($event, submit, deactivate)">
       </TagInput>
