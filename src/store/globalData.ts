@@ -94,7 +94,9 @@ export const useGlobalData = defineStore({
      * @desc 保存 taggedSongs 到 indexedDB
      */
     setTaggedSongs2DB(taggedSongs?: TaggedSong[]) {
-      localforage.setItem("taggedSongs", toRaw(taggedSongs || this.taggedSongs));
+      const data = toRaw(taggedSongs || this.taggedSongs)
+      console.log('setTaggedSongs2DB =>', data)
+      localforage.setItem("taggedSongs", data);
     },
     /** 
      * @desc 保存 传入的 tags，到指定的 taggedSongs[id].tags 中
@@ -325,7 +327,7 @@ export const useGlobalData = defineStore({
           content: '同步完成！',
           duration: 3000
         })
-        
+
         useGlobalState().topBar.tagsIsSync = true;
         return true
       }

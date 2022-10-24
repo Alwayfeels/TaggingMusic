@@ -83,7 +83,7 @@ function resetPager(): void {
 
 function rowClassName(row: any): string {
   let className = ''
-  if (row?.id === globalState.songlist.active?.id) {
+  if (row?.id === globalState.player.active?.id) {
     className += 'playing-song'
     if (globalState.player.isPlaying) {
       className += ' song-playing';
